@@ -1,0 +1,21 @@
+<ion-header>
+  <ion-navbar>
+    <ion-title text-center>{{bar.name}}</ion-title>
+  </ion-navbar>
+</ion-header>
+
+<ion-content class="home">
+  <ion-grid>
+    <ion-row justify-content-center class="firstRow">
+      <ion-col col-3 text-center>
+        <button ion-button (click)="close();">Get Directions</button>
+      </ion-col>
+    </ion-row>
+    <ion-row justify-content-center class="secondRow">
+      <button ion-button text-center (click)="close();">Get Directions</button>
+      <!--<ion-col col-3 text-center>
+        <button ion-button text-center (click)="close();">Get Directions</button>
+      </ion-col>-->
+    </ion-row>
+  </ion-grid>
+</ion-content>

@@ -1,0 +1,21 @@
+page-barPopover {
+    .home {
+        scroll-content {
+            display: flex;
+            flex-direction: column;
+        }
+    
+        ion-grid {
+            padding: 0;
+            height: 100%;
+        }
+
+        .firstRow {
+            flex: 5;
+        }
+
+        .secondRow {
+            flex: 1;
+        }
+    }
+}

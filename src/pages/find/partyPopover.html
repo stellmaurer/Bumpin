@@ -1,0 +1,209 @@
+<ion-content class="home">
+  <ion-grid>
+
+    <ion-row>
+      <ion-col col-12 class="singleElement">
+        <div class="centerMe">
+          <h1 [style.color]="{'Bumpin': '#32db64', 'Heating Up': 'yellow', 'Decent': 'orange', 'Weak': '#f53d3d'}[party.averageRating]">{{party.title}}</h1>
+        </div>
+      </ion-col>
+    </ion-row>
+
+    <!--
+    <ion-row>
+        <ion-col col-12 class="singleElement">
+          <div class="centerMe">
+            <button ion-button [color]="primary" style="color: black;" (click)='close();'>Get Directions</button>
+          </div>
+        </ion-col>
+    </ion-row>
+    -->
+
+    <ion-row>
+        <ion-col col-12 class="singleElement">
+          <div class="centerMe">
+            <label>Address</label>
+          </div>
+          <div class="centerMe backgroundIncluded needsPadding">
+            <label>{{party.addressLine1}}{{party.addressLine2 == "null" ? "" : ", " + party.addressLine2}}</label>
+          </div>
+        </ion-col>
+    </ion-row>
+
+    <ion-row>
+        <ion-col col-12 class="singleElement">
+          <div class="centerMe">
+            <label>Details</label>
+          </div>
+          <div class="centerMe backgroundIncluded needsPadding">
+            <label style="white-space: pre-wrap;">{{party.details == "null" ? "No details provided." : party.details}}</label>
+          </div>
+        </ion-col>
+    </ion-row>
+
+    <ion-row>
+        <ion-col col-12 class="singleElement">
+          <div class="centerMe">
+            <label>Hosts</label>
+          </div>
+          <div class="centerMe backgroundIncluded needsPadding">
+            <label class="hosts" style="display: inline-block;" *ngFor='let key of party.keysInHostsMap'>{{party.hosts.get(key).name}}</label>
+          </div>
+        </ion-col>
+    </ion-row>
+
+    <ion-row>
+      <ion-col col-12 class="singleElement">
+        <div class="centerMe">
+          <label>{{party.numberOfPeopleAtParty}} people are at this party</label>
+        </div>
+      </ion-col>
+    </ion-row>
+
+    <ion-row>
+      <ion-col col-6 class="twoElementsSmall">
+        <div class="centerMe">
+            <label>{{party.percentageOfMen}}% Men</label>
+        </div>
+      </ion-col>
+      <ion-col col-6 class="twoElementsSmall">
+        <div class="centerMe">
+            <label>{{party.percentageOfWomen}}% Women</label>
+        </div>
+      </ion-col>
+    </ion-row>
+
+    <ion-row>
+      <ion-col col-3 class="fourElements">
+        <div class="centerMe">
+          <label>Bumpin</label>
+        </div>
+        <div class="centerMe">
+          <button ion-button [color]="primary" style="color: black;" (click)='rateParty("Bumpin");'>
+            {{party.bumpinRatings}}
+          </button>
+        </div>
+      </ion-col>
+      <ion-col col-3 class="fourElements">
+        <div class="centerMe">
+          <label style="color: yellow;">Heating Up</label>
+        </div>
+        <div class="centerMe">
+          <button ion-button [color]="primary" style="color: black;" (click)='rateParty("Heating Up");'>
+            {{party.heatingUpRatings}}
+          </button>
+        </div>
+      </ion-col>
+      <ion-col col-3 class="fourElements">
+        <div class="centerMe">
+          <label style="color: orange;">Decent</label>
+        </div>
+        <div class="centerMe">
+          <button ion-button [color]="primary" style="color: black;" (click)='rateParty("Decent");'>
+            {{party.decentRatings}}
+          </button>
+        </div>
+      </ion-col>
+      <ion-col col-3 class="fourElements">
+        <div class="centerMe">
+          <label style="color: #f53d3d;">Weak</label>
+        </div>
+        <div class="centerMe">
+          <button ion-button [color]="primary" style="color: black;" (click)='rateParty("Weak");'>
+            {{party.weakRatings}}
+          </button>
+        </div>
+      </ion-col>
+    </ion-row>
+
+    <ion-row>
+      <ion-col col-6 class="twoElementsSmall">
+        <div class="centerMe">
+            <label>Your Rating: {{party.myInviteeInfo.rating}}</label>
+        </div>
+      </ion-col>
+      <ion-col col-6 class="twoElementsSmall">
+        <div class="centerMe">
+            <label>Your Status: {{party.myInviteeInfo.status}}</label>
+        </div>
+      </ion-col>
+    </ion-row>
+
+    <ion-row>
+        <ion-col col-4 class="threeElements">
+          <div class="centerMe">
+            <label>Going</label>
+          </div>
+          <div class="centerMe">
+            <button ion-button [color]="primary" style="color: black;" (click)='changeAttendanceStatus("Going");'>
+              {{party.peopleGoing}}
+            </button>
+          </div>
+        </ion-col>
+        <ion-col col-4 class="threeElements">
+          <div class="centerMe">
+            <label>Maybe</label>
+          </div>
+          <div class="centerMe">
+            <button ion-button [color]="primary" style="color: black;" (click)='changeAttendanceStatus("Maybe");'>
+              {{party.peopleMaybe}}
+            </button>
+          </div>
+        </ion-col>
+        <ion-col col-4 class="threeElements">
+          <div class="centerMe">
+            <label>Invited</label>
+          </div>
+          <div class="centerMe">
+            <button ion-button [color]="primary" style="color: black;" (click)='changeAttendanceStatus("Invited");'>
+              {{party.peopleInvited}}
+            </button>
+          </div>
+        </ion-col>
+    </ion-row>
+
+    <ion-row>
+        <ion-col col-6 class="twoElementsSmall">
+          <div class="centerMe">
+            <label>Drinks Provided?</label>
+          </div>
+          <div class="centerMe">
+            <button ion-button [color]="'background-info-color'" style="color: #32db64;">
+              {{party.drinksProvided ? "yes" : "no"}}
+            </button>
+          </div>
+        </ion-col>
+        <ion-col col-6 class="twoElementsSmall">
+          <div class="centerMe">
+            <label>Fee For Drinks?</label>
+          </div>
+          <div class="centerMe">
+            <button ion-button [color]="'background-info-color'" style="color: #32db64;">
+              {{party.feeForDrinks ? "yes" : "no"}}
+            </button>
+          </div>
+        </ion-col>
+    </ion-row>
+
+    <ion-row>
+        <ion-col col-6 class="twoElementsLarge">
+          <div class="centerMe">
+            <label>Start Time</label>
+          </div>
+          <div class="centerMe">
+            <button ion-button [color]="'background-info-color'" style="color: #32db64;">
+              {{party.startTime}}
+            </button>
+          </div>
+        </ion-col>
+        <ion-col col-6 class="twoElementsLarge">
+          <div class="centerMe">
+            <label>End Time</label>
+          </div>
+          <div class="centerMe">
+            <button ion-button [color]="'background-info-color'" style="color: #32db64;">{{party.endTime}}</button>
+          </div>
+        </ion-col>
+    </ion-row>
+  </ion-grid>
+</ion-content>

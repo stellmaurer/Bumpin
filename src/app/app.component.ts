@@ -7,6 +7,8 @@ import { TabsPage } from '../pages/tabs/tabs';
 import { LoginPage } from '../pages/login/login';
 import { NativeStorage } from 'ionic-native';
 import { ViewChild } from '@angular/core';
+import { Events } from 'ionic-angular';
+import { BackgroundGeolocation, BackgroundGeolocationConfig, BackgroundGeolocationResponse } from '@ionic-native/background-geolocation';
 
 @Component({
   templateUrl: 'app.html',
@@ -17,7 +19,7 @@ export class MyApp {
   @ViewChild('myNav') nav
   private rootPage:any;
 
-  constructor(platform: Platform, statusBar: StatusBar, splashScreen: SplashScreen) {
+  constructor(platform: Platform, statusBar: StatusBar, splashScreen: SplashScreen, private backgroundGeolocation: BackgroundGeolocation, private events : Events) {
     platform.ready().then(() => {
       /*
       // Here we will check if the user is already logged in
@@ -42,7 +44,6 @@ export class MyApp {
       //this.rootPage = TabsPage;
       splashScreen.hide();
       statusBar.styleDefault();
-      
     });
   }
 }

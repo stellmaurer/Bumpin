@@ -1,21 +1,205 @@
-<ion-header>
-  <ion-navbar>
-    <ion-title text-center>{{bar.name}}</ion-title>
-  </ion-navbar>
-</ion-header>
-
-<ion-content class="home">
+<ion-scroll class="home" scrollY="true">
   <ion-grid>
-    <ion-row justify-content-center class="firstRow">
-      <ion-col col-3 text-center>
-        <button ion-button (click)="close();">Get Directions</button>
+
+    <ion-row>
+      <ion-col col-12 class="singleElement">
+        <div class="centerMe">
+          <h1 [style.color]="{'Bumpin': '#32db64', 'Heating Up': 'yellow', 'Decent': 'orange', 'Weak': '#f53d3d'}[bar.averageRating]">{{bar.name}}</h1>
+        </div>
       </ion-col>
     </ion-row>
-    <ion-row justify-content-center class="secondRow">
-      <button ion-button text-center (click)="close();">Get Directions</button>
-      <!--<ion-col col-3 text-center>
-        <button ion-button text-center (click)="close();">Get Directions</button>
-      </ion-col>-->
+
+    <ion-row>
+      <ion-col col-12 class="singleElement">
+        <div class="centerMe">
+          <label>{{bar.numberOfPeopleAtBar}} people are at this bar</label>
+        </div>
+      </ion-col>
     </ion-row>
+
+    <ion-row>
+      <ion-col col-6 class="twoElementsSmall">
+        <div class="centerMe">
+            <label>{{bar.percentageOfMen}}% Men</label>
+        </div>
+      </ion-col>
+      <ion-col col-6 class="twoElementsSmall">
+        <div class="centerMe">
+            <label>{{bar.percentageOfWomen}}% Women</label>
+        </div>
+      </ion-col>
+    </ion-row>
+
+    <ion-row>
+      <ion-col col-3 class="fourElements">
+        <div class="centerMe">
+          <label>Bumpin</label>
+        </div>
+        <div class="centerMe">
+          <button ion-button [color]="primary" style="color: black;" (click)='rateBar("Bumpin");'>
+            {{bar.bumpinRatings}}
+          </button>
+        </div>
+      </ion-col>
+      <ion-col col-3 class="fourElements">
+        <div class="centerMe">
+          <label style="color: yellow;">Heat'n-up</label>
+        </div>
+        <div class="centerMe">
+          <button ion-button [color]="primary" style="color: black;" (click)='rateBar("Heating Up");'>
+            {{bar.heatingUpRatings}}
+          </button>
+        </div>
+      </ion-col>
+      <ion-col col-3 class="fourElements">
+        <div class="centerMe">
+          <label style="color: orange;">Decent</label>
+        </div>
+        <div class="centerMe">
+          <button ion-button [color]="primary" style="color: black;" (click)='rateBar("Decent");'>
+            {{bar.decentRatings}}
+          </button>
+        </div>
+      </ion-col>
+      <ion-col col-3 class="fourElements">
+        <div class="centerMe">
+          <label style="color: #f53d3d;">Weak</label>
+        </div>
+        <div class="centerMe">
+          <button ion-button [color]="primary" style="color: black;" (click)='rateBar("Weak");'>
+            {{bar.weakRatings}}
+          </button>
+        </div>
+      </ion-col>
+    </ion-row>
+
+    <ion-row>
+      <ion-col col-6 class="twoElementsSmall">
+        <div class="centerMe">
+            <label>Your Rating: {{bar.myAttendeeInfo == null ? "None" : bar.myAttendeeInfo.rating}}</label>
+        </div>
+      </ion-col>
+      <ion-col col-6 class="twoElementsSmall">
+        <div class="centerMe">
+            <label>Your Status: {{bar.myAttendeeInfo == null ? "None" : bar.myAttendeeInfo.status}}</label>
+        </div>
+      </ion-col>
+    </ion-row>
+
+    <ion-row>
+        <ion-col col-6 class="twoElements">
+          <div class="centerMe">
+            <label>Going</label>
+          </div>
+          <div class="centerMe">
+            <button ion-button [color]="primary" style="color: black;" (click)='changeAttendanceStatus("Going");'>
+              {{bar.peopleGoing}}
+            </button>
+          </div>
+        </ion-col>
+        <ion-col col-6 class="twoElements">
+          <div class="centerMe">
+            <label>Maybe</label>
+          </div>
+          <div class="centerMe">
+            <button ion-button [color]="primary" style="color: black;" (click)='changeAttendanceStatus("Maybe");'>
+              {{bar.peopleMaybe}}
+            </button>
+          </div>
+        </ion-col>
+    </ion-row>
+
+    <ion-row>
+        <ion-col col-12 class="singleElement">
+          <div class="centerMe">
+            <label>Details</label>
+          </div>
+          <div class="centerMe backgroundIncluded needsPadding">
+            <label style="white-space: pre-wrap;">{{bar.details == "null" ? "No details provided." : bar.details}}</label>
+          </div>
+        </ion-col>
+    </ion-row>
+
+    <ion-row id="schedule">
+        <ion-col col-12 class="singleElement">
+          <div class="centerMe">
+            <label>Schedule</label>
+          </div>
+          <div class="centerMe backgroundIncluded needsPadding">
+            <div>
+              <div class="dayCol">
+                <div class="rowForDay">
+                  <label class="dayLabel">Monday</label>
+                </div>
+                <div class="rowForDay">
+                  <label class="dayLabel">Tuesday</label>
+                </div>
+                <div class="rowForDay">
+                  <label class="dayLabel">Wednesday</label>
+                </div>
+                <div class="rowForDay">
+                  <label class="dayLabel">Thursday</label>
+                </div>
+                <div class="rowForDay">
+                  <label class="dayLabel">Friday</label>
+                </div>
+                <div class="rowForDay">
+                  <label class="dayLabel">Saturday</label>
+                </div>
+                <div class="rowForDay">
+                  <label class="dayLabel">Sunday</label>
+                </div>
+              </div>
+
+              <div class="timeCol">
+                <div class="rowForTime">
+                  <label class="timeLabel">{{bar.schedule["Monday"]["open"]}}</label>
+                </div>
+                <div class="rowForTime">
+                  <label class="timeLabel">{{bar.schedule["Tuesday"]["open"]}}</label>
+                </div>
+                <div class="rowForTime">
+                  <label class="timeLabel">{{bar.schedule["Wednesday"]["open"]}}</label>
+                </div>
+                <div class="rowForTime">
+                  <label class="timeLabel">{{bar.schedule["Thursday"]["open"]}}</label>
+                </div>
+                <div class="rowForTime">
+                  <label class="timeLabel">{{bar.schedule["Friday"]["open"]}}</label>
+                </div>
+                <div class="rowForTime">
+                  <label class="timeLabel">{{bar.schedule["Saturday"]["open"]}}</label>
+                </div>
+                <div class="rowForTime">
+                  <label class="timeLabel">{{bar.schedule["Sunday"]["open"]}}</label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </ion-col>
+    </ion-row>
+
+    <ion-row>
+        <ion-col col-12 class="singleElement">
+          <div class="centerMe">
+            <label>Phone Number</label>
+          </div>
+          <div class="centerMe backgroundIncluded needsPadding">
+            <label style="white-space: pre-wrap;">{{bar.phoneNumber}}</label>
+          </div>
+        </ion-col>
+    </ion-row>
+
+    <ion-row>
+        <ion-col col-12 class="singleElement">
+          <div class="centerMe">
+            <label>Address</label>
+          </div>
+          <div class="centerMe backgroundIncluded needsPadding">
+            <label>{{bar.addressLine1}}{{bar.addressLine2 == "null" ? "" : ", " + bar.addressLine2}}</label>
+          </div>
+        </ion-col>
+    </ion-row>
+
   </ion-grid>
-</ion-content>
+</ion-scroll>

@@ -1,11 +1,10 @@
 
 page-partyPopover {
+    ion-scroll { white-space: nowrap; }
+
     .home {
-        scroll-content {
-            display: flex;
-            flex-direction: column;
-        }
-    
+        
+
         ion-grid {
             height: 100%;
             width: 100%;
@@ -55,14 +54,16 @@ page-partyPopover {
             text-align: center;
             margin-left:auto;
             margin-right:auto;
-            min-width: 80px;
+            min-width: 71px;
         }
 
         .fourElements {
             text-align: center;
+            padding-left: 2.5px;
+            padding-right: 2.5px;
             margin-left:auto;
             margin-right:auto;
-            min-width: 80px;
+            min-width: 71px;
         }
 
         .centerMe {

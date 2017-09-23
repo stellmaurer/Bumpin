@@ -10,11 +10,16 @@ import { PartyPopover } from '../pages/find/partyPopover'
 import { BarPopover } from '../pages/find/barPopover'
 import { TabsPage } from '../pages/tabs/tabs';
 import { AllMyData } from '../model/allMyData';
+import { LocationTracker } from '../providers/location-tracker';
+import { BackgroundGeolocation } from '@ionic-native/background-geolocation';
+import { Geolocation } from '@ionic-native/geolocation';
 
 import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
 import { CloudSettings, CloudModule } from '@ionic/cloud-angular';
 import { IonicStorageModule } from '@ionic/storage';
+import { BrowserModule } from '@angular/platform-browser';
+import { HttpModule } from '@angular/http';
 
 const cloudSettings: CloudSettings = {
   'core': {
@@ -41,6 +46,8 @@ const cloudSettings: CloudSettings = {
     TabsPage
   ],
   imports: [
+    BrowserModule,
+    HttpModule,
     IonicModule.forRoot(MyApp),
     CloudModule.forRoot(cloudSettings),
     IonicStorageModule.forRoot()
@@ -58,6 +65,9 @@ const cloudSettings: CloudSettings = {
     TabsPage
   ],
   providers: [
+    LocationTracker,
+    BackgroundGeolocation,
+    Geolocation,
     [AllMyData],
     StatusBar,
     SplashScreen,

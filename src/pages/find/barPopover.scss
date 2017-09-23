@@ -1,21 +1,108 @@
 page-barPopover {
+    ion-scroll { white-space: nowrap; }
+    
     .home {
-        scroll-content {
-            display: flex;
-            flex-direction: column;
-        }
     
         ion-grid {
-            padding: 0;
             height: 100%;
+            width: 100%;
         }
 
-        .firstRow {
-            flex: 5;
+        .needsPadding {
+            padding: 10px;
         }
 
-        .secondRow {
-            flex: 1;
+        .hosts {
+            padding-left: 10px;
+            padding-right: 10px;
+        }
+
+        .blocksRow {
+            text-align: center;
+            
+            .center-block {
+                text-align: center;
+                margin-left:auto;
+                margin-right:auto;
+                display:block;
+            }
+        }
+
+        .oneElement {
+            text-align: center;
+            margin-left:auto;
+            margin-right:auto;
+        }
+
+        .twoElementsSmall {
+            text-align: center;
+            margin-left:auto;
+            margin-right:auto;
+            min-width: 100px;
+        }
+
+        .twoElementsLarge {
+            text-align: center;
+            margin-left:auto;
+            margin-right:auto;
+            min-width: 240px;
+        }
+
+        .threeElements {
+            text-align: center;
+            margin-left:auto;
+            margin-right:auto;
+            min-width: 71px;
+        }
+
+        .fourElements {
+            text-align: center;
+            padding-left: 2.5px;
+            padding-right: 2.5px;
+            margin-left:auto;
+            margin-right:auto;
+            min-width: 71px;
+        }
+
+        .centerMe {
+            text-align: center;
+        }
+
+        .backgroundNotIncluded {
+            border-radius: 5px;
+            background-color: $background-color;
+        }
+
+        .backgroundIncluded {
+            border-radius: 5px;
+            background-color: $background-info-color;
+        }
+
+        #schedule {
+            .dayCol{
+                margin-right: 5px;
+                display: inline-block;
+                text-align: left;
+                .rowForDay{
+                    margin-top: 5px;
+                    margin-bottom: 5px;
+                    .dayLabel {
+                        white-space: pre-wrap;
+                    }
+                }
+            }
+            .timeCol{
+                margin-left: 5px;
+                display: inline-block;
+                text-align: left;
+                .rowForTime{
+                    margin-top: 5px;
+                    margin-bottom: 5px;
+                    .timeLabel {
+                        white-space: pre-wrap;
+                    }
+                }
+            }
         }
     }
 }

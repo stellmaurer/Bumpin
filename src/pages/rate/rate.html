@@ -6,12 +6,91 @@
   </ion-navbar>
 </ion-header>
 
-<ion-content>
-  <ion-list>
-    <ion-item>
-      <ion-icon name="ionic" item-left></ion-icon>
-      @ionicframework
-    </ion-item>
-    <p [innerHtml]="parties"></p>
-  </ion-list>
+<ion-content class="home">
+
+  <ion-grid>
+
+    <ion-row>
+      <ion-col col-12 class="singleElement">
+        <div class="centerMe">
+          <h1 [style.color]="{'Bumpin': '#32db64', 'Heating Up': 'yellow', 'Decent': 'orange', 'Weak': '#f53d3d'}[party.averageRating]">{{party.title}}</h1>
+        </div>
+      </ion-col>
+    </ion-row>
+
+    <ion-row>
+      <ion-col col-12 class="singleElement">
+        <div class="centerMe">
+          <label>{{party.numberOfPeopleAtParty}} people are at this party</label>
+        </div>
+      </ion-col>
+    </ion-row>
+
+    <ion-row>
+      <ion-col col-6 class="twoElementsSmall">
+        <div class="centerMe">
+            <label>{{party.percentageOfMen}}% Men</label>
+        </div>
+      </ion-col>
+      <ion-col col-6 class="twoElementsSmall">
+        <div class="centerMe">
+            <label>{{party.percentageOfWomen}}% Women</label>
+        </div>
+      </ion-col>
+    </ion-row>
+
+    <ion-row>
+      <ion-col col-12 class="singleElement">
+        <div class="centerMe">
+            <label>Your Rating: {{party.myInviteeInfo.rating}}</label>
+        </div>
+      </ion-col>
+    </ion-row>
+
+    <ion-row>
+      <ion-col col-3 class="fourElements">
+        <div class="centerMe">
+          <label>Bumpin</label>
+        </div>
+        <div class="centerMe">
+          <button ion-button [color]="primary" style="color: black;" (click)='rateParty("Bumpin");'>
+            {{party.bumpinRatings}}
+          </button>
+        </div>
+      </ion-col>
+      <ion-col col-3 class="fourElements">
+        <div class="centerMe">
+          <label style="color: yellow;">Heat'n-up</label>
+        </div>
+        <div class="centerMe">
+          <button ion-button [color]="primary" style="color: black;" (click)='rateParty("Heating Up");'>
+            {{party.heatingUpRatings}}
+          </button>
+        </div>
+      </ion-col>
+      <ion-col col-3 class="fourElements">
+        <div class="centerMe">
+          <label style="color: orange;">Decent</label>
+        </div>
+        <div class="centerMe">
+          <button ion-button [color]="primary" style="color: black;" (click)='rateParty("Decent");'>
+            {{party.decentRatings}}
+          </button>
+        </div>
+      </ion-col>
+      <ion-col col-3 class="fourElements">
+        <div class="centerMe">
+          <label style="color: #f53d3d;">Weak</label>
+        </div>
+        <div class="centerMe">
+          <button ion-button [color]="primary" style="color: black;" (click)='rateParty("Weak");'>
+            {{party.weakRatings}}
+          </button>
+        </div>
+      </ion-col>
+    </ion-row>
+
+  </ion-grid>
+
 </ion-content>
+

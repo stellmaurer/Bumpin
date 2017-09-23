@@ -1,6 +1,6 @@
 import { Component, ViewChild, ElementRef } from '@angular/core';
 import { NavController, Events } from 'ionic-angular';
-import { Geolocation } from 'ionic-native';
+import { Geolocation, Geoposition } from 'ionic-native';
 import { Person } from '../../model/person';
 import {Http, Headers, RequestOptions} from '@angular/http';
 import {deserialize} from "serializer.ts/Serializer";
@@ -10,6 +10,7 @@ import { AllMyData } from "../../model/allMyData";
 import { PopoverController } from 'ionic-angular';
 import { PartyPopover } from './partyPopover';
 import { BarPopover } from './barPopover';
+import { LocationTracker } from '../../providers/location-tracker';
  
 declare var google;
 
@@ -27,11 +28,12 @@ export class FindPage {
   userLocationMarker: any;
   myCoordinates : any;
  
-  constructor(private allMyData : AllMyData, private events : Events, private http:Http, public navCtrl: NavController, public popoverCtrl: PopoverController) {
+  constructor(private allMyData : AllMyData, public locationTracker: LocationTracker, private events : Events, private http:Http, public navCtrl: NavController, public popoverCtrl: PopoverController) {
     //console.log(this.allMyData);
     this.allMyData.events = events;
     this.partyMarkersOnMap = new Map<string,any>();
     this.barMarkersOnMap = new Map<string,any>();
+    this.locationTracker.startTracking();
   }
  
   ionViewDidLoad(){
@@ -89,14 +91,22 @@ export class FindPage {
   }
 
   private enableUserLocation(){
-    var subscription = Geolocation.watchPosition()
+    this.locationTracker.watch.subscribe(() => {
+      this.myCoordinates = {lat: this.locationTracker.lat, lng: this.locationTracker.lng}
+      this.userLocationMarker.setPosition(this.myCoordinates);
+    });
+  }
+
+  /* OLD way I was using to watch location
+  var subscription = Geolocation.watchPosition()
                                .filter((p) => p.coords !== undefined) //Filter Out Errors
                                .subscribe(position => {
       //console.log("my current position: " + position.coords.longitude + " " + position.coords.latitude);
       this.myCoordinates = {lat: position.coords.latitude, lng: position.coords.longitude};
+      console.log("UserLocationMarker's position is now set.");
       this.userLocationMarker.setPosition(this.myCoordinates);
-    });
-  }
+  });
+  */
  
   private loadMap(){
     return new Promise((resolve, reject) => {
@@ -111,7 +121,8 @@ export class FindPage {
         }
   
         this.map = new google.maps.Map(this.mapElement.nativeElement, mapOptions);
-        var image = '../../assets/greencircle.png';
+        var image = 'assets/greencircle.png';
+        console.log("UserLocationMarker has been created.");
         this.userLocationMarker = new google.maps.Marker({
           map: this.map,
           position: {lat: position.coords.latitude, lng: position.coords.longitude},
@@ -137,7 +148,8 @@ export class FindPage {
     Case 3 : this party isn't on the map
   */
   private refreshPartyMarkers(){
-    console.log(this.allMyData.invitedTo);
+    console.log("In refreshPartyMarkers function");
+    //console.log(this.allMyData.invitedTo);
     var thisInstance = this;
     //console.log(thisInstance.partyMarkersOnMap);
     // Transform party array into a hashmap for quick access in Case 1
@@ -174,7 +186,7 @@ export class FindPage {
       }
       // Case 3 : this party isn't on the map
       else{
-        var image = '../../assets/darkgreen_MarkerP.png';
+        var image = 'assets/darkgreen_MarkerP.png';
         marker = new google.maps.Marker({
           map: this.map,
           animation: google.maps.Animation.DROP,
@@ -240,7 +252,7 @@ export class FindPage {
       }
       // Case 3 : this bar isn't on the map
       else{
-        var image = '../../assets/blue_MarkerB.png';
+        var image = 'assets/blue_MarkerB.png';
         marker = new google.maps.Marker({
           map: this.map,
           animation: google.maps.Animation.DROP,
@@ -259,7 +271,7 @@ export class FindPage {
 
   private addPartiesToMap(parties : Party[]){
     if(parties != null){
-      var image = '../../assets/darkgreen_MarkerP.png';
+      var image = 'assets/darkgreen_MarkerP.png';
       for(var i = 0; i < parties.length; i++){
         let party : Party = parties[i];
         var marker = new google.maps.Marker({
@@ -280,7 +292,7 @@ export class FindPage {
 
   private addBarsToMap(bars : Bar[]){
     if(bars != null){
-      var image = '../../assets/blue_MarkerB.png';
+      var image = 'assets/blue_MarkerB.png';
       for(var i = 0; i < bars.length; i++){
         let bar : Bar = bars[i];
         var marker = new google.maps.Marker({
@@ -337,7 +349,7 @@ export class FindPage {
   }
 
   private presentBarPopover(bar : Bar) {
-    let popover = this.popoverCtrl.create(BarPopover, {bar:bar});
+    let popover = this.popoverCtrl.create(BarPopover, {bar:bar, allMyData:this.allMyData, http:this.http}, {cssClass:'barPopover.scss'});
     popover.present();
   }
 }

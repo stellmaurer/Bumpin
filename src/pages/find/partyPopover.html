@@ -1,4 +1,5 @@
-<ion-content class="home">
+<ion-scroll class="home" scrollY="true">
+
   <ion-grid>
 
     <ion-row>
@@ -7,49 +8,6 @@
           <h1 [style.color]="{'Bumpin': '#32db64', 'Heating Up': 'yellow', 'Decent': 'orange', 'Weak': '#f53d3d'}[party.averageRating]">{{party.title}}</h1>
         </div>
       </ion-col>
-    </ion-row>
-
-    <!--
-    <ion-row>
-        <ion-col col-12 class="singleElement">
-          <div class="centerMe">
-            <button ion-button [color]="primary" style="color: black;" (click)='close();'>Get Directions</button>
-          </div>
-        </ion-col>
-    </ion-row>
-    -->
-
-    <ion-row>
-        <ion-col col-12 class="singleElement">
-          <div class="centerMe">
-            <label>Address</label>
-          </div>
-          <div class="centerMe backgroundIncluded needsPadding">
-            <label>{{party.addressLine1}}{{party.addressLine2 == "null" ? "" : ", " + party.addressLine2}}</label>
-          </div>
-        </ion-col>
-    </ion-row>
-
-    <ion-row>
-        <ion-col col-12 class="singleElement">
-          <div class="centerMe">
-            <label>Details</label>
-          </div>
-          <div class="centerMe backgroundIncluded needsPadding">
-            <label style="white-space: pre-wrap;">{{party.details == "null" ? "No details provided." : party.details}}</label>
-          </div>
-        </ion-col>
-    </ion-row>
-
-    <ion-row>
-        <ion-col col-12 class="singleElement">
-          <div class="centerMe">
-            <label>Hosts</label>
-          </div>
-          <div class="centerMe backgroundIncluded needsPadding">
-            <label class="hosts" style="display: inline-block;" *ngFor='let key of party.keysInHostsMap'>{{party.hosts.get(key).name}}</label>
-          </div>
-        </ion-col>
     </ion-row>
 
     <ion-row>
@@ -86,7 +44,7 @@
       </ion-col>
       <ion-col col-3 class="fourElements">
         <div class="centerMe">
-          <label style="color: yellow;">Heating Up</label>
+          <label style="color: yellow;">Heat'n-up</label>
         </div>
         <div class="centerMe">
           <button ion-button [color]="primary" style="color: black;" (click)='rateParty("Heating Up");'>
@@ -205,5 +163,40 @@
           </div>
         </ion-col>
     </ion-row>
+
+    <ion-row>
+        <ion-col col-12 class="singleElement">
+          <div class="centerMe">
+            <label>Details</label>
+          </div>
+          <div class="centerMe backgroundIncluded needsPadding">
+            <label style="white-space: pre-wrap;">{{party.details == "null" ? "No details provided." : party.details}}</label>
+          </div>
+        </ion-col>
+    </ion-row>
+
+    <ion-row>
+        <ion-col col-12 class="singleElement">
+          <div class="centerMe">
+            <label>Address</label>
+          </div>
+          <div class="centerMe backgroundIncluded needsPadding">
+            <label>{{party.addressLine1}}{{party.addressLine2 == "null" ? "" : ", " + party.addressLine2}}</label>
+          </div>
+        </ion-col>
+    </ion-row>
+
+    <ion-row>
+        <ion-col col-12 class="singleElement">
+          <div class="centerMe">
+            <label>Hosts</label>
+          </div>
+          <div class="centerMe backgroundIncluded needsPadding">
+            <label class="hosts" style="display: inline-block;" *ngFor='let key of party.keysInHostsMap'>{{party.hosts.get(key).name}}</label>
+          </div>
+        </ion-col>
+    </ion-row>
+
   </ion-grid>
-</ion-content>
+
+</ion-scroll>

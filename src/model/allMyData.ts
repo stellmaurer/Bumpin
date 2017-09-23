@@ -34,7 +34,7 @@ export class AllMyData{
         var tempThis = this;
         var id = setInterval(function(){
             tempThis.events.publish("timeToRefreshPartyAndBarData");
-        }, 60000);
+        }, 20000);
     }
 
     public loginProcedure(http : Http){
@@ -69,12 +69,25 @@ export class AllMyData{
         });
     }
 
-    public rateParty(partyID : string, facebookID : string, rating : string, http : Http){
+    public rateParty(partyID : string, facebookID : string, rating : string, timeLastRated : string, http : Http){
         return new Promise((resolve, reject) => {
             var query = new Query(this, http);
-            query.rateParty(partyID, facebookID, rating)
+            query.rateParty(partyID, facebookID, rating, timeLastRated)
             .then((res) => {
                 resolve("rateParty query succeeded.");
+            })
+            .catch((err) => {
+                reject(err);
+            });
+        });
+    }
+
+    public rateBar(barID : string, facebookID : string, isMale : boolean, name : string, rating : string, status : string, timeLastRated : string, http : Http){
+        return new Promise((resolve, reject) => {
+            var query = new Query(this, http);
+            query.rateBar(barID, facebookID, isMale, name, rating, status, timeLastRated)
+            .then((res) => {
+                resolve("rateBar query succeeded.");
             })
             .catch((err) => {
                 reject(err);
@@ -88,6 +101,19 @@ export class AllMyData{
             query.changeAttendanceStatusToParty(partyID, facebookID, status)
             .then((res) => {
                 resolve("changeAttendanceStatusToParty query succeeded.");
+            })
+            .catch((err) => {
+                reject(err);
+            });
+        });
+    }
+
+    public changeAttendanceStatusToBar(barID : string, facebookID : string, atBar : boolean, isMale : boolean, name : string, rating : string, status : string, timeLastRated : string, http : Http){
+        return new Promise((resolve, reject) => {
+            var query = new Query(this, http);
+            query.changeAttendanceStatusToBar(barID,facebookID,atBar,isMale,name,rating,status,timeLastRated)
+            .then((res) => {
+                resolve("changeAttendanceStatusToBar query succeeded.");
             })
             .catch((err) => {
                 reject(err);

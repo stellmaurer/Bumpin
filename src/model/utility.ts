@@ -1,11 +1,7 @@
 import {Party} from "./party";
-import {AllMyData} from "./allMyData";
+import {Bar} from "./bar";
 
 export class Utility {
-
-    constructor(private allMyData : AllMyData) {
-        
-    }
 
     // ISO Format = 2017-03-04T00:57:00Z
     public static convertDateTimeToISOFormat(date: Date){
@@ -22,6 +18,16 @@ export class Utility {
     {
         for(let i = 0; i < parties.length; i++){
             if(parties[i].partyID == party.partyID){
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    public static findIndexOfBar(bar : Bar, bars : Bar[])
+    {
+        for(let i = 0; i < bars.length; i++){
+            if(bars[i].barID == bar.barID){
                 return i;
             }
         }

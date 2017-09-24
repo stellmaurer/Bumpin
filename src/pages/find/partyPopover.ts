@@ -90,22 +90,11 @@ export class PartyPopover {
       this.party.invitees.get(this.allMyData.me.facebookID).rating = rating;
       this.party.myInviteeInfo.rating = rating;
       this.party.myInviteeInfo.timeLastRated = timeLastRated;
-      console.log("After rating the party. Before refresh party stats.");
-        console.log("this.allMyData.invitedTo[0] ratings:");
-        console.log(this.allMyData.invitedTo[0].bumpinRatings);
-        console.log(this.allMyData.invitedTo[0].heatingUpRatings);
-        console.log(this.allMyData.invitedTo[0].decentRatings);
-        console.log(this.allMyData.invitedTo[0].weakRatings);
-        console.log("this.party.bumpinRatings:");
-        console.log(this.party.bumpinRatings);
-        console.log(this.party.heatingUpRatings);
-        console.log(this.party.decentRatings);
-        console.log(this.party.weakRatings);
       this.party.refreshPartyStats();
       
       this.allMyData.rateParty(this.party.partyID, this.allMyData.me.facebookID, rating, timeLastRated, this.http)
         .then((res) => {
-          
+          //console.log("Rating the party query succeeded.");
         })
         .catch((err) => {
           console.log(err);
@@ -149,7 +138,7 @@ export class PartyPopover {
       this.party.invitees.get(this.allMyData.me.facebookID).status = status;
       this.allMyData.changeAttendanceStatusToParty(this.party.partyID, this.allMyData.me.facebookID, status, this.http)
         .then((res) => {
-          
+          //console.log("Changing attendance status to the party query succeeded.");
         })
         .catch((err) => {
           console.log(err);

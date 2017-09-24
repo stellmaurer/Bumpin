@@ -34,7 +34,7 @@ export class AllMyData{
         var tempThis = this;
         var id = setInterval(function(){
             tempThis.events.publish("timeToRefreshPartyAndBarData");
-        }, 20000);
+        }, 60000);
     }
 
     public loginProcedure(http : Http){

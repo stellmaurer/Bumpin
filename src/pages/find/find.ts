@@ -11,6 +11,7 @@ import { PopoverController } from 'ionic-angular';
 import { PartyPopover } from './partyPopover';
 import { BarPopover } from './barPopover';
 import { LocationTracker } from '../../providers/location-tracker';
+import { BackgroundGeolocationResponse } from '@ionic-native/background-geolocation';
  
 declare var google;
 
@@ -91,9 +92,10 @@ export class FindPage {
   }
 
   private enableUserLocation(){
-    this.locationTracker.watch.subscribe(() => {
-      this.myCoordinates = {lat: this.locationTracker.lat, lng: this.locationTracker.lng}
-      this.userLocationMarker.setPosition(this.myCoordinates);
+    this.locationTracker.watch
+      .subscribe((location) => {
+        this.myCoordinates = {lat: this.locationTracker.lat, lng: this.locationTracker.lng}
+        this.userLocationMarker.setPosition(this.myCoordinates);
     });
   }
 

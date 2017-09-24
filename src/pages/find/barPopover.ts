@@ -25,11 +25,25 @@ export class BarPopover {
     this.bar = params.get("bar");
   }
 
+  ionViewWillEnter(){
+    this.synchronizeLatestBarData();
+  }
+
   close() {
     this.viewCtrl.dismiss();
   }
 
+  synchronizeLatestBarData(){
+   let indexOfBar = Utility.findIndexOfBar(this.bar, this.allMyData.barsCloseToMe);
+    if(indexOfBar == -1){
+      console.log("Bar has been removed. You cannot rate it anymore.");
+      return;
+    }
+    this.bar = this.allMyData.barsCloseToMe[indexOfBar];
+ }
+
   rateBar(rating : string){
+      this.synchronizeLatestBarData();
       // If you're not an attendee of the bar, make yourself an attendee
       if(this.bar.attendees.get(this.allMyData.me.facebookID) == null){
         var newAttendee = new Attendee();
@@ -90,7 +104,7 @@ export class BarPopover {
         this.bar.refreshBarStats();
         this.allMyData.rateBar(this.bar.barID, this.allMyData.me.facebookID, this.allMyData.me.isMale, this.allMyData.me.name, rating, this.bar.attendees.get(this.allMyData.me.facebookID).status, timeLastRated, this.http)
           .then((res) => {
-            
+            //console.log("Rating the bar query succeeded.");
           })
           .catch((err) => {
             console.log(err);
@@ -100,6 +114,7 @@ export class BarPopover {
 
 
   changeAttendanceStatus(status : string){
+    this.synchronizeLatestBarData();
     var timeLastRated = "2001-01-01T00:00:00Z";
     if(this.bar.attendees.get(this.allMyData.me.facebookID) != null){
       if(status != this.bar.attendees.get(this.allMyData.me.facebookID).status){
@@ -150,7 +165,7 @@ export class BarPopover {
     this.bar.myAttendeeInfo = me;
     this.allMyData.changeAttendanceStatusToBar(this.bar.barID, this.allMyData.me.facebookID, me.atBar, me.isMale, me.name, me.rating, me.status, me.timeLastRated, this.http)
           .then((res) => {
-            
+            //console.log("Changing attendance status to the bar query succeeded.");
           })
           .catch((err) => {
             console.log(err);

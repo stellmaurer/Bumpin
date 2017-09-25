@@ -2,6 +2,10 @@ import { Injectable, NgZone } from '@angular/core';
 import { BackgroundGeolocation } from '@ionic-native/background-geolocation';
 import { Geolocation, Geoposition } from '@ionic-native/geolocation';
 import 'rxjs/add/operator/filter';
+import { AllMyData } from '../model/allMyData';
+import { Party } from '../model/party';
+import { Bar } from '../model/bar';
+import { Utility } from '../model/utility';
  
 @Injectable()
 export class LocationTracker {
@@ -10,9 +14,11 @@ export class LocationTracker {
   public lat: number = 0;
   public lng: number = 0;
  
-  constructor(public zone: NgZone, private backgroundGeolocation: BackgroundGeolocation, private geolocation: Geolocation) {
+  constructor(private allMyData : AllMyData, public zone: NgZone, private backgroundGeolocation: BackgroundGeolocation, private geolocation: Geolocation) {
  
   }
+
+  
  
   startTracking() {
     let foregroundConfig = {
@@ -38,7 +44,7 @@ export class LocationTracker {
     });
     // Turn ON the background-geolocation system.
     this.backgroundGeolocation.start();
-}
+  }
  
   stopTracking() {
     console.log('stopTracking');

@@ -12,6 +12,7 @@ import { PartyPopover } from './partyPopover';
 import { BarPopover } from './barPopover';
 import { LocationTracker } from '../../providers/location-tracker';
 import { BackgroundGeolocationResponse } from '@ionic-native/background-geolocation';
+import { Utility } from '../../model/utility';
  
 declare var google;
 
@@ -35,8 +36,9 @@ export class FindPage {
     this.partyMarkersOnMap = new Map<string,any>();
     this.barMarkersOnMap = new Map<string,any>();
     this.locationTracker.startTracking();
+    console.log("Distance between points = " + Utility.getDistanceInMetersBetweenCoordinates(43.072237, -89.408233, 43.072058, -89.407008));
   }
- 
+
   ionViewDidLoad(){
     this.loadMap()
     .then((res) => {

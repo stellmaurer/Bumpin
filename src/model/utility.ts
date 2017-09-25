@@ -3,6 +3,26 @@ import {Bar} from "./bar";
 
 export class Utility {
 
+    public static getDistanceInMetersBetweenCoordinates(lat1 : number, lng1 : number, lat2 : number, lng2 : number){
+        var R = 6371e3; // metres
+        var φ1 = this.toRad(lat1);
+        var φ2 = this.toRad(lat2);
+        var Δφ = this.toRad(lat2-lat1);
+        var Δλ = this.toRad(lng2-lng1);
+
+        var a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
+                Math.cos(φ1) * Math.cos(φ2) *
+                Math.sin(Δλ/2) * Math.sin(Δλ/2);
+        var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+
+        var d = R * c;
+        return d;
+    }
+
+    private static toRad(x) {
+        return x * Math.PI / 180;
+    }
+
     // ISO Format = 2017-03-04T00:57:00Z
     public static convertDateTimeToISOFormat(date: Date){
         var year = date.getUTCFullYear();

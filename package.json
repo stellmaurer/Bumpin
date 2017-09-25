@@ -23,6 +23,7 @@
         "@angular/platform-server": "4.0.0",
         "@ionic-native/background-geolocation": "^4.1.0",
         "@ionic-native/core": "3.6.0",
+        "@ionic-native/geofence": "^4.2.1",
         "@ionic-native/geolocation": "^4.1.0",
         "@ionic-native/splash-screen": "3.4.2",
         "@ionic-native/status-bar": "3.4.2",

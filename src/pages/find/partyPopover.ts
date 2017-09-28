@@ -86,13 +86,18 @@ export class PartyPopover {
               break;
           }
       }
-      var timeLastRated = Utility.convertDateTimeToISOFormat(new Date());
+
+      let timeLastRated = Utility.convertDateTimeToISOFormat(new Date());
+      let timeOfLastKnownLocation = timeLastRated;
       this.party.invitees.get(this.allMyData.me.facebookID).rating = rating;
+      this.party.invitees.get(this.allMyData.me.facebookID).timeLastRated = timeLastRated;
+      this.party.invitees.get(this.allMyData.me.facebookID).timeOfLastKnownLocation = timeOfLastKnownLocation;
       this.party.myInviteeInfo.rating = rating;
       this.party.myInviteeInfo.timeLastRated = timeLastRated;
+      this.party.myInviteeInfo.timeOfLastKnownLocation = timeOfLastKnownLocation;
       this.party.refreshPartyStats();
       
-      this.allMyData.rateParty(this.party.partyID, this.allMyData.me.facebookID, rating, timeLastRated, this.http)
+      this.allMyData.rateParty(this.party.partyID, this.allMyData.me.facebookID, rating, timeLastRated, timeOfLastKnownLocation, this.http)
         .then((res) => {
           //console.log("Rating the party query succeeded.");
         })

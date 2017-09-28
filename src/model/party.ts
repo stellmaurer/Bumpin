@@ -118,9 +118,9 @@ export class Party {
             let invitee = this.invitees.get(key);
             if(invitee.atParty){
                 this.numberOfPeopleAtParty++;
-            }
-            if(invitee.isMale){
-                numberOfMen++;
+                if(invitee.isMale){
+                    numberOfMen++;
+                }
             }
             // Initialize rating stats
             switch(invitee.rating){
@@ -226,5 +226,6 @@ export class Invitee {
     public status : string;
     public atParty : boolean;
     public timeLastRated : string;
+    public timeOfLastKnownLocation : string;
     constructor() {}
 }

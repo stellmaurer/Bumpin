@@ -96,13 +96,17 @@ export class BarPopover {
                 break;
             }
         }
-        var timeLastRated = Utility.convertDateTimeToISOFormat(new Date());
+
+        let timeLastRated = Utility.convertDateTimeToISOFormat(new Date());
+        let timeOfLastKnownLocation = timeLastRated;
         this.bar.attendees.get(this.allMyData.me.facebookID).rating = rating;
-        this.bar.attendees.get(this.allMyData.me.facebookID).timeLastRated = Utility.convertDateTimeToISOFormat(new Date());
+        this.bar.attendees.get(this.allMyData.me.facebookID).timeLastRated = timeLastRated;
+        this.bar.attendees.get(this.allMyData.me.facebookID).timeOfLastKnownLocation = timeOfLastKnownLocation;
         this.bar.myAttendeeInfo.rating = rating;
         this.bar.myAttendeeInfo.timeLastRated = timeLastRated;
+        this.bar.myAttendeeInfo.timeOfLastKnownLocation = timeOfLastKnownLocation;
         this.bar.refreshBarStats();
-        this.allMyData.rateBar(this.bar.barID, this.allMyData.me.facebookID, this.allMyData.me.isMale, this.allMyData.me.name, rating, this.bar.attendees.get(this.allMyData.me.facebookID).status, timeLastRated, this.http)
+        this.allMyData.rateBar(this.bar.barID, this.allMyData.me.facebookID, this.allMyData.me.isMale, this.allMyData.me.name, rating, this.bar.attendees.get(this.allMyData.me.facebookID).status, timeLastRated, timeOfLastKnownLocation, this.http)
           .then((res) => {
             //console.log("Rating the bar query succeeded.");
           })
@@ -115,7 +119,6 @@ export class BarPopover {
 
   changeAttendanceStatus(status : string){
     this.synchronizeLatestBarData();
-    var timeLastRated = "2001-01-01T00:00:00Z";
     if(this.bar.attendees.get(this.allMyData.me.facebookID) != null){
       if(status != this.bar.attendees.get(this.allMyData.me.facebookID).status){
         switch(this.bar.attendees.get(this.allMyData.me.facebookID).status){
@@ -159,11 +162,12 @@ export class BarPopover {
       newAttendee.rating = "None";
       newAttendee.status = status;
       newAttendee.timeLastRated = "2001-01-01T00:00:00Z";
+      newAttendee.timeOfLastKnownLocation = "2001-01-01T00:00:00Z";
       this.bar.attendees.set(this.allMyData.me.facebookID, newAttendee);
     }
     var me = this.bar.attendees.get(this.allMyData.me.facebookID);
     this.bar.myAttendeeInfo = me;
-    this.allMyData.changeAttendanceStatusToBar(this.bar.barID, this.allMyData.me.facebookID, me.atBar, me.isMale, me.name, me.rating, me.status, me.timeLastRated, this.http)
+    this.allMyData.changeAttendanceStatusToBar(this.bar.barID, this.allMyData.me.facebookID, me.atBar, me.isMale, me.name, me.rating, me.status, me.timeLastRated, me.timeOfLastKnownLocation, this.http)
           .then((res) => {
             //console.log("Changing attendance status to the bar query succeeded.");
           })

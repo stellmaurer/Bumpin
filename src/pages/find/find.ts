@@ -31,12 +31,10 @@ export class FindPage {
   myCoordinates : any;
  
   constructor(private allMyData : AllMyData, public locationTracker: LocationTracker, private events : Events, private http:Http, public navCtrl: NavController, public popoverCtrl: PopoverController) {
-    //console.log(this.allMyData);
     this.allMyData.events = events;
     this.partyMarkersOnMap = new Map<string,any>();
     this.barMarkersOnMap = new Map<string,any>();
     this.locationTracker.startTracking();
-    console.log("Distance between points = " + Utility.getDistanceInMetersBetweenCoordinates(43.072237, -89.408233, 43.072058, -89.407008));
   }
 
   ionViewDidLoad(){

@@ -23,8 +23,8 @@ export class RatePage {
   public bar : Bar;
   constructor(private allMyData : AllMyData, private http:Http, public navCtrl: NavController) {
     //this.party = this.allMyData.invitedTo[0];
-    this.party = null;
-    this.bar = this.allMyData.barsCloseToMe[0];
+    //this.party = null;
+    //this.bar = this.allMyData.barsCloseToMe[0];
     //this.bar = null;
 
   }
@@ -32,6 +32,20 @@ export class RatePage {
   ionViewWillEnter(){
       this.synchronizeLatestPartyData();
       this.synchronizeLatestBarData();
+      if(this.allMyData.thePartyOrBarIAmAt == null){
+          this.party = null;
+          this.bar = null;
+      } else if(this.allMyData.thePartyOrBarIAmAt instanceof Party){
+          this.party = this.allMyData.thePartyOrBarIAmAt;
+          this.bar = null;
+      } else if(this.allMyData.thePartyOrBarIAmAt instanceof Bar){
+          this.party = null;
+          this.bar = this.allMyData.thePartyOrBarIAmAt;
+      } else {
+          this.party = null;
+          this.bar = null;
+          console.log("There's a bug somewhere in the findThePartyOrBarIAmAt function.");
+      }
   }
 
 
@@ -99,13 +113,17 @@ export class RatePage {
           }
       }
 
-      var timeLastRated = Utility.convertDateTimeToISOFormat(new Date());
+      let timeLastRated = Utility.convertDateTimeToISOFormat(new Date());
+      let timeOfLastKnownLocation = timeLastRated;
       this.party.invitees.get(this.allMyData.me.facebookID).rating = rating;
+      this.party.invitees.get(this.allMyData.me.facebookID).timeLastRated = timeLastRated;
+      this.party.invitees.get(this.allMyData.me.facebookID).timeOfLastKnownLocation = timeOfLastKnownLocation;
       this.party.myInviteeInfo.rating = rating;
       this.party.myInviteeInfo.timeLastRated = timeLastRated;
+      this.party.myInviteeInfo.timeOfLastKnownLocation = timeOfLastKnownLocation;
 
       this.party.refreshPartyStats();
-      this.allMyData.rateParty(this.party.partyID, this.allMyData.me.facebookID, rating, timeLastRated, this.http)
+      this.allMyData.rateParty(this.party.partyID, this.allMyData.me.facebookID, rating, timeLastRated, timeOfLastKnownLocation, this.http)
         .then((res) => {
           //console.log("Rating the party query succeeded.");
         })
@@ -169,13 +187,16 @@ export class RatePage {
                 break;
             }
         }
-        var timeLastRated = Utility.convertDateTimeToISOFormat(new Date());
+        let timeLastRated = Utility.convertDateTimeToISOFormat(new Date());
+        let timeOfLastKnownLocation = timeLastRated;
         this.bar.attendees.get(this.allMyData.me.facebookID).rating = rating;
-        this.bar.attendees.get(this.allMyData.me.facebookID).timeLastRated = Utility.convertDateTimeToISOFormat(new Date());
+        this.bar.attendees.get(this.allMyData.me.facebookID).timeLastRated = timeLastRated;
+        this.bar.attendees.get(this.allMyData.me.facebookID).timeOfLastKnownLocation = timeOfLastKnownLocation;
         this.bar.myAttendeeInfo.rating = rating;
         this.bar.myAttendeeInfo.timeLastRated = timeLastRated;
+        this.bar.myAttendeeInfo.timeOfLastKnownLocation = timeOfLastKnownLocation;
         this.bar.refreshBarStats();
-        this.allMyData.rateBar(this.bar.barID, this.allMyData.me.facebookID, this.allMyData.me.isMale, this.allMyData.me.name, rating, this.bar.attendees.get(this.allMyData.me.facebookID).status, timeLastRated, this.http)
+        this.allMyData.rateBar(this.bar.barID, this.allMyData.me.facebookID, this.allMyData.me.isMale, this.allMyData.me.name, rating, this.bar.attendees.get(this.allMyData.me.facebookID).status, timeLastRated, timeOfLastKnownLocation, this.http)
           .then((res) => {
             //console.log("Rating the bar query succeeded.");
           })

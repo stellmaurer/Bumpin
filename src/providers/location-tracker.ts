@@ -37,6 +37,14 @@ export class LocationTracker {
     this.watch = this.geolocation.watchPosition(foregroundConfig).filter((p: any) => p.code === undefined);
     this.watch.subscribe((position: Geoposition) => {
       //this.findClosestPartyOrBar(position.coords.latitude, position.coords.longitude);
+      // TODO: This works! Even with background, this works.
+      //    - However, it doesn't update the UI right away
+      //      Tasks:
+      //            (1) Get the party and bar popovers to update right away.
+      //            (2) Get the rate tab to update right away
+      //            (3) Figure out why iOS is killing the task being run here and figure out how to not get it killed.
+      //            (4) Change rate buttons on Find and Rate tabs to only allow you to rate the party/bar when you are there
+      //            (5) Change party and bar stats to only count ratings within 30 minutes and attendance within 15 minutes
       var thePartyOrBarIAmCurrentlyAt = this.findThePartyOrBarIAmAt(position.coords.latitude, position.coords.longitude);
       this.updateMyAtPartyOrAtBarStatuses(this.allMyData.thePartyOrBarIAmAt, thePartyOrBarIAmCurrentlyAt);
       this.allMyData.thePartyOrBarIAmAt = thePartyOrBarIAmCurrentlyAt;
@@ -49,7 +57,7 @@ export class LocationTracker {
       });
     });
     // Turn ON the background-geolocation system.
-    //this.backgroundGeolocation.start();
+    this.backgroundGeolocation.start();
   }
  
   stopTracking() {
@@ -59,6 +67,8 @@ export class LocationTracker {
   }
 
   updateMyAtPartyOrAtBarStatuses(partyOrBarIWasAt : any, partyOrBarIAmAt : any){
+    console.log("Party/bar i was at: " + partyOrBarIWasAt);
+    console.log("Party/bar i am at: " + partyOrBarIAmAt);
     let party : Party = null;
     let bar : Bar = null;
 
@@ -90,6 +100,27 @@ export class LocationTracker {
         this.allMyData.changeAtBarStatus(bar, false, this.http);
       }
     }else if((partyOrBarIWasAt != null) && (partyOrBarIAmAt != null)){
+      // Check to see if we are at the same party/bar
+      if((partyOrBarIWasAt instanceof Party) && (partyOrBarIAmAt instanceof Party)){
+        let partyIWasAt : Party = partyOrBarIWasAt;
+        let partyIAmAt : Party = partyOrBarIAmAt;
+        if(partyIWasAt.partyID == partyIAmAt.partyID){
+          // we make a call here because we need to update timeOfLastKnownLocation for the invitee
+          this.allMyData.changeAtPartyStatus(partyIAmAt, true, this.http);
+          console.log("I am at the same party - just updating my timeOfLastKnownLocation.");
+          return true;
+        }
+      }else if((partyOrBarIWasAt instanceof Bar) && (partyOrBarIAmAt instanceof Bar)){
+        let barIWasAt : Bar = partyOrBarIWasAt;
+        let barIAmAt : Bar = partyOrBarIAmAt;
+        if(barIWasAt.barID == barIAmAt.barID){
+          // we make a call here because we need to update timeOfLastKnownLocation for the attendee
+          this.allMyData.changeAtBarStatus(barIAmAt, true, this.http);
+          console.log("I am at the same bar - just updating my timeOfLastKnownLocation.");
+          return true;
+        }
+      }
+      
       // I was at a bar/party, and now I am at another bar/party, so I need to communicate that
       //    I'm not at the bar/party I was at, and that I'm at this new bar/party.
       console.log("I was at a bar/party, and now I am at another bar/party, so I need to communicate that I'm not at the bar/party I was at, and that I'm at this new bar/party.");
@@ -137,6 +168,7 @@ export class LocationTracker {
         closestPartyOrBar = bar;
       }
     }
+    console.log("This is how far away the closest party/bar is: " + max);
     if((closestPartyOrBar == null) || (max > 20)){
       return null;
     }

@@ -134,6 +134,7 @@ export class AllMyData{
             party.invitees.get(this.me.facebookID).timeOfLastKnownLocation = timeOfLastKnownLocation;
             party.myInviteeInfo = party.invitees.get(this.me.facebookID);
         });
+        party.refreshPartyStats();
         // update external data
         return new Promise((resolve, reject) => {
             var query = new Query(this, http);
@@ -180,6 +181,7 @@ export class AllMyData{
                 bar.myAttendeeInfo = bar.attendees.get(facebookID);
             });
         }
+        bar.refreshBarStats();
         // update external data
         return new Promise((resolve, reject) => {
             var query = new Query(this, http);

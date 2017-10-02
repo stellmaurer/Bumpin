@@ -35,7 +35,6 @@ export class LocationTracker {
       interval: 2000 
     };
     this.backgroundGeolocation.configure(backgroundConfig);
-  
     this.watch = this.geolocation.watchPosition(foregroundConfig).filter((p: any) => p.code === undefined);
     this.watch.subscribe((position: Geoposition) => {
       //this.findClosestPartyOrBar(position.coords.latitude, position.coords.longitude);
@@ -51,11 +50,11 @@ export class LocationTracker {
       //            (7) Fix if you want - if you are at a party/bar and close the app, then leave the part/bar and reopen the app,
       //                it still thinks you're there until the expiration time, because I am not checking this edge case currently.
       var thePartyOrBarIAmCurrentlyAt = this.findThePartyOrBarIAmAt(position.coords.latitude, position.coords.longitude);
+      // This is checking an atParty/atBar edge case
       if(this.appWasJustStarted == true){
-        // check if we need to set our atParty or atBar attendance to false
-        //       for any party or bar in the area.
-        
+        this.checkAndUpdateIfYouNeedToSetYourAttendanceToFalse();
       }
+
       let shouldUpdateUI = this.updateMyAtPartyOrAtBarStatuses(this.allMyData.thePartyOrBarIAmAt, thePartyOrBarIAmCurrentlyAt);
 
       // Run update inside of Angular's zone
@@ -76,26 +75,63 @@ export class LocationTracker {
 
   // if you are at a party/bar and close the app, then leave the part/bar and reopen the app,
   //  it still thinks you're there until the expiration time (15 minutes).
-  checkToSeeIfYouNeedToSetYourAttendanceToFalse(){
-    let party : Party = null;
-    let bar : Bar = null;
+  checkAndUpdateIfYouNeedToSetYourAttendanceToFalse(){
+    if((this.lat == 0) || (this.lng == 0)){
+      return null;
+    }
+    if((this.allMyData.invitedTo.length == 0) && (this.allMyData.barsCloseToMe.length == 0)){
+      return null;
+    }
+    this.appWasJustStarted = false;
+
+    // Based off my current location, am I at a party or bar?
+    let partyImActuallyAt : Party = null;
+    let barImActuallyAt : Bar = null;
     if(this.allMyData.thePartyOrBarIAmAt instanceof Party){
-      party = this.allMyData.thePartyOrBarIAmAt;
+      partyImActuallyAt = this.allMyData.thePartyOrBarIAmAt;
     }else{
-      bar = this.allMyData.thePartyOrBarIAmAt;
+      barImActuallyAt = this.allMyData.thePartyOrBarIAmAt;
     }
-    if(party != null){
-      for(let i = 0; i < this.allMyData.invitedTo.length; i++){
 
+    // Based off the database, am I at a party or bar?
+    let partyImAtInTheDatabase : Party = null;
+    let barImAtInTheDatabase : Bar = null;
+    for(let i = 0; i < this.allMyData.invitedTo.length; i++){
+      if(this.allMyData.invitedTo[i].myInviteeInfo.atParty == true){
+        partyImAtInTheDatabase = this.allMyData.invitedTo[i];
+        break;
       }
     }
-    if(bar != null){
+    if(partyImAtInTheDatabase == null){
       for(let i = 0; i < this.allMyData.barsCloseToMe.length; i++){
-
+        if(this.allMyData.barsCloseToMe[i].myAttendeeInfo.atBar == true){
+          barImAtInTheDatabase = this.allMyData.barsCloseToMe[i];
+          break;
+        }
       }
     }
-    this.allMyData.changeAtPartyStatus(party, false, this.http);
-        this.allMyData.changeAtBarStatus(bar, true, this.http);
+
+    // Determine if I need to update the database
+    if(partyImAtInTheDatabase != null){
+      if(partyImActuallyAt != null){
+        if(partyImAtInTheDatabase.partyID != partyImActuallyAt.partyID){
+          this.allMyData.changeAtPartyStatus(partyImAtInTheDatabase, false, this.http);
+        }
+      }else{
+        this.allMyData.changeAtPartyStatus(partyImAtInTheDatabase, false, this.http);
+      }
+    }
+    if(barImAtInTheDatabase != null){
+      if(barImActuallyAt != null){
+        if(barImAtInTheDatabase.barID != barImActuallyAt.barID){
+          this.allMyData.changeAtBarStatus(barImAtInTheDatabase, false, this.http);
+        }
+      }else{
+        this.allMyData.changeAtBarStatus(barImAtInTheDatabase, false, this.http);
+      }
+    }
+    // If there aren't any parties or bars in the database that have me with atParty or atBar = true, then
+    //      I don't need to do anything
   }
  
   stopTracking() {

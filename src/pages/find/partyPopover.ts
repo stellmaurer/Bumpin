@@ -48,43 +48,46 @@ export class PartyPopover {
   rateParty(rating : string){
     this.synchronizeLatestPartyData();
     this.party.invitees.get(this.allMyData.me.facebookID).atParty = true;
+    var ratingIsExpired = Utility.isRatingExpired(this.party.invitees.get(this.allMyData.me.facebookID).timeLastRated);
     if(rating != this.party.invitees.get(this.allMyData.me.facebookID).rating){
-      switch(this.party.invitees.get(this.allMyData.me.facebookID).rating){
-          case "Bumpin": {
-              this.party.bumpinRatings--;
-              break;
-          }
-          case "Heating Up": {
-              this.party.heatingUpRatings--;
-              break;
-          }
-          case "Decent": {
-              this.party.decentRatings--;
-              break;
-          }
-          case "Weak": {
-              this.party.weakRatings--;
-              break;
-          }
-      }
+      if(ratingIsExpired == false){
+        switch(this.party.invitees.get(this.allMyData.me.facebookID).rating){
+            case "Bumpin": {
+                this.party.bumpinRatings--;
+                break;
+            }
+            case "Heating Up": {
+                this.party.heatingUpRatings--;
+                break;
+            }
+            case "Decent": {
+                this.party.decentRatings--;
+                break;
+            }
+            case "Weak": {
+                this.party.weakRatings--;
+                break;
+            }
+        }
 
-      switch(rating){
-          case "Bumpin": {
-              this.party.bumpinRatings++;
-              break;
-          }
-          case "Heating Up": {
-              this.party.heatingUpRatings++;
-              break;
-          }
-          case "Decent": {
-              this.party.decentRatings++;
-              break;
-          }
-          case "Weak": {
-              this.party.weakRatings++;
-              break;
-          }
+        switch(rating){
+            case "Bumpin": {
+                this.party.bumpinRatings++;
+                break;
+            }
+            case "Heating Up": {
+                this.party.heatingUpRatings++;
+                break;
+            }
+            case "Decent": {
+                this.party.decentRatings++;
+                break;
+            }
+            case "Weak": {
+                this.party.weakRatings++;
+                break;
+            }
+        }
       }
 
       let timeLastRated = Utility.convertDateTimeToISOFormat(new Date());
@@ -106,7 +109,6 @@ export class PartyPopover {
       });
     }
   }
-
 
   changeAttendanceStatus(status : string){
     this.synchronizeLatestPartyData();

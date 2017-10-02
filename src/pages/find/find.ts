@@ -13,6 +13,8 @@ import { BarPopover } from './barPopover';
 import { LocationTracker } from '../../providers/location-tracker';
 import { BackgroundGeolocationResponse } from '@ionic-native/background-geolocation';
 import { Utility } from '../../model/utility';
+import { AlertController } from 'ionic-angular';
+
  
 declare var google;
 
@@ -29,12 +31,173 @@ export class FindPage {
 
   userLocationMarker: any;
   myCoordinates : any;
+
+  private includeBars : boolean;
+  private includePartiesToday : boolean;
+  private includePartiesThisWeek : boolean;
+  private includeAllParties : boolean;
+  private includeBarsTemp : boolean;
+  private includePartiesTodayTemp : boolean;
+  private includePartiesThisWeekTemp : boolean;
+  private includeAllPartiesTemp : boolean;
  
-  constructor(private allMyData : AllMyData, public locationTracker: LocationTracker, private events : Events, private http:Http, public navCtrl: NavController, public popoverCtrl: PopoverController) {
+  constructor(private allMyData : AllMyData, public alertCtrl: AlertController, public locationTracker: LocationTracker, private events : Events, private http:Http, public navCtrl: NavController, public popoverCtrl: PopoverController) {
     this.allMyData.events = events;
     this.partyMarkersOnMap = new Map<string,any>();
     this.barMarkersOnMap = new Map<string,any>();
     this.locationTracker.startTracking();
+    this.includeBars = true;
+    this.includePartiesToday = true;
+    this.includePartiesThisWeek = true;
+    this.includeAllParties = true;
+    this.includeBarsTemp = true;
+    this.includePartiesTodayTemp = true;
+    this.includePartiesThisWeekTemp = true;
+    this.includeAllPartiesTemp = true;
+  }
+
+  presentAlert() {
+    let alert = this.alertCtrl.create();
+    alert.setTitle('What do you want to include on the map?');
+
+    alert.addInput({
+      type: 'checkbox',
+      label: 'Bars',
+      checked: this.includeBars,
+      handler: data =>  { this.includeBarsTemp = !this.includeBarsTemp;}
+    });
+    alert.addInput({
+      type: 'checkbox',
+      label: 'Parties Today',
+      checked: this.includePartiesToday,
+      handler: data =>  { this.includePartiesTodayTemp = !this.includePartiesTodayTemp;}
+    });
+    alert.addInput({
+      type: 'checkbox',
+      label: 'Parties This Week',
+      checked: this.includePartiesThisWeek,
+      handler: data =>  { this.includePartiesThisWeekTemp = !this.includePartiesThisWeekTemp;}
+    });
+    alert.addInput({
+      type: 'checkbox',
+      label: 'All Parties',
+      checked: this.includeAllParties,
+      handler: data =>  { this.includeAllPartiesTemp = !this.includeAllPartiesTemp;}
+    });
+
+
+    alert.addButton({
+      text: 'Cancel',
+      handler: data => {
+        this.includeBarsTemp = this.includeBars;
+        this.includePartiesTodayTemp = this.includePartiesToday;
+        this.includePartiesThisWeekTemp = this.includePartiesThisWeek;
+        this.includeAllPartiesTemp = this.includeAllParties;
+        console.log('Checkbox data:', data);
+      }
+    });
+    alert.addButton({
+      text: 'Okay',
+      handler: data => {
+        this.includeBars = this.includeBarsTemp;
+        this.includePartiesToday = this.includePartiesTodayTemp;
+        this.includePartiesThisWeek = this.includePartiesThisWeekTemp;
+        this.includeAllParties = this.includeAllPartiesTemp;
+        this.updateMapMarkersVisibility();
+        console.log('Checkbox data:', data);
+      }
+    });
+    alert.present();
+  }
+
+  updateMapMarkersVisibility(){
+    if(this.includeBars == true){
+      this.showBarMarkers();
+    }else{
+      this.hideBarMarkers();
+    }
+
+    if(this.includeAllParties == true){
+      this.showAllPartyMarkers();
+    }else if(this.includePartiesThisWeek == true){
+      this.showPartyMarkersForThisWeekAndHideEverythingElse();
+    }else if(this.includePartiesToday == true){
+      this.showPartyMarkersForTodayAndHideEverythingElse();
+    }else{
+      this.hideAllPartyMarkers();
+    }
+  }
+
+  partyMarkerShouldBeVisible(party : Party){
+    var markerShouldBeVisible = false;
+    if(this.includeAllParties == true){
+      markerShouldBeVisible = true;
+    }else if(this.includePartiesThisWeek == true){
+      if(Utility.isPartyThisWeek(party) == true){
+        markerShouldBeVisible = true;
+      }else{
+        markerShouldBeVisible = false;
+      }
+    }else if(this.includePartiesToday == true){
+      if(Utility.isPartyToday(party) == true){
+        markerShouldBeVisible = true;
+      }else{
+        markerShouldBeVisible = false;
+      }
+    }else{
+      markerShouldBeVisible = false;
+    }
+    return markerShouldBeVisible;
+  }
+
+  showPartyMarkersForTodayAndHideEverythingElse(){
+    this.partyMarkersOnMap.forEach((value: any, key: string) => {
+        var theMarker = this.partyMarkersOnMap.get(key);
+        if(Utility.isPartyToday(theMarker.party) == true){
+          theMarker.setMap(this.map);
+        }else{
+          theMarker.setMap(null);
+        }
+    });
+  }
+
+  showPartyMarkersForThisWeekAndHideEverythingElse(){
+    this.partyMarkersOnMap.forEach((value: any, key: string) => {
+        var theMarker = this.partyMarkersOnMap.get(key);
+        if(Utility.isPartyThisWeek(theMarker.party) == true){
+          theMarker.setMap(this.map);
+        }else{
+          theMarker.setMap(null);
+        }
+    });
+  }
+
+  hideAllPartyMarkers(){
+    this.partyMarkersOnMap.forEach((value: any, key: string) => {
+        var theMarkerToHide = this.partyMarkersOnMap.get(key);
+        theMarkerToHide.setMap(null);
+    });
+  }
+
+  showAllPartyMarkers(){
+    this.partyMarkersOnMap.forEach((value: any, key: string) => {
+        var theMarkerToShow = this.partyMarkersOnMap.get(key);
+        theMarkerToShow.setMap(this.map);
+    });
+  }
+
+  hideBarMarkers(){
+    this.barMarkersOnMap.forEach((value: any, key: string) => {
+        var theMarkerToHide = this.barMarkersOnMap.get(key);
+        theMarkerToHide.setMap(null);
+    });
+  }
+
+  showBarMarkers(){
+    this.barMarkersOnMap.forEach((value: any, key: string) => {
+        var theMarkerToShow = this.barMarkersOnMap.get(key);
+        theMarkerToShow.setMap(this.map);
+    });
   }
 
   ionViewDidLoad(){
@@ -71,7 +234,6 @@ export class FindPage {
     this.events.subscribe("timeToRefreshPartyAndBarData",() => {
       this.allMyData.refreshPerson(this.http)
       .then((res) => {
-        // TODO: this is fucked up! 
         Promise.all([this.allMyData.refreshBarsCloseToMe(this.myCoordinates, this.http), this.allMyData.refreshParties(this.http)]).then(thePromise => {
           //console.log("parties have been refreshed");
           return thePromise;
@@ -89,6 +251,20 @@ export class FindPage {
         console.log(err);
       });
     });
+
+    this.events.subscribe("timeToUpdateUI",() => {
+        console.log("********************* updating the find tab UI now");
+        this.updateTheUI();
+    });
+  }
+
+  private updateTheUI(){
+    for(let i = 0; i < this.allMyData.invitedTo.length; i++){
+      this.allMyData.invitedTo[i].refreshPartyStats();
+    }
+    for(let i = 0; i < this.allMyData.barsCloseToMe.length; i++){
+      this.allMyData.barsCloseToMe[i].refreshBarStats();
+    }
   }
 
   private enableUserLocation(){
@@ -98,17 +274,6 @@ export class FindPage {
         this.userLocationMarker.setPosition(this.myCoordinates);
     });
   }
-
-  /* OLD way I was using to watch location
-  var subscription = Geolocation.watchPosition()
-                               .filter((p) => p.coords !== undefined) //Filter Out Errors
-                               .subscribe(position => {
-      //console.log("my current position: " + position.coords.longitude + " " + position.coords.latitude);
-      this.myCoordinates = {lat: position.coords.latitude, lng: position.coords.longitude};
-      console.log("UserLocationMarker's position is now set.");
-      this.userLocationMarker.setPosition(this.myCoordinates);
-  });
-  */
  
   private loadMap(){
     return new Promise((resolve, reject) => {
@@ -124,7 +289,7 @@ export class FindPage {
   
         this.map = new google.maps.Map(this.mapElement.nativeElement, mapOptions);
         var image = 'assets/greencircle.png';
-        console.log("UserLocationMarker has been created.");
+        //console.log("UserLocationMarker has been created.");
         this.userLocationMarker = new google.maps.Marker({
           map: this.map,
           position: {lat: position.coords.latitude, lng: position.coords.longitude},
@@ -188,9 +353,14 @@ export class FindPage {
       }
       // Case 3 : this party isn't on the map
       else{
+        // Check the filters to see if we should put this marker on the map
+        var mapToAttachToMarker = this.map;
+        if(this.partyMarkerShouldBeVisible(value) == false){
+          mapToAttachToMarker = null;
+        }
         var image = 'assets/darkgreen_MarkerP.png';
         marker = new google.maps.Marker({
-          map: this.map,
+          map: mapToAttachToMarker,
           animation: google.maps.Animation.DROP,
           position: {lat: value.latitude, lng: value.longitude},
           icon : image,

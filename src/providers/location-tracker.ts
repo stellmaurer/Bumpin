@@ -7,6 +7,7 @@ import { Party } from '../model/party';
 import { Bar, Attendee } from '../model/bar';
 import { Utility } from '../model/utility';
 import { Http } from '@angular/http';
+import { Events } from 'ionic-angular';
  
 @Injectable()
 export class LocationTracker {
@@ -14,9 +15,10 @@ export class LocationTracker {
   public watch: any;    
   public lat: number = 0;
   public lng: number = 0;
+  private appWasJustStarted : boolean;
  
-  constructor(private allMyData : AllMyData, public zone: NgZone, private backgroundGeolocation: BackgroundGeolocation, private geolocation: Geolocation, private http : Http) {
- 
+  constructor(private allMyData : AllMyData, private events : Events, public zone: NgZone, private backgroundGeolocation: BackgroundGeolocation, private geolocation: Geolocation, private http : Http) {
+    this.appWasJustStarted = true;
   }
 
 
@@ -40,24 +42,60 @@ export class LocationTracker {
       // TODO: This works! Even with background, this works.
       //    - However, it doesn't update the UI right away
       //      Tasks:
-      //            (1) Get the party and bar popovers to update right away.
-      //            (2) Get the rate tab to update right away
-      //            (3) Figure out why iOS is killing the task being run here and figure out how to not get it killed.
-      //            (4) Change rate buttons on Find and Rate tabs to only allow you to rate the party/bar when you are there
-      //            (5) Change party and bar stats to only count ratings within 30 minutes and attendance within 15 minutes
+      //     Done   (1) Get the party and bar popovers to update right away.
+      //     Done   (2) Get the rate tab to update right away
+      //     Done   (3) Figure out why iOS is killing the task being run here and figure out how to not get it killed.
+      //     Done   (4) Change rate buttons on Find and Rate tabs to only allow you to rate the party/bar when you are there
+      //     Done   (5) Change party and bar stats to only count ratings within 30 minutes and attendance within 15 minutes
+      //     Done   (6) Add party marker filter on Find tab (today, next few days, this week, all of time)
+      //            (7) Fix if you want - if you are at a party/bar and close the app, then leave the part/bar and reopen the app,
+      //                it still thinks you're there until the expiration time, because I am not checking this edge case currently.
       var thePartyOrBarIAmCurrentlyAt = this.findThePartyOrBarIAmAt(position.coords.latitude, position.coords.longitude);
-      this.updateMyAtPartyOrAtBarStatuses(this.allMyData.thePartyOrBarIAmAt, thePartyOrBarIAmCurrentlyAt);
-      this.allMyData.thePartyOrBarIAmAt = thePartyOrBarIAmCurrentlyAt;
+      if(this.appWasJustStarted == true){
+        // check if we need to set our atParty or atBar attendance to false
+        //       for any party or bar in the area.
+        
+      }
+      let shouldUpdateUI = this.updateMyAtPartyOrAtBarStatuses(this.allMyData.thePartyOrBarIAmAt, thePartyOrBarIAmCurrentlyAt);
 
       // Run update inside of Angular's zone
       this.zone.run(() => {
+        this.allMyData.thePartyOrBarIAmAt = thePartyOrBarIAmCurrentlyAt;
+        if(shouldUpdateUI == true){
+          this.events.publish("timeToUpdateUI");
+        }
         this.lat = position.coords.latitude;
         this.lng = position.coords.longitude;
-        console.log("Latitude: " + this.lat + ", " + "Longitude: " + this.lng);
+        //console.log("Latitude: " + this.lat + ", " + "Longitude: " + this.lng);
       });
+      this.backgroundGeolocation.finish();
     });
     // Turn ON the background-geolocation system.
     this.backgroundGeolocation.start();
+  }
+
+  // if you are at a party/bar and close the app, then leave the part/bar and reopen the app,
+  //  it still thinks you're there until the expiration time (15 minutes).
+  checkToSeeIfYouNeedToSetYourAttendanceToFalse(){
+    let party : Party = null;
+    let bar : Bar = null;
+    if(this.allMyData.thePartyOrBarIAmAt instanceof Party){
+      party = this.allMyData.thePartyOrBarIAmAt;
+    }else{
+      bar = this.allMyData.thePartyOrBarIAmAt;
+    }
+    if(party != null){
+      for(let i = 0; i < this.allMyData.invitedTo.length; i++){
+
+      }
+    }
+    if(bar != null){
+      for(let i = 0; i < this.allMyData.barsCloseToMe.length; i++){
+
+      }
+    }
+    this.allMyData.changeAtPartyStatus(party, false, this.http);
+        this.allMyData.changeAtBarStatus(bar, true, this.http);
   }
  
   stopTracking() {
@@ -67,8 +105,8 @@ export class LocationTracker {
   }
 
   updateMyAtPartyOrAtBarStatuses(partyOrBarIWasAt : any, partyOrBarIAmAt : any){
-    console.log("Party/bar i was at: " + partyOrBarIWasAt);
-    console.log("Party/bar i am at: " + partyOrBarIAmAt);
+    //console.log("Party/bar i was at: " + partyOrBarIWasAt);
+    //console.log("Party/bar i am at: " + partyOrBarIAmAt);
     let party : Party = null;
     let bar : Bar = null;
 
@@ -100,6 +138,7 @@ export class LocationTracker {
         this.allMyData.changeAtBarStatus(bar, false, this.http);
       }
     }else if((partyOrBarIWasAt != null) && (partyOrBarIAmAt != null)){
+      let atTheSamePartyOrBar = false;
       // Check to see if we are at the same party/bar
       if((partyOrBarIWasAt instanceof Party) && (partyOrBarIAmAt instanceof Party)){
         let partyIWasAt : Party = partyOrBarIWasAt;
@@ -108,7 +147,7 @@ export class LocationTracker {
           // we make a call here because we need to update timeOfLastKnownLocation for the invitee
           this.allMyData.changeAtPartyStatus(partyIAmAt, true, this.http);
           console.log("I am at the same party - just updating my timeOfLastKnownLocation.");
-          return true;
+          atTheSamePartyOrBar = true;
         }
       }else if((partyOrBarIWasAt instanceof Bar) && (partyOrBarIAmAt instanceof Bar)){
         let barIWasAt : Bar = partyOrBarIWasAt;
@@ -117,26 +156,28 @@ export class LocationTracker {
           // we make a call here because we need to update timeOfLastKnownLocation for the attendee
           this.allMyData.changeAtBarStatus(barIAmAt, true, this.http);
           console.log("I am at the same bar - just updating my timeOfLastKnownLocation.");
-          return true;
+          atTheSamePartyOrBar = true;
         }
       }
-      
-      // I was at a bar/party, and now I am at another bar/party, so I need to communicate that
-      //    I'm not at the bar/party I was at, and that I'm at this new bar/party.
-      console.log("I was at a bar/party, and now I am at another bar/party, so I need to communicate that I'm not at the bar/party I was at, and that I'm at this new bar/party.");
-      if(partyOrBarIWasAt instanceof Party){
-        party = partyOrBarIWasAt;
-        this.allMyData.changeAtPartyStatus(party, false, this.http);
-      }else{
-        bar = partyOrBarIWasAt;
-        this.allMyData.changeAtBarStatus(bar, false, this.http);
-      }
-      if(partyOrBarIAmAt instanceof Party){
-        party = partyOrBarIAmAt;
-        this.allMyData.changeAtPartyStatus(party, true, this.http);
-      }else{
-        bar = partyOrBarIAmAt;
-        this.allMyData.changeAtBarStatus(bar, true, this.http);
+
+      if(atTheSamePartyOrBar == false){
+        // I was at a bar/party, and now I am at another bar/party, so I need to communicate that
+        //    I'm not at the bar/party I was at, and that I'm at this new bar/party.
+        console.log("I was at a bar/party, and now I am at another bar/party, so I need to communicate that I'm not at the bar/party I was at, and that I'm at this new bar/party.");
+        if(partyOrBarIWasAt instanceof Party){
+          party = partyOrBarIWasAt;
+          this.allMyData.changeAtPartyStatus(party, false, this.http);
+        }else{
+          bar = partyOrBarIWasAt;
+          this.allMyData.changeAtBarStatus(bar, false, this.http);
+        }
+        if(partyOrBarIAmAt instanceof Party){
+          party = partyOrBarIAmAt;
+          this.allMyData.changeAtPartyStatus(party, true, this.http);
+        }else{
+          bar = partyOrBarIAmAt;
+          this.allMyData.changeAtBarStatus(bar, true, this.http);
+        }
       }
     }
     return true;

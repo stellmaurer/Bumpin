@@ -6,6 +6,7 @@ import { Http } from '@angular/http';
 import { Component } from '@angular/core';
 import { Events } from 'ionic-angular';
 import { Utility } from "./utility";
+import { Injectable, NgZone } from '@angular/core';
 
 // This class only gets created once and it happens when the app launches.
 //      Person is equal to your Person object in the database. It is used
@@ -14,6 +15,7 @@ import { Utility } from "./utility";
 //          hosting.
 //      The rest of the data (barHostFor, invitedTo, and partyHostFor) contains
 //          the actual Party and Bar objects, not just the keys to them.
+@Injectable()
 export class AllMyData{
     public me : Person;
     public partyHostFor : Party[];
@@ -24,7 +26,7 @@ export class AllMyData{
     
     public events : Events;
 
-    constructor() {
+    constructor(public zone: NgZone) {
         this.me = new Person();
         this.partyHostFor = new Array<Party>();
         this.barHostFor = new Array<Bar>();
@@ -127,8 +129,11 @@ export class AllMyData{
     public changeAtPartyStatus(party : Party, atParty : boolean, http : Http){
         let timeOfLastKnownLocation = Utility.convertDateTimeToISOFormat(new Date());
         // update internal data too
-        party.invitees.get(this.me.facebookID).atParty = atParty;
-        party.invitees.get(this.me.facebookID).timeOfLastKnownLocation = timeOfLastKnownLocation;
+        this.zone.run(() => {
+            party.invitees.get(this.me.facebookID).atParty = atParty;
+            party.invitees.get(this.me.facebookID).timeOfLastKnownLocation = timeOfLastKnownLocation;
+            party.myInviteeInfo = party.invitees.get(this.me.facebookID);
+        });
         // update external data
         return new Promise((resolve, reject) => {
             var query = new Query(this, http);
@@ -156,8 +161,11 @@ export class AllMyData{
             status = attendee.status;
             timeLastRated = attendee.timeLastRated;
             // update internal data
-            attendee.atBar = atBar;
-            attendee.timeOfLastKnownLocation = timeOfLastKnownLocation;
+            this.zone.run(() => {
+                attendee.atBar = atBar;
+                attendee.timeOfLastKnownLocation = timeOfLastKnownLocation;
+                bar.myAttendeeInfo = attendee;
+            });
         }else{
             // update internal data
             let newAttendee : Attendee = new Attendee();
@@ -167,7 +175,10 @@ export class AllMyData{
             newAttendee.rating = rating;
             newAttendee.timeLastRated = timeLastRated;
             newAttendee.timeOfLastKnownLocation = timeLastRated;
-            bar.attendees.set(facebookID, newAttendee);
+            this.zone.run(() => {
+                bar.attendees.set(facebookID, newAttendee);
+                bar.myAttendeeInfo = bar.attendees.get(facebookID);
+            });
         }
         // update external data
         return new Promise((resolve, reject) => {

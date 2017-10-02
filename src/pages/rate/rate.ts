@@ -12,6 +12,7 @@ import {Party} from "../../model/party";
 import {Bar, Attendee} from "../../model/bar";
 import { AllMyData } from "../../model/allMyData";
 import {Utility} from "../../model/utility";
+import { Events } from 'ionic-angular';
 
 
 @Component({
@@ -21,15 +22,22 @@ import {Utility} from "../../model/utility";
 export class RatePage {
   public party : Party;
   public bar : Bar;
-  constructor(private allMyData : AllMyData, private http:Http, public navCtrl: NavController) {
+  constructor(private allMyData : AllMyData, private events : Events, private http:Http, public navCtrl: NavController) {
     //this.party = this.allMyData.invitedTo[0];
     //this.party = null;
     //this.bar = this.allMyData.barsCloseToMe[0];
     //this.bar = null;
-
   }
 
   ionViewWillEnter(){
+      this.updateTheUI();
+      this.events.subscribe("timeToUpdateUI",() => {
+        console.log("********************* updating the rate tab UI now");
+        this.updateTheUI();
+      });
+  }
+
+  updateTheUI(){
       this.synchronizeLatestPartyData();
       this.synchronizeLatestBarData();
       if(this.allMyData.thePartyOrBarIAmAt == null){

@@ -1,6 +1,7 @@
 import { Type } from "serializer.ts/Decorators";
 import { AllMyData } from "../model/allMyData";
 import { Injectable } from "@angular/core";
+import { Utility } from "./utility";
 
 export class Party {
     public addressLine1 : string;
@@ -39,6 +40,8 @@ export class Party {
     public myInviteeInfo : Invitee;
     public addressFirstLine : string;
     public addressSecondLine : string;
+    public localStartTime : string;
+    public localEndTime : string;
 
     constructor() {
         this.hosts = new Map<string,Host>();
@@ -60,8 +63,8 @@ export class Party {
 
     public preparePartyObjectForTheUI(){
         this.initializeMyInviteeInfo();
-        this.startTime = this.convertTimeToLocalTimeAndFormatForUI(new Date(this.startTime));
-        this.endTime = this.convertTimeToLocalTimeAndFormatForUI(new Date(this.endTime));
+        this.localStartTime = Utility.convertTimeToLocalTimeAndFormatForUI(new Date(this.startTime));
+        this.localEndTime = Utility.convertTimeToLocalTimeAndFormatForUI(new Date(this.endTime));
         this.initializeAddressLines();
         this.refreshPartyStats();
     }
@@ -84,22 +87,6 @@ export class Party {
         this.keysInHostsMap = Array.from(this.hosts.keys());
     }
 
-    private convertTimeToLocalTimeAndFormatForUI(date: Date){
-        var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-        var days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-        var militaryHour = date.getHours();
-
-        var dayName = days[date.getDay()];
-        var monthName = months[date.getMonth()];
-        var dayNumber = date.getDate();
-        var year = date.getFullYear();
-        var hour = militaryHour < 13 ? militaryHour : militaryHour - 12;
-        var minutes = date.getMinutes().toString().length == 1 ? '0'+date.getMinutes() : date.getMinutes();
-        var ampm = militaryHour < 12 ? "AM" : "PM";
-
-        return hour + ":" + minutes + " " + ampm + " " + dayName + ", " + monthName + "-" + dayNumber + "-" + year;
-    }
-
     public refreshPartyStats(){
         this.averageRatingNumber = 0;
         this.bumpinRatings = 0;
@@ -116,33 +103,37 @@ export class Party {
         let numberOfMen = 0;
         this.invitees.forEach((value: Invitee, key: string) => {
             let invitee = this.invitees.get(key);
-            if(invitee.atParty){
+            var attendanceIsExpired = Utility.isAttendanceExpired(invitee.timeOfLastKnownLocation);
+            if(invitee.atParty && (attendanceIsExpired == false)){
                 this.numberOfPeopleAtParty++;
                 if(invitee.isMale){
                     numberOfMen++;
                 }
             }
-            // Initialize rating stats
-            switch(invitee.rating){
-                case "Bumpin": {
-                    this.bumpinRatings++;
-                    this.averageRatingNumber = this.averageRatingNumber+4;
-                    break;
-                }
-                case "Heating Up": {
-                    this.heatingUpRatings++;
-                    this.averageRatingNumber = this.averageRatingNumber+3;
-                    break;
-                }
-                case "Decent": {
-                    this.decentRatings++;
-                    this.averageRatingNumber = this.averageRatingNumber+2;
-                    break;
-                }
-                case "Weak": {
-                    this.weakRatings++;
-                    this.averageRatingNumber = this.averageRatingNumber+1;
-                    break;
+            var ratingIsExpired = Utility.isRatingExpired(invitee.timeLastRated);
+            if(ratingIsExpired == false){
+                // Initialize rating stats
+                switch(invitee.rating){
+                    case "Bumpin": {
+                        this.bumpinRatings++;
+                        this.averageRatingNumber = this.averageRatingNumber+4;
+                        break;
+                    }
+                    case "Heating Up": {
+                        this.heatingUpRatings++;
+                        this.averageRatingNumber = this.averageRatingNumber+3;
+                        break;
+                    }
+                    case "Decent": {
+                        this.decentRatings++;
+                        this.averageRatingNumber = this.averageRatingNumber+2;
+                        break;
+                    }
+                    case "Weak": {
+                        this.weakRatings++;
+                        this.averageRatingNumber = this.averageRatingNumber+1;
+                        break;
+                    }
                 }
             }
             // Initialize status stats
@@ -192,6 +183,18 @@ export class Party {
         }else{
             this.averageRatingNumber = 0;
             this.averageRating = "None";
+        }
+        this.refreshMyInviteeInfo();
+    }
+
+    private refreshMyInviteeInfo(){
+        let ratingIsExpired = Utility.isRatingExpired(this.invitees.get("10155613117039816").timeLastRated);
+        if(ratingIsExpired == true){
+            this.myInviteeInfo.rating = "None";
+        }
+        let attendanceIsExpired = Utility.isAttendanceExpired(this.invitees.get("10155613117039816").timeOfLastKnownLocation);
+        if(attendanceIsExpired == true){
+            this.myInviteeInfo.atParty = false;
         }
     }
 

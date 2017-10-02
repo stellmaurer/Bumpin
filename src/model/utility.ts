@@ -3,6 +3,69 @@ import {Bar} from "./bar";
 
 export class Utility {
 
+    public static isPartyToday(party : Party){
+        var partyIsToday = false;
+        if(party == null){
+            return partyIsToday;
+        }
+        console.log("Party start time = " + party.startTime);
+        var timeOfPartyInMilliseconds = Date.parse(party.startTime);
+        
+        var todayRightBeforeMidnight = new Date();
+        todayRightBeforeMidnight.setHours(23);
+        todayRightBeforeMidnight.setMinutes(59);
+        var timeRightBeforeMidnightInMilliseconds = todayRightBeforeMidnight.getTime();
+        console.log("timeRightBeforeMidnightInMilliseconds = " + timeRightBeforeMidnightInMilliseconds);
+        console.log("timeOfPartyInMilliseconds = " + timeOfPartyInMilliseconds);
+        if((timeRightBeforeMidnightInMilliseconds - timeOfPartyInMilliseconds) >= 0){
+            partyIsToday = true;
+        }
+        return partyIsToday;
+    }
+
+    public static isPartyThisWeek(party : Party){
+        var partyIsThisWeek = false;
+        if(party == null){
+            return partyIsThisWeek;
+        }
+        console.log("Party start time = " + party.startTime);
+        var currentTimeInMilliseconds = new Date().getTime();
+        var aWeekFromNowInMilliseconds = currentTimeInMilliseconds + 604800000; // 604,800,000 milliseconds is eqaul to one week
+        var timeOfPartyInMilliseconds = Date.parse(party.startTime);
+        console.log("aWeekFromNowInMilliseconds = " + aWeekFromNowInMilliseconds);
+        console.log("timeOfPartyInMilliseconds" + timeOfPartyInMilliseconds);
+        if((aWeekFromNowInMilliseconds - timeOfPartyInMilliseconds) >= 0){
+            partyIsThisWeek= true;
+        }
+        return partyIsThisWeek;
+    }
+
+    public static isRatingExpired(timeLastRated : string){
+        if(timeLastRated == null){
+            return true;
+        }
+        var currentTimeInMilliseconds = new Date().getTime();
+        var timeLastRatedInMilliseconds = Date.parse(timeLastRated);
+        var ratingIsExpired = false;
+        if((currentTimeInMilliseconds - timeLastRatedInMilliseconds) > 1800000){ // 1,800,000 milliseconds is 30 minutes
+            ratingIsExpired = true;
+        }
+        return ratingIsExpired;
+    }
+
+    public static isAttendanceExpired(timeOfLastKnownLocation : string){
+        if(timeOfLastKnownLocation == null){
+            return true;
+        }
+        var currentTimeInMilliseconds = new Date().getTime();
+        var timeOfLastKnownLocationInMilliseconds = Date.parse(timeOfLastKnownLocation);
+        var attendanceIsExpired = false;
+        if((currentTimeInMilliseconds - timeOfLastKnownLocationInMilliseconds) > 900000){ // 600,000 milliseconds is 15 minutes
+            attendanceIsExpired = true;
+        }
+        return attendanceIsExpired;
+    }
+
     public static getDistanceInMetersBetweenCoordinates(lat1 : number, lng1 : number, lat2 : number, lng2 : number){
         var R = 6371e3; // metres
         var φ1 = this.toRad(lat1);
@@ -32,6 +95,22 @@ export class Utility {
         var minutes = date.getUTCMinutes().toString().length == 1 ? '0'+date.getUTCMinutes() : date.getUTCMinutes();
         var seconds = date.getUTCSeconds().toString().length == 1 ? '0'+date.getUTCSeconds() : date.getUTCSeconds();
         return year + "-" + month + "-" + day + "T" + hour + ":" + minutes + ":" + seconds + "Z"; 
+    }
+
+    public static convertTimeToLocalTimeAndFormatForUI(date: Date){
+        var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        var days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+        var militaryHour = date.getHours();
+
+        var dayName = days[date.getDay()];
+        var monthName = months[date.getMonth()];
+        var dayNumber = date.getDate();
+        var year = date.getFullYear();
+        var hour = militaryHour < 13 ? militaryHour : militaryHour - 12;
+        var minutes = date.getMinutes().toString().length == 1 ? '0'+date.getMinutes() : date.getMinutes();
+        var ampm = militaryHour < 12 ? "AM" : "PM";
+
+        return hour + ":" + minutes + " " + ampm + " " + dayName + ", " + monthName + "-" + dayNumber + "-" + year;
     }
 
     public static findIndexOfParty(party : Party, parties : Party[])

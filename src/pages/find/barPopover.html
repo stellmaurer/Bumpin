@@ -36,7 +36,7 @@
           <label>Bumpin</label>
         </div>
         <div class="centerMe">
-          <button ion-button [color]="primary" style="color: black;" (click)='rateBar("Bumpin");'>
+          <button ion-button [disabled]="bar.myAttendeeInfo.atBar == false" [color]="primary" style="color: black;" (click)='rateBar("Bumpin");'>
             {{bar.bumpinRatings}}
           </button>
         </div>
@@ -46,7 +46,7 @@
           <label style="color: yellow;">Heat'n-up</label>
         </div>
         <div class="centerMe">
-          <button ion-button [color]="primary" style="color: black;" (click)='rateBar("Heating Up");'>
+          <button ion-button [disabled]="bar.myAttendeeInfo.atBar == false" [color]="primary" style="color: black;" (click)='rateBar("Heating Up");'>
             {{bar.heatingUpRatings}}
           </button>
         </div>
@@ -56,7 +56,7 @@
           <label style="color: orange;">Decent</label>
         </div>
         <div class="centerMe">
-          <button ion-button [color]="primary" style="color: black;" (click)='rateBar("Decent");'>
+          <button ion-button [disabled]="bar.myAttendeeInfo.atBar == false" [color]="primary" style="color: black;" (click)='rateBar("Decent");'>
             {{bar.decentRatings}}
           </button>
         </div>
@@ -66,7 +66,7 @@
           <label style="color: #f53d3d;">Weak</label>
         </div>
         <div class="centerMe">
-          <button ion-button [color]="primary" style="color: black;" (click)='rateBar("Weak");'>
+          <button ion-button [disabled]="bar.myAttendeeInfo.atBar == false" [color]="primary" style="color: black;" (click)='rateBar("Weak");'>
             {{bar.weakRatings}}
           </button>
         </div>

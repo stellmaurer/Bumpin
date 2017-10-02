@@ -37,7 +37,7 @@
           <label>Bumpin</label>
         </div>
         <div class="centerMe">
-          <button ion-button [color]="primary" style="color: black;" (click)='rateParty("Bumpin");'>
+          <button ion-button [disabled]="party.myInviteeInfo.atParty == false" [color]="primary" style="color: black;" (click)='rateParty("Bumpin");'>
             {{party.bumpinRatings}}
           </button>
         </div>
@@ -47,7 +47,7 @@
           <label style="color: yellow;">Heat'n-up</label>
         </div>
         <div class="centerMe">
-          <button ion-button [color]="primary" style="color: black;" (click)='rateParty("Heating Up");'>
+          <button ion-button [disabled]="party.myInviteeInfo.atParty == false" [color]="primary" style="color: black;" (click)='rateParty("Heating Up");'>
             {{party.heatingUpRatings}}
           </button>
         </div>
@@ -57,7 +57,7 @@
           <label style="color: orange;">Decent</label>
         </div>
         <div class="centerMe">
-          <button ion-button [color]="primary" style="color: black;" (click)='rateParty("Decent");'>
+          <button ion-button [disabled]="party.myInviteeInfo.atParty == false" [color]="primary" style="color: black;" (click)='rateParty("Decent");'>
             {{party.decentRatings}}
           </button>
         </div>
@@ -67,7 +67,7 @@
           <label style="color: #f53d3d;">Weak</label>
         </div>
         <div class="centerMe">
-          <button ion-button [color]="primary" style="color: black;" (click)='rateParty("Weak");'>
+          <button ion-button [disabled]="party.myInviteeInfo.atParty == false" [color]="primary" style="color: black;" (click)='rateParty("Weak");'>
             {{party.weakRatings}}
           </button>
         </div>
@@ -150,7 +150,7 @@
           </div>
           <div class="centerMe">
             <button ion-button [color]="'background-info-color'" style="color: #32db64;">
-              {{party.startTime}}
+              {{party.localStartTime}}
             </button>
           </div>
         </ion-col>
@@ -159,7 +159,9 @@
             <label>End Time</label>
           </div>
           <div class="centerMe">
-            <button ion-button [color]="'background-info-color'" style="color: #32db64;">{{party.endTime}}</button>
+            <button ion-button [color]="'background-info-color'" style="color: #32db64;">
+              {{party.localEndTime}}
+            </button>
           </div>
         </ion-col>
     </ion-row>

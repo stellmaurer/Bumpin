@@ -1,6 +1,7 @@
 import {Type} from "serializer.ts/Decorators";
 import { AllMyData } from "../model/allMyData";
 import { Injectable } from "@angular/core";
+import { Utility } from "./utility";
 
 export class Bar {
     public addressLine1 : string;
@@ -82,22 +83,6 @@ export class Bar {
         this.keysInHostsMap = Array.from(this.hosts.keys());
     }
 
-    private convertTimeToLocalTimeAndFormatForUI(date: Date){
-        var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-        var days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-        var militaryHour = date.getHours();
-
-        var dayName = days[date.getDay()];
-        var monthName = months[date.getMonth()];
-        var dayNumber = date.getDate();
-        var year = date.getFullYear();
-        var hour = militaryHour < 13 ? militaryHour : militaryHour - 12;
-        var minutes = date.getMinutes().toString().length == 1 ? '0'+date.getMinutes() : date.getMinutes();
-        var ampm = militaryHour < 12 ? "AM" : "PM";
-
-        return hour + ":" + minutes + " " + ampm + " " + dayName + ", " + monthName + "-" + dayNumber + "-" + year;
-    }
-
     public refreshBarStats(){
         this.averageRatingNumber = 0;
         this.bumpinRatings = 0;
@@ -113,33 +98,37 @@ export class Bar {
         let numberOfMen = 0;
         this.attendees.forEach((value: Attendee, key: string) => {
             let attendee = this.attendees.get(key);
-            if(attendee.atBar){
+            var attendanceIsExpired = Utility.isAttendanceExpired(attendee.timeOfLastKnownLocation);
+            if(attendee.atBar && (attendanceIsExpired == false)){
                 this.numberOfPeopleAtBar++;
                 if(attendee.isMale){
                     numberOfMen++;
                 }
             }
-            // Initialize rating stats
-            switch(attendee.rating){
-                case "Bumpin": {
-                    this.bumpinRatings++;
-                    this.averageRatingNumber = this.averageRatingNumber+4;
-                    break;
-                }
-                case "Heating Up": {
-                    this.heatingUpRatings++;
-                    this.averageRatingNumber = this.averageRatingNumber+3;
-                    break;
-                }
-                case "Decent": {
-                    this.decentRatings++;
-                    this.averageRatingNumber = this.averageRatingNumber+2;
-                    break;
-                }
-                case "Weak": {
-                    this.weakRatings++;
-                    this.averageRatingNumber = this.averageRatingNumber+1;
-                    break;
+            var ratingIsExpired = Utility.isRatingExpired(attendee.timeLastRated);
+            if(ratingIsExpired == false){
+                // Initialize rating stats
+                switch(attendee.rating){
+                    case "Bumpin": {
+                        this.bumpinRatings++;
+                        this.averageRatingNumber = this.averageRatingNumber+4;
+                        break;
+                    }
+                    case "Heating Up": {
+                        this.heatingUpRatings++;
+                        this.averageRatingNumber = this.averageRatingNumber+3;
+                        break;
+                    }
+                    case "Decent": {
+                        this.decentRatings++;
+                        this.averageRatingNumber = this.averageRatingNumber+2;
+                        break;
+                    }
+                    case "Weak": {
+                        this.weakRatings++;
+                        this.averageRatingNumber = this.averageRatingNumber+1;
+                        break;
+                    }
                 }
             }
             // Initialize status stats
@@ -186,11 +175,45 @@ export class Bar {
             this.averageRatingNumber = 0;
             this.averageRating = "None";
         }
+        this.refreshMyAttendeeInfo();
+    }
+
+    private refreshMyAttendeeInfo(){
+        if(this.attendees == null){
+            this.myAttendeeInfo.rating = "None";
+            return;
+        }
+        if(this.attendees.get("10155613117039816") == null){
+            this.myAttendeeInfo.rating = "None";
+            return;
+        }
+        var ratingIsExpired = Utility.isRatingExpired(this.attendees.get("10155613117039816").timeLastRated);
+        if(ratingIsExpired == true){
+            this.myAttendeeInfo.rating = "None";
+        }
+
+        let attendanceIsExpired = Utility.isAttendanceExpired(this.attendees.get("10155613117039816").timeOfLastKnownLocation);
+        if(attendanceIsExpired == true){
+            this.myAttendeeInfo.atBar = false;
+        }
     }
 
     private initializeMyAttendeeInfo(){
         let fbid = "10155613117039816";
         this.myAttendeeInfo = this.attendees.get(fbid);
+        if(this.myAttendeeInfo == null){
+            // The UI needs myAttendeeInfo to not be null, so just create
+            //      an attendee object locally to take care of this
+            var tempAttendee : Attendee = new Attendee();
+            tempAttendee.atBar = false;
+            tempAttendee.isMale = true;
+            tempAttendee.name = "doesn't matter";
+            tempAttendee.rating = "None";
+            tempAttendee.status = "None";
+            tempAttendee.timeLastRated = "2001-01-01T00:00:00Z";
+            tempAttendee.timeOfLastKnownLocation = "2001-01-01T00:00:00Z";
+            this.myAttendeeInfo = tempAttendee;
+        }
     }
 
     private initializeAddressLines(){

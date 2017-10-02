@@ -58,42 +58,45 @@ export class BarPopover {
       }
 
       this.bar.attendees.get(this.allMyData.me.facebookID).atBar = true;
+      var ratingIsExpired = Utility.isRatingExpired(this.bar.attendees.get(this.allMyData.me.facebookID).timeLastRated);
       if(rating != this.bar.attendees.get(this.allMyData.me.facebookID).rating){
-        switch(this.bar.attendees.get(this.allMyData.me.facebookID).rating){
-            case "Bumpin": {
-                this.bar.bumpinRatings--;
-                break;
+        if(ratingIsExpired == false){
+            switch(this.bar.attendees.get(this.allMyData.me.facebookID).rating){
+                case "Bumpin": {
+                    this.bar.bumpinRatings--;
+                    break;
+                }
+                case "Heating Up": {
+                    this.bar.heatingUpRatings--;
+                    break;
+                }
+                case "Decent": {
+                    this.bar.decentRatings--;
+                    break;
+                }
+                case "Weak": {
+                    this.bar.weakRatings--;
+                    break;
+                }
             }
-            case "Heating Up": {
-                this.bar.heatingUpRatings--;
-                break;
-            }
-            case "Decent": {
-                this.bar.decentRatings--;
-                break;
-            }
-            case "Weak": {
-                this.bar.weakRatings--;
-                break;
-            }
-        }
 
-        switch(rating){
-            case "Bumpin": {
-                this.bar.bumpinRatings++;
-                break;
-            }
-            case "Heating Up": {
-                this.bar.heatingUpRatings++;
-                break;
-            }
-            case "Decent": {
-                this.bar.decentRatings++;
-                break;
-            }
-            case "Weak": {
-                this.bar.weakRatings++;
-                break;
+            switch(rating){
+                case "Bumpin": {
+                    this.bar.bumpinRatings++;
+                    break;
+                }
+                case "Heating Up": {
+                    this.bar.heatingUpRatings++;
+                    break;
+                }
+                case "Decent": {
+                    this.bar.decentRatings++;
+                    break;
+                }
+                case "Weak": {
+                    this.bar.weakRatings++;
+                    break;
+                }
             }
         }
 

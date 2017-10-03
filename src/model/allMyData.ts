@@ -74,49 +74,109 @@ export class AllMyData{
         });
     }
 
-    public rateParty(partyID : string, facebookID : string, rating : string, timeLastRated : string, timeOfLastKnownLocation : string, http : Http){
-        return new Promise((resolve, reject) => {
-            var query = new Query(this, http);
-            query.rateParty(partyID, facebookID, rating, timeLastRated, timeOfLastKnownLocation)
-            .then((res) => {
-                resolve("rateParty query succeeded.");
-            })
-            .catch((err) => {
-                reject(err);
+    public rateParty(party : Party, rating : string, http : Http){
+        if(rating != party.invitees.get(this.me.facebookID).rating){
+            let timeLastRated = Utility.convertDateTimeToISOFormat(new Date());
+            let timeOfLastKnownLocation = timeLastRated;
+            this.zone.run(() => {
+                party.invitees.get(this.me.facebookID).rating = rating;
+                party.invitees.get(this.me.facebookID).timeLastRated = timeLastRated;
+                party.invitees.get(this.me.facebookID).timeOfLastKnownLocation = timeOfLastKnownLocation;
+                party.refreshPartyStats();
             });
-        });
+            return new Promise((resolve, reject) => {
+                var query = new Query(this, http);
+                query.rateParty(party.partyID, this.me.facebookID, rating, timeLastRated, timeOfLastKnownLocation)
+                .then((res) => {
+                    resolve("rateParty query succeeded.");
+                })
+                .catch((err) => {
+                    reject(err);
+                });
+            });
+        }
     }
 
-    public rateBar(barID : string, facebookID : string, isMale : boolean, name : string, rating : string, status : string, timeLastRated : string, timeOfLastKnownLocation : string, http : Http){
-        return new Promise((resolve, reject) => {
-            var query = new Query(this, http);
-            query.rateBar(barID, facebookID, isMale, name, rating, status, timeLastRated, timeOfLastKnownLocation)
-            .then((res) => {
-                resolve("rateBar query succeeded.");
-            })
-            .catch((err) => {
-                reject(err);
+    public rateBar(bar : Bar, rating : string, http : Http){
+        
+        // If you're not an attendee of the bar, make yourself an attendee
+        if(bar.attendees.get(this.me.facebookID) == null){
+            var newAttendee = new Attendee();
+            newAttendee.atBar = true;
+            newAttendee.isMale = this.me.isMale;
+            newAttendee.name = this.me.name;
+            newAttendee.rating = "None";
+            newAttendee.status = "None";
+            newAttendee.timeLastRated = "2001-01-01T00:00:00Z";
+            bar.attendees.set(this.me.facebookID, newAttendee);
+            bar.myAttendeeInfo = newAttendee;
+        }
+
+        if(rating != bar.attendees.get(this.me.facebookID).rating){
+            let timeLastRated = Utility.convertDateTimeToISOFormat(new Date());
+            let timeOfLastKnownLocation = timeLastRated;
+            this.zone.run(() => {
+                bar.attendees.get(this.me.facebookID).rating = rating;
+                bar.attendees.get(this.me.facebookID).timeLastRated = timeLastRated;
+                bar.attendees.get(this.me.facebookID).timeOfLastKnownLocation = timeOfLastKnownLocation;
+                bar.refreshBarStats();
             });
-        });
+            return new Promise((resolve, reject) => {
+                var query = new Query(this, http);
+                query.rateBar(bar.barID, this.me.facebookID, this.me.isMale, this.me.name, rating, bar.attendees.get(this.me.facebookID).status, timeLastRated, timeOfLastKnownLocation)
+                .then((res) => {
+                    resolve("rateBar query succeeded.");
+                })
+                .catch((err) => {
+                    reject(err);
+                });
+            });
+        }
     }
 
-    public changeAttendanceStatusToParty(partyID : string, facebookID : string, status : string, http : Http){
-        return new Promise((resolve, reject) => {
-            var query = new Query(this, http);
-            query.changeAttendanceStatusToParty(partyID, facebookID, status)
-            .then((res) => {
-                resolve("changeAttendanceStatusToParty query succeeded.");
-            })
-            .catch((err) => {
-                reject(err);
+    public changeAttendanceStatusToParty(party : Party, status : string, http : Http){
+        if(status != party.invitees.get(this.me.facebookID).status){
+            this.zone.run(() => {
+                party.invitees.get(this.me.facebookID).status = status;
+                party.refreshPartyStats();
             });
-        });
+            return new Promise((resolve, reject) => {
+                var query = new Query(this, http);
+                query.changeAttendanceStatusToParty(party.partyID, this.me.facebookID, status)
+                .then((res) => {
+                    resolve("changeAttendanceStatusToParty query succeeded.");
+                })
+                .catch((err) => {
+                    reject(err);
+                });
+            });
+        }
     }
 
-    public changeAttendanceStatusToBar(barID : string, facebookID : string, atBar : boolean, isMale : boolean, name : string, rating : string, status : string, timeLastRated : string, timeOfLastKnownLocation : string, http : Http){
+    public changeAttendanceStatusToBar(bar : Bar, status : string, http : Http){
+        this.zone.run(() => {
+            if(bar.attendees.get(this.me.facebookID) != null){
+                if(status != bar.attendees.get(this.me.facebookID).status){
+                    bar.attendees.get(this.me.facebookID).status = status;
+                }
+            }else{
+                var newAttendee = new Attendee();
+                newAttendee.atBar = false;
+                newAttendee.isMale = this.me.isMale;
+                newAttendee.name = this.me.name;
+                newAttendee.rating = "None";
+                newAttendee.status = status;
+                newAttendee.timeLastRated = "2001-01-01T00:00:00Z";
+                newAttendee.timeOfLastKnownLocation = "2001-01-01T00:00:00Z";
+                bar.attendees.set(this.me.facebookID, newAttendee);
+            }
+            bar.myAttendeeInfo = bar.attendees.get(this.me.facebookID);
+            bar.refreshBarStats();
+        });
+        let me = bar.attendees.get(this.me.facebookID);
         return new Promise((resolve, reject) => {
             var query = new Query(this, http);
-            query.changeAttendanceStatusToBar(barID,facebookID,atBar,isMale,name,rating,status,timeLastRated,timeOfLastKnownLocation)
+            query.changeAttendanceStatusToBar(bar.barID, this.me.facebookID, me.atBar, me.isMale, me.name, me.rating, me.status, me.timeLastRated, me.timeOfLastKnownLocation)
             .then((res) => {
                 resolve("changeAttendanceStatusToBar query succeeded.");
             })
@@ -133,8 +193,8 @@ export class AllMyData{
             party.invitees.get(this.me.facebookID).atParty = atParty;
             party.invitees.get(this.me.facebookID).timeOfLastKnownLocation = timeOfLastKnownLocation;
             party.myInviteeInfo = party.invitees.get(this.me.facebookID);
+            party.refreshPartyStats();
         });
-        party.refreshPartyStats();
         // update external data
         return new Promise((resolve, reject) => {
             var query = new Query(this, http);
@@ -166,6 +226,7 @@ export class AllMyData{
                 attendee.atBar = atBar;
                 attendee.timeOfLastKnownLocation = timeOfLastKnownLocation;
                 bar.myAttendeeInfo = attendee;
+                bar.refreshBarStats();
             });
         }else{
             // update internal data
@@ -174,14 +235,15 @@ export class AllMyData{
             newAttendee.isMale = isMale;
             newAttendee.name = name;
             newAttendee.rating = rating;
+            newAttendee.status = status;
             newAttendee.timeLastRated = timeLastRated;
             newAttendee.timeOfLastKnownLocation = timeLastRated;
             this.zone.run(() => {
                 bar.attendees.set(facebookID, newAttendee);
                 bar.myAttendeeInfo = bar.attendees.get(facebookID);
+                bar.refreshBarStats();
             });
         }
-        bar.refreshBarStats();
         // update external data
         return new Promise((resolve, reject) => {
             var query = new Query(this, http);

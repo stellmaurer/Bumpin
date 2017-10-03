@@ -188,14 +188,19 @@ export class Party {
     }
 
     private refreshMyInviteeInfo(){
-        let ratingIsExpired = Utility.isRatingExpired(this.invitees.get("10155613117039816").timeLastRated);
+        let myInvitee : Invitee = this.invitees.get("10155613117039816");
+        let ratingIsExpired = Utility.isRatingExpired(myInvitee.timeLastRated);
         if(ratingIsExpired == true){
             this.myInviteeInfo.rating = "None";
         }
-        let attendanceIsExpired = Utility.isAttendanceExpired(this.invitees.get("10155613117039816").timeOfLastKnownLocation);
+        let attendanceIsExpired = Utility.isAttendanceExpired(myInvitee.timeOfLastKnownLocation);
         if(attendanceIsExpired == true){
             this.myInviteeInfo.atParty = false;
         }
+        this.myInviteeInfo.numberOfInvitationsLeft = myInvitee.numberOfInvitationsLeft;
+        this.myInviteeInfo.status = myInvitee.status;
+        this.myInviteeInfo.timeLastRated = myInvitee.timeLastRated;
+        this.myInviteeInfo.timeOfLastKnownLocation = myInvitee.timeOfLastKnownLocation;
     }
 
     private initializeMyInviteeInfo(){

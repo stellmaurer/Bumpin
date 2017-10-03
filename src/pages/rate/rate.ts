@@ -81,136 +81,23 @@ export class RatePage {
 
   rateParty(rating : string){
     this.synchronizeLatestPartyData();
-    this.party.invitees.get(this.allMyData.me.facebookID).atParty = true;
-    if(rating != this.party.invitees.get(this.allMyData.me.facebookID).rating){
-      switch(this.party.invitees.get(this.allMyData.me.facebookID).rating){
-          case "Bumpin": {
-              this.party.bumpinRatings--;
-              break;
-          }
-          case "Heating Up": {
-              this.party.heatingUpRatings--;
-              break;
-          }
-          case "Decent": {
-              this.party.decentRatings--;
-              break;
-          }
-          case "Weak": {
-              this.party.weakRatings--;
-              break;
-          }
-      }
-
-      switch(rating){
-          case "Bumpin": {
-              this.party.bumpinRatings++;
-              break;
-          }
-          case "Heating Up": {
-              this.party.heatingUpRatings++;
-              break;
-          }
-          case "Decent": {
-              this.party.decentRatings++;
-              break;
-          }
-          case "Weak": {
-              this.party.weakRatings++;
-              break;
-          }
-      }
-
-      let timeLastRated = Utility.convertDateTimeToISOFormat(new Date());
-      let timeOfLastKnownLocation = timeLastRated;
-      this.party.invitees.get(this.allMyData.me.facebookID).rating = rating;
-      this.party.invitees.get(this.allMyData.me.facebookID).timeLastRated = timeLastRated;
-      this.party.invitees.get(this.allMyData.me.facebookID).timeOfLastKnownLocation = timeOfLastKnownLocation;
-      this.party.myInviteeInfo.rating = rating;
-      this.party.myInviteeInfo.timeLastRated = timeLastRated;
-      this.party.myInviteeInfo.timeOfLastKnownLocation = timeOfLastKnownLocation;
-
-      this.party.refreshPartyStats();
-      this.allMyData.rateParty(this.party.partyID, this.allMyData.me.facebookID, rating, timeLastRated, timeOfLastKnownLocation, this.http)
-        .then((res) => {
-          //console.log("Rating the party query succeeded.");
-        })
-        .catch((err) => {
-          console.log(err);
-      });
-    }
+    this.allMyData.rateParty(this.party, rating, this.http)
+    .then((res) => {
+        //console.log("Rating the party query succeeded.");
+    })
+    .catch((err) => {
+        console.log(err);
+    });
   }
 
   rateBar(rating : string){
-      this.synchronizeLatestBarData();
-      // If you're not an attendee of the bar, make yourself an attendee
-      if(this.bar.attendees.get(this.allMyData.me.facebookID) == null){
-        var newAttendee = new Attendee();
-        newAttendee.atBar = true;
-        newAttendee.isMale = this.allMyData.me.isMale;
-        newAttendee.name = this.allMyData.me.name;
-        newAttendee.rating = "None";
-        newAttendee.status = "None";
-        newAttendee.timeLastRated = "2001-01-01T00:00:00Z";
-        this.bar.attendees.set(this.allMyData.me.facebookID, newAttendee);
-        this.bar.myAttendeeInfo = newAttendee;
-      }
-
-      this.bar.attendees.get(this.allMyData.me.facebookID).atBar = true;
-      if(rating != this.bar.attendees.get(this.allMyData.me.facebookID).rating){
-        switch(this.bar.attendees.get(this.allMyData.me.facebookID).rating){
-            case "Bumpin": {
-                this.bar.bumpinRatings--;
-                break;
-            }
-            case "Heating Up": {
-                this.bar.heatingUpRatings--;
-                break;
-            }
-            case "Decent": {
-                this.bar.decentRatings--;
-                break;
-            }
-            case "Weak": {
-                this.bar.weakRatings--;
-                break;
-            }
-        }
-
-        switch(rating){
-            case "Bumpin": {
-                this.bar.bumpinRatings++;
-                break;
-            }
-            case "Heating Up": {
-                this.bar.heatingUpRatings++;
-                break;
-            }
-            case "Decent": {
-                this.bar.decentRatings++;
-                break;
-            }
-            case "Weak": {
-                this.bar.weakRatings++;
-                break;
-            }
-        }
-        let timeLastRated = Utility.convertDateTimeToISOFormat(new Date());
-        let timeOfLastKnownLocation = timeLastRated;
-        this.bar.attendees.get(this.allMyData.me.facebookID).rating = rating;
-        this.bar.attendees.get(this.allMyData.me.facebookID).timeLastRated = timeLastRated;
-        this.bar.attendees.get(this.allMyData.me.facebookID).timeOfLastKnownLocation = timeOfLastKnownLocation;
-        this.bar.myAttendeeInfo.rating = rating;
-        this.bar.myAttendeeInfo.timeLastRated = timeLastRated;
-        this.bar.myAttendeeInfo.timeOfLastKnownLocation = timeOfLastKnownLocation;
-        this.bar.refreshBarStats();
-        this.allMyData.rateBar(this.bar.barID, this.allMyData.me.facebookID, this.allMyData.me.isMale, this.allMyData.me.name, rating, this.bar.attendees.get(this.allMyData.me.facebookID).status, timeLastRated, timeOfLastKnownLocation, this.http)
-          .then((res) => {
-            //console.log("Rating the bar query succeeded.");
-          })
-          .catch((err) => {
-            console.log(err);
-        });
-      }
+    this.synchronizeLatestBarData();
+    this.allMyData.rateBar(this.bar, rating, this.http)
+        .then((res) => {
+        //console.log("Rating the bar query succeeded.");
+        })
+        .catch((err) => {
+        console.log(err);
+    });
   }
 }

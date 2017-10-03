@@ -183,19 +183,23 @@ export class Bar {
             this.myAttendeeInfo.rating = "None";
             return;
         }
-        if(this.attendees.get("10155613117039816") == null){
+        let myAttendee : Attendee = this.attendees.get("10155613117039816");
+        if(myAttendee == null){
             this.myAttendeeInfo.rating = "None";
             return;
         }
-        var ratingIsExpired = Utility.isRatingExpired(this.attendees.get("10155613117039816").timeLastRated);
+        var ratingIsExpired = Utility.isRatingExpired(myAttendee.timeLastRated);
         if(ratingIsExpired == true){
             this.myAttendeeInfo.rating = "None";
         }
 
-        let attendanceIsExpired = Utility.isAttendanceExpired(this.attendees.get("10155613117039816").timeOfLastKnownLocation);
+        let attendanceIsExpired = Utility.isAttendanceExpired(myAttendee.timeOfLastKnownLocation);
         if(attendanceIsExpired == true){
             this.myAttendeeInfo.atBar = false;
         }
+        this.myAttendeeInfo.status = myAttendee.status;
+        this.myAttendeeInfo.timeLastRated = myAttendee.timeLastRated;
+        this.myAttendeeInfo.timeOfLastKnownLocation = myAttendee.timeOfLastKnownLocation;
     }
 
     private initializeMyAttendeeInfo(){

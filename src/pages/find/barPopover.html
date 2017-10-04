@@ -4,7 +4,7 @@
     <ion-row>
       <ion-col col-12 class="singleElement">
         <div class="centerMe">
-          <h1 [style.color]="{'Bumpin': '#32db64', 'Heating Up': 'yellow', 'Decent': 'orange', 'Weak': '#f53d3d'}[bar.averageRating]">{{bar.name}}</h1>
+          <h1 [style.color]="{'Bumpin': '#32db64', 'Heat\\'n-up': 'yellow', 'Decent': 'orange', 'Weak': '#f53d3d'}[bar.averageRating]">{{bar.name}}</h1>
         </div>
       </ion-col>
     </ion-row>
@@ -46,7 +46,7 @@
           <label style="color: yellow;">Heat'n-up</label>
         </div>
         <div class="centerMe">
-          <button ion-button [disabled]="bar.myAttendeeInfo.atBar == false" [color]="primary" style="color: black;" (click)='rateBar("Heating Up");'>
+          <button ion-button [disabled]="bar.myAttendeeInfo.atBar == false" [color]="primary" style="color: black;" (click)='rateBar("Heat&#39;n-up");'>
             {{bar.heatingUpRatings}}
           </button>
         </div>

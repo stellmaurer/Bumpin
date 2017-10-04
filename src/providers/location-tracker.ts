@@ -38,17 +38,6 @@ export class LocationTracker {
     this.watch = this.geolocation.watchPosition(foregroundConfig).filter((p: any) => p.code === undefined);
     this.watch.subscribe((position: Geoposition) => {
       //this.findClosestPartyOrBar(position.coords.latitude, position.coords.longitude);
-      // TODO: This works! Even with background, this works.
-      //    - However, it doesn't update the UI right away
-      //      Tasks:
-      //     Done   (1) Get the party and bar popovers to update right away.
-      //     Done   (2) Get the rate tab to update right away
-      //     Done   (3) Figure out why iOS is killing the task being run here and figure out how to not get it killed.
-      //     Done   (4) Change rate buttons on Find and Rate tabs to only allow you to rate the party/bar when you are there
-      //     Done   (5) Change party and bar stats to only count ratings within 30 minutes and attendance within 15 minutes
-      //     Done   (6) Add party marker filter on Find tab (today, next few days, this week, all of time)
-      //            (7) Fix if you want - if you are at a party/bar and close the app, then leave the part/bar and reopen the app,
-      //                it still thinks you're there until the expiration time, because I am not checking this edge case currently.
       var thePartyOrBarIAmCurrentlyAt = this.findThePartyOrBarIAmAt(position.coords.latitude, position.coords.longitude);
       // This is checking an atParty/atBar edge case
       if(this.appWasJustStarted == true){

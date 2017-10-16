@@ -56,10 +56,10 @@ export class LocationTracker {
         this.lng = position.coords.longitude;
         //console.log("Latitude: " + this.lat + ", " + "Longitude: " + this.lng);
       });
-      this.backgroundGeolocation.finish();
+      //this.backgroundGeolocation.finish();
     });
     // Turn ON the background-geolocation system.
-    this.backgroundGeolocation.start();
+    //this.backgroundGeolocation.start();
   }
 
   // if you are at a party/bar and close the app, then leave the part/bar and reopen the app,
@@ -86,16 +86,18 @@ export class LocationTracker {
     let partyImAtInTheDatabase : Party = null;
     let barImAtInTheDatabase : Bar = null;
     for(let i = 0; i < this.allMyData.invitedTo.length; i++){
-      if(this.allMyData.invitedTo[i].myInviteeInfo.atParty == true){
+      if(this.allMyData.invitedTo[i].invitees.get(this.allMyData.me.facebookID).atParty == true){
         partyImAtInTheDatabase = this.allMyData.invitedTo[i];
         break;
       }
     }
     if(partyImAtInTheDatabase == null){
       for(let i = 0; i < this.allMyData.barsCloseToMe.length; i++){
-        if(this.allMyData.barsCloseToMe[i].myAttendeeInfo.atBar == true){
-          barImAtInTheDatabase = this.allMyData.barsCloseToMe[i];
-          break;
+        if(this.allMyData.barsCloseToMe[i].attendees.has(this.allMyData.me.facebookID) == true){
+          if(this.allMyData.barsCloseToMe[i].attendees.get(this.allMyData.me.facebookID).atBar == true){
+            barImAtInTheDatabase = this.allMyData.barsCloseToMe[i];
+            break;
+          }
         }
       }
     }

@@ -20,12 +20,48 @@ export class Query{
             }
         });
     }
+
+    // curl "https://graph.facebook.com/me?fields=id,name,gender,friends&access_token=EAACEdEose0cBAB6rZA5M4FggQWjpvo7FUv0iRA4xpFZBZAdL5ElYrbNC92YAaaf1gy9zyVYfxyHWE51YcQ6Jh7hFhP9cgoJhQQapczYr1qZAs7ZCa4Re3ifb9q1zRBdVybE5KvydgUFo5Rs6DvEKZCWuFUdpMbjtkzQXMWh8dSGgvAWDah0rNTAZBIzo8JJxyAZD"
+    public refreshMyDataFromFacebook(accessToken : string){
+        console.log("Query.ts: in refreshMyDataFromFacebook");
+        return new Promise((resolve, reject) => {
+            var url = "https://graph.facebook.com/me?fields=id,name,gender&access_token=" + accessToken;
+            console.log("Sending the Facebook request now");
+            this.http.get(url).map(res => res.json()).subscribe(data => {
+                console.log("Facebook data retrieved.");
+                // TODO: Might need to eventually check for an error here.
+                console.log("This is the data from Facebook: " + "id = " + data.id + ", gender = " + data.gender + ", name = " + data.name);
+                this.allMyData.me.facebookID = data.id;
+                if(data.gender == "male"){
+                    this.allMyData.me.isMale = true;
+                }else{
+                    this.allMyData.me.isMale = false;
+                }
+                this.allMyData.me.name = data.name;
+                resolve(data);
+            });
+        });
+    }
     
-    public createOrUpdatePerson(){
+    public getPerson(facebookID : string){
+        return new Promise((resolve, reject) => {
+            var url = "http://bumpin-env.us-west-2.elasticbeanstalk.com:80/getPerson?facebookID=" + facebookID;
+            this.http.get(url).map(res => res.json()).subscribe(data => {
+                if(data.succeeded){
+                    this.allMyData.me = deserialize<Person>(Person, data.people[0]);
+                    resolve(data);
+                }else{
+                    reject(data);
+                }
+            });
+        });
+    }
+    
+    public createOrUpdatePerson(facebookID : string, isMale : boolean, name : string){
         // let body = "facebookID=10155613117039816&isMale=true&name=Steve%20Ellmaurer";
         return new Promise((resolve, reject) => {
             var url = "http://bumpin-env.us-west-2.elasticbeanstalk.com:80/createOrUpdatePerson";
-            let body = "facebookID=10155613117039816&isMale=true&name=Steve%20Ellmaurer";
+            let body = "facebookID=" + facebookID + "&isMale=" + isMale + "&name=" + encodeURIComponent(name);
             var headers = new Headers();
             headers.append('content-type', "application/x-www-form-urlencoded");
             let options= new RequestOptions({headers: headers});
@@ -141,20 +177,6 @@ export class Query{
             let options= new RequestOptions({headers: headers});
             this.http.post(url, body, options).map(res => res.json()).subscribe(data => {
                 if(data.succeeded){
-                    resolve(data);
-                }else{
-                    reject(data);
-                }
-            });
-        });
-    }
-
-    public getPerson(){
-        return new Promise((resolve, reject) => {
-            var url = "http://bumpin-env.us-west-2.elasticbeanstalk.com:80/getPerson?facebookID=10155613117039816";
-            this.http.get(url).map(res => res.json()).subscribe(data => {
-                if(data.succeeded){
-                    this.allMyData.me = deserialize<Person>(Person, data.people[0]);
                     resolve(data);
                 }else{
                     reject(data);

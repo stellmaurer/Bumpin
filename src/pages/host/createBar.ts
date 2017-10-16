@@ -4,29 +4,16 @@ import { Person } from '../../model/person';
 import { AllMyData} from '../../model/allMyData';
 import { Party } from '../../model/party';
 import { Bar } from '../../model/bar';
-import { CreatePage } from './create';
 
 
 @Component({
-  selector: 'page-host',
-  templateUrl: 'host.html'
+  selector: 'page-createBar',
+  templateUrl: 'createBar.html'
 })
-export class HostPage {
+export class CreateBarPage {
 
   constructor(public allMyData : AllMyData, private navCtrl: NavController) {
-    console.log(allMyData.me.name);
+    console.log("In createBar.ts");
     
-  }
-
-  partySelected(party : Party) {
-    
-  }
-
-  barSelected(bar : Bar) {
-    
-  }
-
-  goToCreatePage(){
-    this.navCtrl.push(CreatePage, {}, {animate: false});
   }
 }

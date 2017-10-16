@@ -43,7 +43,7 @@
     <ion-row>
       <ion-col col-12 class="singleElement">
         <div class="centerMe">
-            <label>Your Rating: {{party.myInviteeInfo.rating}}</label>
+            <label>Your Rating: {{this.party.invitees.get(this.allMyData.me.facebookID).rating}}</label>
         </div>
       </ion-col>
     </ion-row>
@@ -128,7 +128,7 @@
     <ion-row>
       <ion-col col-12 class="singleElement">
         <div class="centerMe">
-            <label>Your Rating: {{bar.myAttendeeInfo == null ? "None" : bar.myAttendeeInfo.rating}}</label>
+            <label>Your Rating: {{ bar.attendees.has(allMyData.me.facebookID) == false ? "None" : bar.attendees.get(allMyData.me.facebookID).rating}}</label>
         </div>
       </ion-col>
     </ion-row>
@@ -182,7 +182,7 @@
   <ion-grid *ngIf="(bar == null) && (party == null)">
 
     <ion-row>
-      <ion-col col-12 class="singleElement">
+      <ion-col col-12 class="oneElement">
         <div class="centerMe">
           <h1 [style.color]="'#32db64'">You aren't at a party or bar.</h1>
         </div>

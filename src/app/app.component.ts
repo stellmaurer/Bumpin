@@ -21,26 +21,14 @@ export class MyApp {
 
   constructor(platform: Platform, statusBar: StatusBar, splashScreen: SplashScreen, private backgroundGeolocation: BackgroundGeolocation, private events : Events) {
     platform.ready().then(() => {
-      /*
-      // Here we will check if the user is already logged in
-      // because we don't want to ask users to log in each time they open the app
-      let env = this;
-      NativeStorage.getItem('user')
-      .then( function (data) {
-        // user is previously logged and we have his data
-        // we will let him access the app
-        env.nav.push(TabsPage);
-        splashScreen.hide();
-      }, function (error) {
-        //we don't have the user data so we will ask him to log in
-        env.nav.push(LoginPage);
-        splashScreen.hide();
-      });
-      */
+      this.rootPage = TabsPage;
+      //this.nav.push(LoginPage);
+      //splashScreen.hide();
+      
       
       let env = this;
-      //env.nav.push(LoginPage);
-      env.nav.push(TabsPage);
+      env.nav.push(LoginPage);
+      //env.nav.push(TabsPage);
       //this.rootPage = TabsPage;
       splashScreen.hide();
       statusBar.styleDefault();

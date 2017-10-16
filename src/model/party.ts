@@ -1,13 +1,10 @@
 import { Type } from "serializer.ts/Decorators";
-import { AllMyData } from "../model/allMyData";
+import { AllMyData } from "./allMyData";
 import { Injectable } from "@angular/core";
 import { Utility } from "./utility";
 
 export class Party {
-    public addressLine1 : string;
-    public addressLine2 : string;
-    public city : string;
-    public country : string;
+    public address : string;
     public details : string;
     public drinksProvided : boolean;
     public endTime : string;
@@ -20,9 +17,7 @@ export class Party {
     public longitude : number;
     public partyID : string;
     public startTime : string;
-    public stateProvinceRegion : string;
     public title : string;
-    public zipCode : number;
 
     public averageRating : string;
     public averageRatingNumber : number;
@@ -37,9 +32,6 @@ export class Party {
     public percentageOfMen : number;
     public percentageOfWomen : number;
 
-    public myInviteeInfo : Invitee;
-    public addressFirstLine : string;
-    public addressSecondLine : string;
     public localStartTime : string;
     public localEndTime : string;
 
@@ -62,24 +54,26 @@ export class Party {
     }
 
     public preparePartyObjectForTheUI(){
-        this.initializeMyInviteeInfo();
+        console.log("In preparePartyObjectForTheUI function");
         this.localStartTime = Utility.convertTimeToLocalTimeAndFormatForUI(new Date(this.startTime));
         this.localEndTime = Utility.convertTimeToLocalTimeAndFormatForUI(new Date(this.endTime));
-        this.initializeAddressLines();
         this.refreshPartyStats();
     }
 
     public fixMaps(){
+        console.log("In fixMaps function");
         var fixedHostsMap = new Map<string,Host>();
         var fixedInviteesMap = new Map<string,Invitee>();
         var hosts = this.hosts;
         var invitees = this.invitees;
         Object.keys(hosts).forEach(function (key) {
             // do something with obj[key]
+            console.log("key = " + key + ", hosts[key] = " + hosts[key]);
             fixedHostsMap.set(key, hosts[key]);
         });
         Object.keys(invitees).forEach(function (key) {
             // do something with obj[key]
+            console.log("key = " + key + ", invitees[key] = " + invitees[key]);
             fixedInviteesMap.set(key, invitees[key]);
         });
         this.hosts = fixedHostsMap;
@@ -109,6 +103,9 @@ export class Party {
                 if(invitee.isMale){
                     numberOfMen++;
                 }
+            } else if(invitee.atParty && attendanceIsExpired){
+                // really only doing this so that your personal atParty status is correct on the client side
+                invitee.atParty = false;
             }
             var ratingIsExpired = Utility.isRatingExpired(invitee.timeLastRated);
             if(ratingIsExpired == false){
@@ -135,6 +132,9 @@ export class Party {
                         break;
                     }
                 }
+            }else{
+                // rating is expired - only doing this so that your personal rating is correct on the client side
+                invitee.rating = "None";
             }
             // Initialize status stats
             switch(invitee.status){
@@ -184,38 +184,6 @@ export class Party {
             this.averageRatingNumber = 0;
             this.averageRating = "None";
         }
-        this.refreshMyInviteeInfo();
-    }
-
-    private refreshMyInviteeInfo(){
-        let myInvitee : Invitee = this.invitees.get("10155613117039816");
-        let ratingIsExpired = Utility.isRatingExpired(myInvitee.timeLastRated);
-        if(ratingIsExpired == true){
-            this.myInviteeInfo.rating = "None";
-        }
-        let attendanceIsExpired = Utility.isAttendanceExpired(myInvitee.timeOfLastKnownLocation);
-        if(attendanceIsExpired == true){
-            this.myInviteeInfo.atParty = false;
-        }
-        this.myInviteeInfo.numberOfInvitationsLeft = myInvitee.numberOfInvitationsLeft;
-        this.myInviteeInfo.status = myInvitee.status;
-        this.myInviteeInfo.timeLastRated = myInvitee.timeLastRated;
-        this.myInviteeInfo.timeOfLastKnownLocation = myInvitee.timeOfLastKnownLocation;
-    }
-
-    private initializeMyInviteeInfo(){
-        let fbid = "10155613117039816";
-        this.myInviteeInfo = this.invitees.get(fbid);
-    }
-
-    private initializeAddressLines(){
-        // addressFirstLine
-        this.addressFirstLine = this.addressLine1;
-        if(this.addressLine2 != "null"){
-            this.addressFirstLine += " " + this.addressLine2;
-        }
-        // addressSecondLine
-        this.addressSecondLine = this.city + ", " + this.stateProvinceRegion + " " + this.zipCode;
     }
 }
 

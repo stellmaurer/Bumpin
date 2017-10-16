@@ -27,31 +27,47 @@ export class AllMyData{
     public events : Events;
 
     constructor(public zone: NgZone) {
+        console.log("In AllMyData constructor");
         this.me = new Person();
         this.partyHostFor = new Array<Party>();
         this.barHostFor = new Array<Bar>();
         this.invitedTo = new Array<Party>();
         this.barsCloseToMe = new Array<Bar>();
         this.thePartyOrBarIAmAt = null;
+        console.log("Out of AllMyData constructor");
     }
 
     public startPeriodicDataRetrieval(http : Http){
         var tempThis = this;
         var id = setInterval(function(){
             tempThis.events.publish("timeToRefreshPartyAndBarData");
-        }, 60000);
+        }, 240000);
     }
 
-    public loginProcedure(http : Http){
+    public refreshMyDataFromFacebook(accessToken : string, http : Http){
         return new Promise((resolve, reject) => {
             var query = new Query(this, http);
-            query.createOrUpdatePerson()
+            query.refreshMyDataFromFacebook(accessToken)
+            .then((res) => {
+                resolve("AllMyData class: refreshMyDataFromFacebook query succeeded.");
+            })
+            .catch((err) => {
+                console.log("AllMyData class: error in refreshMyDataFromFacebook.");
+                reject(err);
+            });
+        });
+    }
+
+    public createOrUpdatePerson(http : Http){
+        return new Promise((resolve, reject) => {
+            var query = new Query(this, http);
+            query.createOrUpdatePerson(this.me.facebookID, this.me.isMale, this.me.name)
             .then((res) => {
                 //console.log(res);
-                return query.getPerson();
+                return query.getPerson(this.me.facebookID);
             })
             .then((res) => {
-                resolve("All login queries succeeded.");
+                resolve("CreateUpdateMeInDatabase query succeeded.");
             })
             .catch((err) => {
                 console.log(err);
@@ -63,7 +79,7 @@ export class AllMyData{
     public refreshPerson(http : Http){
         return new Promise((resolve, reject) => {
             var query = new Query(this, http);
-            query.getPerson()
+            query.getPerson(this.me.facebookID)
             .then((res) => {
                 //console.log(this);
                 resolve("getPerson query succeeded.");
@@ -109,7 +125,6 @@ export class AllMyData{
             newAttendee.status = "None";
             newAttendee.timeLastRated = "2001-01-01T00:00:00Z";
             bar.attendees.set(this.me.facebookID, newAttendee);
-            bar.myAttendeeInfo = newAttendee;
         }
 
         if(rating != bar.attendees.get(this.me.facebookID).rating){
@@ -170,7 +185,6 @@ export class AllMyData{
                 newAttendee.timeOfLastKnownLocation = "2001-01-01T00:00:00Z";
                 bar.attendees.set(this.me.facebookID, newAttendee);
             }
-            bar.myAttendeeInfo = bar.attendees.get(this.me.facebookID);
             bar.refreshBarStats();
         });
         let me = bar.attendees.get(this.me.facebookID);
@@ -192,7 +206,6 @@ export class AllMyData{
         this.zone.run(() => {
             party.invitees.get(this.me.facebookID).atParty = atParty;
             party.invitees.get(this.me.facebookID).timeOfLastKnownLocation = timeOfLastKnownLocation;
-            party.myInviteeInfo = party.invitees.get(this.me.facebookID);
             party.refreshPartyStats();
         });
         // update external data
@@ -225,7 +238,6 @@ export class AllMyData{
             this.zone.run(() => {
                 attendee.atBar = atBar;
                 attendee.timeOfLastKnownLocation = timeOfLastKnownLocation;
-                bar.myAttendeeInfo = attendee;
                 bar.refreshBarStats();
             });
         }else{
@@ -240,7 +252,6 @@ export class AllMyData{
             newAttendee.timeOfLastKnownLocation = timeLastRated;
             this.zone.run(() => {
                 bar.attendees.set(facebookID, newAttendee);
-                bar.myAttendeeInfo = bar.attendees.get(facebookID);
                 bar.refreshBarStats();
             });
         }

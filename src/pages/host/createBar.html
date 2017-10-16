@@ -1,0 +1,20 @@
+<ion-header>
+  <ion-navbar>
+    <ion-title>Create Bar</ion-title>
+    <ion-buttons end>
+      
+    </ion-buttons>
+  </ion-navbar>
+</ion-header>
+
+<ion-content padding>
+  <ion-grid *ngIf="(this.allMyData.partyHostFor.length == 0) && (this.allMyData.barHostFor.length == 0)">
+    <ion-row>
+      <ion-col col-12 class="oneElement">
+        <div class="centerMe">
+          
+        </div>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</ion-content>

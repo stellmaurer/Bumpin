@@ -1,17 +1,31 @@
 <ion-header>
   <ion-navbar>
     <ion-title>Home</ion-title>
+    <ion-buttons end>
+      <button ion-button style="color: #32db64; background-color: #222" (click)='goToCreatePage();'>
+        Create
+      </button>
+    </ion-buttons>
   </ion-navbar>
 </ion-header>
 
 <ion-content padding>
-  <h2>Welcome to Ionic!</h2>
-  <p>
-    This starter project comes with simple tabs-based layout for apps
-    that are going to primarily use a Tabbed UI.
-  </p>
-  <p>
-    Take a look at the <code>src/pages/</code> directory to add or change tabs,
-    update any existing page or create new pages.
-  </p>
+  <ion-grid *ngIf="(this.allMyData.partyHostFor.length == 0) && (this.allMyData.barHostFor.length == 0)">
+    <ion-row>
+      <ion-col col-12 class="oneElement">
+        <div class="centerMe">
+          <h1 [style.color]="'#32db64'">You aren't hosting a party or a bar yet.</h1>
+        </div>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+
+  <ion-list *ngIf="(this.allMyData.partyHostFor.length != 0) && (this.allMyData.barHostFor.length != 0)">
+    <button ion-item *ngFor="let party of this.allMyData.partyHostFor" (click)="partySelected(party)">
+      {{ party.title }}
+    </button>
+    <button ion-item *ngFor="let bar of this.allMyData.barHostFor" (click)="barSelected(bar)">
+      {{ bar.name }}
+    </button>
+  </ion-list>
 </ion-content>

@@ -1,6 +1,6 @@
 import { Component, ViewChild, ElementRef } from '@angular/core';
 import { NavController, Events } from 'ionic-angular';
-import { Geolocation, Geoposition } from 'ionic-native';
+import { Geolocation, Geoposition, Geocoder} from 'ionic-native';
 import { Person } from '../../model/person';
 import {Http, Headers, RequestOptions} from '@angular/http';
 import {deserialize} from "serializer.ts/Serializer";
@@ -26,11 +26,14 @@ export class FindPage {
  
   @ViewChild('map') mapElement: ElementRef;
   public map: any;
+
   partyMarkersOnMap : Map<string,any>;
   barMarkersOnMap : Map<string,any>;
 
   userLocationMarker: any;
   myCoordinates : any;
+
+  geocoder : any;
 
   private includeBars : boolean;
   private includePartiesToday : boolean;
@@ -42,6 +45,8 @@ export class FindPage {
   private includeAllPartiesTemp : boolean;
  
   constructor(private allMyData : AllMyData, public alertCtrl: AlertController, public locationTracker: LocationTracker, private events : Events, private http:Http, public navCtrl: NavController, public popoverCtrl: PopoverController) {
+    console.log("AllMyData in Find.ts:");
+    console.log(this.allMyData);
     this.allMyData.events = events;
     this.partyMarkersOnMap = new Map<string,any>();
     this.barMarkersOnMap = new Map<string,any>();
@@ -56,159 +61,18 @@ export class FindPage {
     this.includeAllPartiesTemp = true;
   }
 
-  presentAlert() {
-    let alert = this.alertCtrl.create();
-    alert.setTitle('What do you want to include on the map?');
-
-    alert.addInput({
-      type: 'checkbox',
-      label: 'Bars',
-      checked: this.includeBars,
-      handler: data =>  { this.includeBarsTemp = !this.includeBarsTemp;}
-    });
-    alert.addInput({
-      type: 'checkbox',
-      label: 'Parties Today',
-      checked: this.includePartiesToday,
-      handler: data =>  { this.includePartiesTodayTemp = !this.includePartiesTodayTemp;}
-    });
-    alert.addInput({
-      type: 'checkbox',
-      label: 'Parties This Week',
-      checked: this.includePartiesThisWeek,
-      handler: data =>  { this.includePartiesThisWeekTemp = !this.includePartiesThisWeekTemp;}
-    });
-    alert.addInput({
-      type: 'checkbox',
-      label: 'All Parties',
-      checked: this.includeAllParties,
-      handler: data =>  { this.includeAllPartiesTemp = !this.includeAllPartiesTemp;}
-    });
-
-
-    alert.addButton({
-      text: 'Cancel',
-      handler: data => {
-        this.includeBarsTemp = this.includeBars;
-        this.includePartiesTodayTemp = this.includePartiesToday;
-        this.includePartiesThisWeekTemp = this.includePartiesThisWeek;
-        this.includeAllPartiesTemp = this.includeAllParties;
-        console.log('Checkbox data:', data);
-      }
-    });
-    alert.addButton({
-      text: 'Okay',
-      handler: data => {
-        this.includeBars = this.includeBarsTemp;
-        this.includePartiesToday = this.includePartiesTodayTemp;
-        this.includePartiesThisWeek = this.includePartiesThisWeekTemp;
-        this.includeAllParties = this.includeAllPartiesTemp;
-        this.updateMapMarkersVisibility();
-        console.log('Checkbox data:', data);
-      }
-    });
-    alert.present();
-  }
-
-  updateMapMarkersVisibility(){
-    if(this.includeBars == true){
-      this.showBarMarkers();
-    }else{
-      this.hideBarMarkers();
-    }
-
-    if(this.includeAllParties == true){
-      this.showAllPartyMarkers();
-    }else if(this.includePartiesThisWeek == true){
-      this.showPartyMarkersForThisWeekAndHideEverythingElse();
-    }else if(this.includePartiesToday == true){
-      this.showPartyMarkersForTodayAndHideEverythingElse();
-    }else{
-      this.hideAllPartyMarkers();
-    }
-  }
-
-  partyMarkerShouldBeVisible(party : Party){
-    var markerShouldBeVisible = false;
-    if(this.includeAllParties == true){
-      markerShouldBeVisible = true;
-    }else if(this.includePartiesThisWeek == true){
-      if(Utility.isPartyThisWeek(party) == true){
-        markerShouldBeVisible = true;
-      }else{
-        markerShouldBeVisible = false;
-      }
-    }else if(this.includePartiesToday == true){
-      if(Utility.isPartyToday(party) == true){
-        markerShouldBeVisible = true;
-      }else{
-        markerShouldBeVisible = false;
-      }
-    }else{
-      markerShouldBeVisible = false;
-    }
-    return markerShouldBeVisible;
-  }
-
-  showPartyMarkersForTodayAndHideEverythingElse(){
-    this.partyMarkersOnMap.forEach((value: any, key: string) => {
-        var theMarker = this.partyMarkersOnMap.get(key);
-        if(Utility.isPartyToday(theMarker.party) == true){
-          theMarker.setMap(this.map);
-        }else{
-          theMarker.setMap(null);
-        }
-    });
-  }
-
-  showPartyMarkersForThisWeekAndHideEverythingElse(){
-    this.partyMarkersOnMap.forEach((value: any, key: string) => {
-        var theMarker = this.partyMarkersOnMap.get(key);
-        if(Utility.isPartyThisWeek(theMarker.party) == true){
-          theMarker.setMap(this.map);
-        }else{
-          theMarker.setMap(null);
-        }
-    });
-  }
-
-  hideAllPartyMarkers(){
-    this.partyMarkersOnMap.forEach((value: any, key: string) => {
-        var theMarkerToHide = this.partyMarkersOnMap.get(key);
-        theMarkerToHide.setMap(null);
-    });
-  }
-
-  showAllPartyMarkers(){
-    this.partyMarkersOnMap.forEach((value: any, key: string) => {
-        var theMarkerToShow = this.partyMarkersOnMap.get(key);
-        theMarkerToShow.setMap(this.map);
-    });
-  }
-
-  hideBarMarkers(){
-    this.barMarkersOnMap.forEach((value: any, key: string) => {
-        var theMarkerToHide = this.barMarkersOnMap.get(key);
-        theMarkerToHide.setMap(null);
-    });
-  }
-
-  showBarMarkers(){
-    this.barMarkersOnMap.forEach((value: any, key: string) => {
-        var theMarkerToShow = this.barMarkersOnMap.get(key);
-        theMarkerToShow.setMap(this.map);
-    });
-  }
-
   ionViewDidLoad(){
+    this.events.subscribe("loginProcessComplete",() => {
+      console.log("********************* Login Process Completed");
+      this.setupThePage();
+    });
+  }
+
+  private setupThePage(){
     this.loadMap()
     .then((res) => {
       // Start retrieving user location
       this.enableUserLocation();
-      // Create or update this user in the database
-      return this.allMyData.loginProcedure(this.http);
-    })
-    .then((res) => {
       // Get bars that are close to me from the database
       this.allMyData.refreshBarsCloseToMe(this.myCoordinates,this.http)
       .then((res) => {
@@ -253,7 +117,7 @@ export class FindPage {
     });
 
     this.events.subscribe("timeToUpdateUI",() => {
-        console.log("********************* updating the find tab UI now");
+        console.log("********************* Updating the find tab UI now");
         this.updateTheUI();
     });
   }
@@ -286,7 +150,7 @@ export class FindPage {
           zoom: 15,
           mapTypeId: google.maps.MapTypeId.ROADMAP
         }
-  
+        
         this.map = new google.maps.Map(this.mapElement.nativeElement, mapOptions);
         var image = 'assets/greencircle.png';
         //console.log("UserLocationMarker has been created.");
@@ -315,7 +179,6 @@ export class FindPage {
     Case 3 : this party isn't on the map
   */
   private refreshPartyMarkers(){
-    console.log("In refreshPartyMarkers function");
     //console.log(this.allMyData.invitedTo);
     var thisInstance = this;
     //console.log(thisInstance.partyMarkersOnMap);
@@ -483,29 +346,6 @@ export class FindPage {
     }
   }
 
-  /*
-  private addBarsToMap(bars : Bar[]){
-    if(bars != null){
-      var image = '../../assets/blue_MarkerB.png';
-      for(var i = 0; i < bars.length; i++){
-        var bar : Bar = bars[i];
-        let marker = new google.maps.Marker({
-          map: this.map,
-          animation: google.maps.Animation.DROP,
-          position: {lat: bar.latitude, lng: bar.longitude},
-          icon : image
-        });
-        
-        var infowindow = new google.maps.InfoWindow({
-          content: bar.name
-        });
-        marker.addListener('click', function() {
-          infowindow.open(this.map, marker);
-        });
-      }
-    }
-  }*/
-
   private addInfoWindow(marker, content){
     let infoWindow = new google.maps.InfoWindow({
       content: content
@@ -523,5 +363,149 @@ export class FindPage {
   private presentBarPopover(bar : Bar) {
     let popover = this.popoverCtrl.create(BarPopover, {bar:bar, allMyData:this.allMyData, http:this.http}, {cssClass:'barPopover.scss'});
     popover.present();
+  }
+
+  presentAlert() {
+    let alert = this.alertCtrl.create();
+    alert.setTitle('What do you want to include on the map?');
+
+    alert.addInput({
+      type: 'checkbox',
+      label: 'Bars',
+      checked: this.includeBars,
+      handler: data =>  { this.includeBarsTemp = !this.includeBarsTemp;}
+    });
+    alert.addInput({
+      type: 'checkbox',
+      label: 'Parties Today',
+      checked: this.includePartiesToday,
+      handler: data =>  { this.includePartiesTodayTemp = !this.includePartiesTodayTemp;}
+    });
+    alert.addInput({
+      type: 'checkbox',
+      label: 'Parties This Week',
+      checked: this.includePartiesThisWeek,
+      handler: data =>  { this.includePartiesThisWeekTemp = !this.includePartiesThisWeekTemp;}
+    });
+    alert.addInput({
+      type: 'checkbox',
+      label: 'All Parties',
+      checked: this.includeAllParties,
+      handler: data =>  { this.includeAllPartiesTemp = !this.includeAllPartiesTemp;}
+    });
+
+
+    alert.addButton({
+      text: 'Cancel',
+      handler: data => {
+        this.includeBarsTemp = this.includeBars;
+        this.includePartiesTodayTemp = this.includePartiesToday;
+        this.includePartiesThisWeekTemp = this.includePartiesThisWeek;
+        this.includeAllPartiesTemp = this.includeAllParties;
+        console.log('Checkbox data:', data);
+      }
+    });
+    alert.addButton({
+      text: 'Okay',
+      handler: data => {
+        this.includeBars = this.includeBarsTemp;
+        this.includePartiesToday = this.includePartiesTodayTemp;
+        this.includePartiesThisWeek = this.includePartiesThisWeekTemp;
+        this.includeAllParties = this.includeAllPartiesTemp;
+        this.updateMapMarkersVisibility();
+        console.log('Checkbox data:', data);
+      }
+    });
+    alert.present();
+  }
+
+  updateMapMarkersVisibility(){
+    if(this.includeBars == true){
+      this.showBarMarkers();
+    }else{
+      this.hideBarMarkers();
+    }
+
+    if(this.includeAllParties == true){
+      this.showAllPartyMarkers();
+    }else if(this.includePartiesThisWeek == true){
+      this.showPartyMarkersForThisWeekAndHideEverythingElse();
+    }else if(this.includePartiesToday == true){
+      this.showPartyMarkersForTodayAndHideEverythingElse();
+    }else{
+      this.hideAllPartyMarkers();
+    }
+  }
+
+  partyMarkerShouldBeVisible(party : Party){
+    var markerShouldBeVisible = false;
+    if(this.includeAllParties == true){
+      markerShouldBeVisible = true;
+    }else if(this.includePartiesThisWeek == true){
+      if(Utility.isPartyThisWeek(party) == true){
+        markerShouldBeVisible = true;
+      }else{
+        markerShouldBeVisible = false;
+      }
+    }else if(this.includePartiesToday == true){
+      if(Utility.isPartyToday(party) == true){
+        markerShouldBeVisible = true;
+      }else{
+        markerShouldBeVisible = false;
+      }
+    }else{
+      markerShouldBeVisible = false;
+    }
+    return markerShouldBeVisible;
+  }
+
+  showPartyMarkersForTodayAndHideEverythingElse(){
+    this.partyMarkersOnMap.forEach((value: any, key: string) => {
+        var theMarker = this.partyMarkersOnMap.get(key);
+        if(Utility.isPartyToday(theMarker.party) == true){
+          theMarker.setMap(this.map);
+        }else{
+          theMarker.setMap(null);
+        }
+    });
+  }
+
+  showPartyMarkersForThisWeekAndHideEverythingElse(){
+    this.partyMarkersOnMap.forEach((value: any, key: string) => {
+        var theMarker = this.partyMarkersOnMap.get(key);
+        if(Utility.isPartyThisWeek(theMarker.party) == true){
+          theMarker.setMap(this.map);
+        }else{
+          theMarker.setMap(null);
+        }
+    });
+  }
+
+  hideAllPartyMarkers(){
+    this.partyMarkersOnMap.forEach((value: any, key: string) => {
+        var theMarkerToHide = this.partyMarkersOnMap.get(key);
+        theMarkerToHide.setMap(null);
+    });
+  }
+
+  showAllPartyMarkers(){
+    this.partyMarkersOnMap.forEach((value: any, key: string) => {
+        var theMarkerToShow = this.partyMarkersOnMap.get(key);
+        theMarkerToShow.setMap(this.map);
+    });
+  }
+
+  hideBarMarkers(){
+    this.barMarkersOnMap.forEach((value: any, key: string) => {
+        var theMarkerToHide = this.barMarkersOnMap.get(key);
+        theMarkerToHide.setMap(null);
+    });
+  }
+
+  showBarMarkers(){
+    this.barMarkersOnMap.forEach((value: any, key: string) => {
+        var theMarkerToShow = this.barMarkersOnMap.get(key);
+        theMarkerToShow.setMap(this.map);
+    });
   }
 }

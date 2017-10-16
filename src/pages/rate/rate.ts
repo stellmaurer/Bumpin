@@ -22,12 +22,7 @@ import { Events } from 'ionic-angular';
 export class RatePage {
   public party : Party;
   public bar : Bar;
-  constructor(private allMyData : AllMyData, private events : Events, private http:Http, public navCtrl: NavController) {
-    //this.party = this.allMyData.invitedTo[0];
-    //this.party = null;
-    //this.bar = this.allMyData.barsCloseToMe[0];
-    //this.bar = null;
-  }
+  constructor(private allMyData : AllMyData, private events : Events, private http:Http, public navCtrl: NavController) {}
 
   ionViewWillEnter(){
       this.updateTheUI();

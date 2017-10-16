@@ -1,0 +1,90 @@
+<ion-header>
+  <ion-navbar>
+    <ion-title>Create Party</ion-title>
+    <ion-buttons end>
+      
+    </ion-buttons>
+  </ion-navbar>
+</ion-header>
+
+<ion-content class="home" scrollY="true">
+
+    <ion-item>
+      <ion-label stacked>Title</ion-label>
+      <ion-input type="text"></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-label stacked>Details</ion-label>
+      <ion-input type="text"></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-label stacked>Address</ion-label>
+      <ion-input type="text" [(ngModel)]="address" (blur)="updateMapMarker();"></ion-input>
+    </ion-item>
+
+    <div class="theMap oneElement">
+        <div #map id="map"></div>
+    </div>
+
+    <ion-item>
+      <ion-label>Start Date</ion-label>
+      <ion-datetime displayFormat="DDDD MMM DD, YYYY" pickerFormat="MMM DD YYYY" [(ngModel)]="startDate"></ion-datetime>
+    </ion-item>
+
+    <ion-item>
+      <ion-label>End Date</ion-label>
+      <ion-datetime displayFormat="DDDD MMM DD, YYYY" pickerFormat="MMM DD YYYY" [(ngModel)]="endDate"></ion-datetime>
+    </ion-item>
+
+    <ion-item>
+      <ion-label>Start Time</ion-label>
+      <ion-datetime displayFormat="h:mm A" pickerFormat="h mm A" [(ngModel)]="startTime"></ion-datetime>
+    </ion-item>
+
+    <ion-item>
+      <ion-label>End Time</ion-label>
+      <ion-datetime displayFormat="h:mm A" pickerFormat="h mm A" [(ngModel)]="endTime"></ion-datetime>
+    </ion-item>
+
+  <!-- Still need:
+    hosts
+    invitees
+  -->
+  <ion-item>
+    <ion-grid>
+        <ion-row>
+          <ion-col col-6 class="twoElementsSmall">
+            <div class="centerMe">
+              <label>Drinks Provided?</label>
+            </div>
+            <div class="centerMe">
+              <button ion-button [color]="{true: 'primary', false: 'danger'}[drinksProvided]" [style.color]="{true: 'black', false: 'white'}[drinksProvided]" (click)='toggleDrinksProvided();'>
+                {{drinksProvided ? "yes" : "no"}}
+              </button>
+            </div>
+          </ion-col>
+          <ion-col col-6 class="twoElementsSmall">
+            <div class="centerMe">
+              <label>Fee For Drinks?</label>
+            </div>
+            <div class="centerMe">
+              <button ion-button [color]="{true: 'danger', false: 'primary'}[feeForDrinks]" [style.color]="{true: 'white', false: 'black'}[feeForDrinks]" (click)='toggleFeeForDrinks();'>
+                {{feeForDrinks ? "yes" : "no"}}
+              </button>
+            </div>
+          </ion-col>
+        </ion-row>
+    </ion-grid>
+  </ion-item>
+
+  <ion-item>
+    <ion-label># of invites invitees can give out <ion-badge style="margin-left: 10px;" [color]="'primary'" [style.color]="'black'">{{invitesForNewInvitees}}</ion-badge></ion-label>
+    <ion-range min="0" max="100" [(ngModel)]="invitesForNewInvitees" item-bottom>
+      <ion-label range-left>0</ion-label>
+      <ion-label range-right>100</ion-label>
+    </ion-range>
+  </ion-item>
+
+</ion-content>

@@ -9,10 +9,14 @@ import { FindPage } from '../pages/find/find';
 import { PartyPopover } from '../pages/find/partyPopover'
 import { BarPopover } from '../pages/find/barPopover'
 import { TabsPage } from '../pages/tabs/tabs';
+import { CreatePartyPage } from '../pages/host/createParty';
+import { CreateBarPage } from '../pages/host/createBar';
+import { CreatePage } from '../pages/host/create';
 import { AllMyData } from '../model/allMyData';
 import { LocationTracker } from '../providers/location-tracker';
 import { BackgroundGeolocation } from '@ionic-native/background-geolocation';
 import { Geolocation } from '@ionic-native/geolocation';
+import { Facebook } from '@ionic-native/facebook';
 
 import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
@@ -41,6 +45,9 @@ const cloudSettings: CloudSettings = {
     RatePage,
     HostPage,
     FindPage,
+    CreatePartyPage,
+    CreateBarPage,
+    CreatePage,
     PartyPopover,
     BarPopover,
     TabsPage
@@ -60,6 +67,9 @@ const cloudSettings: CloudSettings = {
     RatePage,
     HostPage,
     FindPage,
+    CreatePartyPage,
+    CreateBarPage,
+    CreatePage,
     PartyPopover,
     BarPopover,
     TabsPage
@@ -67,6 +77,7 @@ const cloudSettings: CloudSettings = {
   providers: [
     LocationTracker,
     BackgroundGeolocation,
+    Facebook,
     Geolocation,
     [AllMyData],
     StatusBar,

@@ -1,15 +1,12 @@
 import {Type} from "serializer.ts/Decorators";
-import { AllMyData } from "../model/allMyData";
+import { AllMyData } from "./allMyData";
 import { Injectable } from "@angular/core";
 import { Utility } from "./utility";
 
 export class Bar {
-    public addressLine1 : string;
-    public addressLine2 : string;
+    public address : string;
     public attendees : Map<string, Attendee>;
     public barID : string;
-    public city : string;
-    public country : string;
     public details : string;
     public hosts : Map<string,Host>;
     public keysInHostsMap : string[];
@@ -18,8 +15,6 @@ export class Bar {
     public name : string;
     public phoneNumber : string;
     public schedule : Map<string,Schedule>;
-    public stateProvinceRegion : string;
-    public zipCode : number;
 
     public averageRating : string;
     public averageRatingNumber : number;
@@ -32,10 +27,6 @@ export class Bar {
     public numberOfPeopleAtBar : number;
     public percentageOfMen : number;
     public percentageOfWomen : number;
-
-    public myAttendeeInfo : Attendee;
-    public addressFirstLine : string;
-    public addressSecondLine : string;
 
     constructor() {
         this.hosts = new Map<string,Host>();
@@ -55,8 +46,6 @@ export class Bar {
     }
 
     public prepareBarObjectForTheUI(){
-        this.initializeMyAttendeeInfo();
-        this.initializeAddressLines();
         this.refreshBarStats();
     }
 
@@ -104,6 +93,9 @@ export class Bar {
                 if(attendee.isMale){
                     numberOfMen++;
                 }
+            } else if(attendee.atBar && attendanceIsExpired){
+                // really only doing this so that your personal atBar status is correct on the client side
+                attendee.atBar = false;
             }
             var ratingIsExpired = Utility.isRatingExpired(attendee.timeLastRated);
             if(ratingIsExpired == false){
@@ -130,6 +122,9 @@ export class Bar {
                         break;
                     }
                 }
+            }else{
+                // rating is expired - only doing this so that your personal rating is correct on the client side
+                attendee.rating = "None";
             }
             // Initialize status stats
             switch(attendee.status){
@@ -175,59 +170,6 @@ export class Bar {
             this.averageRatingNumber = 0;
             this.averageRating = "None";
         }
-        this.refreshMyAttendeeInfo();
-    }
-
-    private refreshMyAttendeeInfo(){
-        if(this.attendees == null){
-            this.myAttendeeInfo.rating = "None";
-            return;
-        }
-        let myAttendee : Attendee = this.attendees.get("10155613117039816");
-        if(myAttendee == null){
-            this.myAttendeeInfo.rating = "None";
-            return;
-        }
-        var ratingIsExpired = Utility.isRatingExpired(myAttendee.timeLastRated);
-        if(ratingIsExpired == true){
-            this.myAttendeeInfo.rating = "None";
-        }
-
-        let attendanceIsExpired = Utility.isAttendanceExpired(myAttendee.timeOfLastKnownLocation);
-        if(attendanceIsExpired == true){
-            this.myAttendeeInfo.atBar = false;
-        }
-        this.myAttendeeInfo.status = myAttendee.status;
-        this.myAttendeeInfo.timeLastRated = myAttendee.timeLastRated;
-        this.myAttendeeInfo.timeOfLastKnownLocation = myAttendee.timeOfLastKnownLocation;
-    }
-
-    private initializeMyAttendeeInfo(){
-        let fbid = "10155613117039816";
-        this.myAttendeeInfo = this.attendees.get(fbid);
-        if(this.myAttendeeInfo == null){
-            // The UI needs myAttendeeInfo to not be null, so just create
-            //      an attendee object locally to take care of this
-            var tempAttendee : Attendee = new Attendee();
-            tempAttendee.atBar = false;
-            tempAttendee.isMale = true;
-            tempAttendee.name = "doesn't matter";
-            tempAttendee.rating = "None";
-            tempAttendee.status = "None";
-            tempAttendee.timeLastRated = "2001-01-01T00:00:00Z";
-            tempAttendee.timeOfLastKnownLocation = "2001-01-01T00:00:00Z";
-            this.myAttendeeInfo = tempAttendee;
-        }
-    }
-
-    private initializeAddressLines(){
-        // addressFirstLine
-        this.addressFirstLine = this.addressLine1;
-        if(this.addressLine2 != "null"){
-            this.addressFirstLine += " " + this.addressLine2;
-        }
-        // addressSecondLine
-        this.addressSecondLine = this.city + ", " + this.stateProvinceRegion + " " + this.zipCode;
     }
 }
 

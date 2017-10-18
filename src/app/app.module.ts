@@ -1,7 +1,6 @@
 import { NgModule, ErrorHandler } from '@angular/core';
 import { IonicApp, IonicModule, IonicErrorHandler } from 'ionic-angular';
 import { MyApp } from './app.component';
-import { LoginPage } from '../pages/login/login';
 import { MorePage } from '../pages/more/more';
 import { RatePage } from '../pages/rate/rate';
 import { HostPage } from '../pages/host/host';
@@ -17,7 +16,7 @@ import { LocationTracker } from '../providers/location-tracker';
 import { BackgroundGeolocation } from '@ionic-native/background-geolocation';
 import { Geolocation } from '@ionic-native/geolocation';
 import { Facebook } from '@ionic-native/facebook';
-
+import { Login } from '../pages/login/login';
 import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
 import { CloudSettings, CloudModule } from '@ionic/cloud-angular';
@@ -40,7 +39,6 @@ const cloudSettings: CloudSettings = {
 @NgModule({
   declarations: [
     MyApp,
-    LoginPage,
     MorePage,
     RatePage,
     HostPage,
@@ -62,7 +60,6 @@ const cloudSettings: CloudSettings = {
   bootstrap: [IonicApp],
   entryComponents: [
     MyApp,
-    LoginPage,
     MorePage,
     RatePage,
     HostPage,
@@ -80,6 +77,7 @@ const cloudSettings: CloudSettings = {
     Facebook,
     Geolocation,
     [AllMyData],
+    [Login],
     StatusBar,
     SplashScreen,
     {provide: ErrorHandler, useClass: IonicErrorHandler}

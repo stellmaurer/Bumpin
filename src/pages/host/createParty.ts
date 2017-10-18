@@ -14,7 +14,7 @@ declare var google;
 })
 export class CreatePartyPage {
 
-  @ViewChild('map') mapElement: ElementRef;
+  @ViewChild('mapForCreateParty') mapElement: ElementRef;
   public map: any;
   geocoder : any;
   private myLocationMarker : any;

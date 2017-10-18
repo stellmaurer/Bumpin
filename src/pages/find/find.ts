@@ -14,6 +14,7 @@ import { LocationTracker } from '../../providers/location-tracker';
 import { BackgroundGeolocationResponse } from '@ionic-native/background-geolocation';
 import { Utility } from '../../model/utility';
 import { AlertController } from 'ionic-angular';
+import { Login } from '../login/login';
 
  
 declare var google;
@@ -44,9 +45,7 @@ export class FindPage {
   private includePartiesThisWeekTemp : boolean;
   private includeAllPartiesTemp : boolean;
  
-  constructor(private allMyData : AllMyData, public alertCtrl: AlertController, public locationTracker: LocationTracker, private events : Events, private http:Http, public navCtrl: NavController, public popoverCtrl: PopoverController) {
-    console.log("AllMyData in Find.ts:");
-    console.log(this.allMyData);
+  constructor(private allMyData : AllMyData, private login : Login, public alertCtrl: AlertController, public locationTracker: LocationTracker, private events : Events, private http:Http, public navCtrl: NavController, public popoverCtrl: PopoverController) {
     this.allMyData.events = events;
     this.partyMarkersOnMap = new Map<string,any>();
     this.barMarkersOnMap = new Map<string,any>();
@@ -62,9 +61,13 @@ export class FindPage {
   }
 
   ionViewDidLoad(){
-    this.events.subscribe("loginProcessComplete",() => {
+    this.login.login()
+    .then((res) => {
       console.log("********************* Login Process Completed");
       this.setupThePage();
+    })
+    .catch((err) => {
+        console.log("Find.ts: Login err = " + err);
     });
   }
 
@@ -143,7 +146,7 @@ export class FindPage {
     return new Promise((resolve, reject) => {
       Geolocation.getCurrentPosition().then((position) => {
         this.myCoordinates = {lat: position.coords.latitude, lng: position.coords.longitude};
-        let latLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+        let latLng = {lat: position.coords.latitude, lng: position.coords.longitude};
   
         let mapOptions = {
           center: latLng,
@@ -159,6 +162,7 @@ export class FindPage {
           position: {lat: position.coords.latitude, lng: position.coords.longitude},
           icon: image
         });
+        
         resolve("the google map has loaded");
       }, (err) => {
         reject(err);

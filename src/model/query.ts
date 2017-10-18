@@ -23,14 +23,18 @@ export class Query{
 
     // curl "https://graph.facebook.com/me?fields=id,name,gender,friends&access_token=EAACEdEose0cBAB6rZA5M4FggQWjpvo7FUv0iRA4xpFZBZAdL5ElYrbNC92YAaaf1gy9zyVYfxyHWE51YcQ6Jh7hFhP9cgoJhQQapczYr1qZAs7ZCa4Re3ifb9q1zRBdVybE5KvydgUFo5Rs6DvEKZCWuFUdpMbjtkzQXMWh8dSGgvAWDah0rNTAZBIzo8JJxyAZD"
     public refreshMyDataFromFacebook(accessToken : string){
-        console.log("Query.ts: in refreshMyDataFromFacebook");
+        //console.log("Query.ts: in refreshMyDataFromFacebook");
         return new Promise((resolve, reject) => {
-            var url = "https://graph.facebook.com/me?fields=id,name,gender&access_token=" + accessToken;
-            console.log("Sending the Facebook request now");
+            var url = "https://graph.facebook.com/me?fields=id,name,gender,friends&access_token=" + accessToken;
+            //console.log("Sending the Facebook request now");
             this.http.get(url).map(res => res.json()).subscribe(data => {
-                console.log("Facebook data retrieved.");
+                //console.log("Facebook data retrieved.");
                 // TODO: Might need to eventually check for an error here.
                 console.log("This is the data from Facebook: " + "id = " + data.id + ", gender = " + data.gender + ", name = " + data.name);
+                console.log("This is my friend's list: ");
+                for(let i = 0; i < data.friends.data.length; i++){
+                    console.log("Friend " + i + " is " + data.friends.data[i].name);
+                }
                 this.allMyData.me.facebookID = data.id;
                 if(data.gender == "male"){
                     this.allMyData.me.isMale = true;
@@ -202,6 +206,9 @@ export class Query{
                 if(data.succeeded){
                     console.log("new party data acquired - starting to fix");
                     this.allMyData.invitedTo = deserialize<Party[]>(Party, data.parties);
+                    if(this.allMyData.invitedTo == null){
+                        this.allMyData.invitedTo = new Array<Party>();
+                    }
                     for(let i = 0; i < this.allMyData.invitedTo.length; i++){
                         this.allMyData.invitedTo[i].fixMaps();
                         this.allMyData.invitedTo[i].preparePartyObjectForTheUI();
@@ -225,8 +232,9 @@ export class Query{
             this.http.get(url).map(res => res.json()).subscribe(data => {
                 if(data.succeeded){
                     this.allMyData.barsCloseToMe = deserialize<Bar[]>(Bar, data.bars);
-                    //let bars : Bar[] = data.bars;
-                    //this.allMyData.barsCloseToMe = bars;
+                    if(this.allMyData.barsCloseToMe == null){
+                        this.allMyData.barsCloseToMe = new Array<Bar>();
+                    }
                     for(let i = 0; i < this.allMyData.barsCloseToMe.length; i++){
                         // TODO : Fix this
                         //console.log(this.allMyData.barsCloseToMe[i]);

@@ -54,26 +54,22 @@ export class Party {
     }
 
     public preparePartyObjectForTheUI(){
-        console.log("In preparePartyObjectForTheUI function");
         this.localStartTime = Utility.convertTimeToLocalTimeAndFormatForUI(new Date(this.startTime));
         this.localEndTime = Utility.convertTimeToLocalTimeAndFormatForUI(new Date(this.endTime));
         this.refreshPartyStats();
     }
 
     public fixMaps(){
-        console.log("In fixMaps function");
         var fixedHostsMap = new Map<string,Host>();
         var fixedInviteesMap = new Map<string,Invitee>();
         var hosts = this.hosts;
         var invitees = this.invitees;
         Object.keys(hosts).forEach(function (key) {
             // do something with obj[key]
-            console.log("key = " + key + ", hosts[key] = " + hosts[key]);
             fixedHostsMap.set(key, hosts[key]);
         });
         Object.keys(invitees).forEach(function (key) {
             // do something with obj[key]
-            console.log("key = " + key + ", invitees[key] = " + invitees[key]);
             fixedInviteesMap.set(key, invitees[key]);
         });
         this.hosts = fixedHostsMap;

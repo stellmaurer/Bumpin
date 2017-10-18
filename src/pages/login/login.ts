@@ -8,86 +8,116 @@ import {Http, Headers, RequestOptions} from '@angular/http';
 import {deserialize} from "serializer.ts/Serializer";
 import {AllMyData} from "../../model/allMyData"
 import { NativeStorage } from 'ionic-native';
+import { Injectable } from '@angular/core';
 
-@Component({
-  selector: 'page-login',
-  templateUrl: 'login.html'
-})
-export class LoginPage {
-  constructor(private allMyData : AllMyData, private http:Http, private events : Events, private fb : Facebook, public navCtrl: NavController, public facebookAuth: FacebookAuth, public user: User) {
-    console.log("in LoginPage constructor");
-    
-    /*
-    facebookAuth.login().then(function gotoNextPage() {
-      console.log("in facebookAuth callback");
+@Injectable()
+export class Login {
+  constructor(private allMyData : AllMyData, private http:Http, private events : Events, private fb : Facebook) {}
 
-      this.createOrUpdatePerson();
-
-      
-      console.log(facebookAuth.getToken.toString());
-      this.allMyData.me.setFacebookID(user.social.facebook.uid);
-      this.allMyData.me.setName(user.social.facebook.data.full_name);
-      console.log(this.allMyData.me.getFacebookID());
-      console.log(this.allMyData.me.getName());
-      console.log(user.social.facebook.data);
-      //this.getFacebookInfo();
-      navCtrl.push(TabsPage, {}, {animate: false});
-    });*/
-  }
-
-  ionViewDidLoad(){
-    this.login();
-  }
-
-  login(){
-    this.fb.getLoginStatus()
-    .then((response: FacebookLoginResponse) => {
-      console.log('Checking status of login.', response);
-      if (response.status === 'connected') {
-        console.log("Login class: status is connected.")
-        // the user is logged in and has authenticated your
-        // app, and response.authResponse supplies
-        // the user's ID, a valid access token, a signed
-        // request, and the time the access token 
-        // and signed request each expire
-        let accessToken = response.authResponse.accessToken;
-        this.createOrUpdatePersonWithFacebookInfo(accessToken);
-      } else if (response.status === 'not_authorized') {
-        // the user is logged in to Facebook, 
-        // but has not authenticated your app
-      } else {
-        // the user isn't logged in to Facebook.
-        this.fb.login(['public_profile', 'user_friends', 'email'])
-        .then((response: FacebookLoginResponse) => {
-          console.log('Logged into Facebook!', response);
+  public login(){
+    return new Promise((resolve, reject) => {
+      this.fb.getLoginStatus()
+      .then((response: FacebookLoginResponse) => {
+        if (response.status === 'connected') {
+          console.log("You are logged into Facebook already.")
+          // the user is logged in and has authenticated your
+          // app, and response.authResponse supplies
+          // the user's ID, a valid access token, a signed
+          // request, and the time the access token 
+          // and signed request each expire
           let accessToken = response.authResponse.accessToken;
-          this.createOrUpdatePersonWithFacebookInfo(accessToken);
-        })
-        .catch(e => {
-          console.log('Error logging into Facebook', e);
-        });
-      }
-    })
-    .catch(e => {
-      console.log('Error checking status of login.', e);
+          this.createOrUpdatePersonWithFacebookInfo(accessToken)
+          .then((res) => {
+            resolve("Login process completed.");
+          })
+          .catch(err => {
+            reject(err);
+          });
+        } else if (response.status === 'not_authorized') {
+          // the user is logged in to Facebook, 
+          // but has not authenticated your app
+          reject("User hasn't authenticated app - whatever that means...");
+        } else {
+          // the user isn't logged in to Facebook.
+          this.fb.login(['public_profile', 'user_friends'])
+          .then((response: FacebookLoginResponse) => {
+            console.log('Logged into Facebook!', response);
+            let accessToken = response.authResponse.accessToken;
+            this.createOrUpdatePersonWithFacebookInfo(accessToken)
+            .then((res) => {
+              resolve("Login process completed.");
+            })
+            .catch(err => {
+              reject(err);
+            });
+          })
+          .catch(e => {
+            console.log('Error logging into Facebook', e);
+            console.log("Trying to log you out and retry.");
+            this.logout()
+            .then((response: FacebookLoginResponse) => {
+              this.fb.login(['public_profile', 'user_friends'])
+              .then((response: FacebookLoginResponse) => {
+                console.log('Logged into Facebook!', response);
+                let accessToken = response.authResponse.accessToken;
+                this.createOrUpdatePersonWithFacebookInfo(accessToken)
+                .then((res) => {
+                  resolve("Login process completed.");
+                })
+                .catch(err => {
+                  reject(err);
+                });
+              })
+              .catch(e => {
+                console.log("We tried logging you out of Facebook and trying to log in again, but it didn't work. Here's the error: " + e);
+                reject(e);
+              });
+            })
+            .catch(e => {
+              console.log('Error logging out of Facebook', e);
+              reject(e);
+            });
+          });
+        }
+      })
+      .catch(e => {
+        console.log('Error checking status of login.', e);
+        reject(e);
+      });
+    });
+  }
+
+  public logout(){
+    return new Promise((resolve, reject) => {
+      this.fb.logout()
+      .then((response: FacebookLoginResponse) => {
+        console.log("Logged out successfully.");
+        this.login();
+        resolve(response);
+      })
+      .catch(e => {
+        console.log('Error checking status of login.', e);
+        reject(e);
+      });
     });
   }
 
   createOrUpdatePersonWithFacebookInfo(accessToken : string){
-    console.log("Access Token = " + accessToken);
-    this.allMyData.refreshMyDataFromFacebook(accessToken, this.http)
-    .then((res) => {
-      console.log("Facebook query finished");
-      this.allMyData.createOrUpdatePerson(this.http)
+    return new Promise((resolve, reject) => {
+      console.log("Access Token = " + accessToken);
+      this.allMyData.refreshMyDataFromFacebook(accessToken, this.http)
       .then((res) => {
-        this.events.publish("loginProcessComplete");
+        this.allMyData.createOrUpdatePerson(this.http)
+        .then((res) => {
+          resolve("Just created or updated Person in DynamoDB with new Facebook info.")
+        })
+        .catch((err) => {
+          reject(err);
+        });
       })
       .catch((err) => {
-        console.log(err);
+        reject(err);
       });
-    })
-    .catch((err) => {
-      console.log("createOrUpdatePersonWithFacebookInfo query failed with error: " + err);
     });
   }
 }

@@ -4,7 +4,6 @@ import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
 
 import { TabsPage } from '../pages/tabs/tabs';
-import { LoginPage } from '../pages/login/login';
 import { NativeStorage } from 'ionic-native';
 import { ViewChild } from '@angular/core';
 import { Events } from 'ionic-angular';
@@ -27,7 +26,7 @@ export class MyApp {
       
       
       let env = this;
-      env.nav.push(LoginPage);
+      
       //env.nav.push(TabsPage);
       //this.rootPage = TabsPage;
       splashScreen.hide();

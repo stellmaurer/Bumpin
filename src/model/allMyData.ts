@@ -27,14 +27,12 @@ export class AllMyData{
     public events : Events;
 
     constructor(public zone: NgZone) {
-        console.log("In AllMyData constructor");
         this.me = new Person();
         this.partyHostFor = new Array<Party>();
         this.barHostFor = new Array<Bar>();
         this.invitedTo = new Array<Party>();
         this.barsCloseToMe = new Array<Bar>();
         this.thePartyOrBarIAmAt = null;
-        console.log("Out of AllMyData constructor");
     }
 
     public startPeriodicDataRetrieval(http : Http){

@@ -25,8 +25,14 @@ export class Bar {
     public peopleGoing : number;
     public peopleMaybe : number;
     public numberOfPeopleAtBar : number;
+    public numberOfMenGoing : number;
+    public numberOfMenMaybe : number;
     public percentageOfMen : number;
     public percentageOfWomen : number;
+    public percentageOfMenGoing : number;
+    public percentageOfWomenGoing : number;
+    public percentageOfMenMaybe : number;
+    public percentageOfWomenMaybe : number;
 
     constructor() {
         this.hosts = new Map<string,Host>();
@@ -41,8 +47,14 @@ export class Bar {
         this.peopleGoing = 0;
         this.peopleMaybe = 0;
         this.numberOfPeopleAtBar = 0;
+        this.numberOfMenGoing = 0;
+        this.numberOfMenMaybe = 0;
         this.percentageOfMen = 0;
         this.percentageOfWomen = 0;
+        this.percentageOfMenGoing = 0;
+        this.percentageOfWomenGoing = 0;
+        this.percentageOfMenMaybe = 0;
+        this.percentageOfWomenMaybe = 0;
     }
 
     public prepareBarObjectForTheUI(){
@@ -83,6 +95,12 @@ export class Bar {
         this.numberOfPeopleAtBar = 0;
         this.percentageOfMen = 0;
         this.percentageOfWomen = 0;
+        this.percentageOfMenGoing = 0;
+        this.percentageOfWomenGoing = 0;
+        this.percentageOfMenMaybe = 0;
+        this.percentageOfWomenMaybe = 0;
+        this.numberOfMenGoing = 0;
+        this.numberOfMenMaybe = 0;
 
         let numberOfMen = 0;
         this.attendees.forEach((value: Attendee, key: string) => {
@@ -130,15 +148,34 @@ export class Bar {
             switch(attendee.status){
                 case "Going": {
                     this.peopleGoing++;
+                    if(attendee.isMale){
+                        this.numberOfMenGoing++;
+                    }
                     break;
                 }
                 case "Maybe": {
                     this.peopleMaybe++;
+                    if(attendee.isMale){
+                        this.numberOfMenMaybe++;
+                    }
                     break;
                 }
             }
         });
-
+        if(this.peopleGoing > 0){
+            this.percentageOfMenGoing = Math.round((this.numberOfMenGoing / this.peopleGoing) * 100);
+            this.percentageOfWomenGoing = 100 - this.percentageOfMenGoing;
+        }else{
+            this.percentageOfMenGoing = 0;
+            this.percentageOfWomenGoing = 0;
+        }
+        if(this.peopleMaybe > 0){
+            this.percentageOfMenMaybe = Math.round((this.numberOfMenMaybe / this.peopleMaybe) * 100);
+            this.percentageOfWomenMaybe = 100 - this.percentageOfMenMaybe;
+        }else{
+            this.percentageOfMenMaybe = 0;
+            this.percentageOfWomenMaybe = 0;
+        }
         if(this.numberOfPeopleAtBar > 0){
             this.percentageOfMen = Math.round((numberOfMen / this.numberOfPeopleAtBar) * 100);
             this.percentageOfWomen = 100 - this.percentageOfMen;

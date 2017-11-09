@@ -97,6 +97,9 @@
               {{party.peopleGoing}}
             </button>
           </div>
+          <div class="centerMe">
+            <label>{{party.numberOfMenGoing}} M / {{party.peopleGoing - party.numberOfMenGoing}} F</label>
+          </div>
         </ion-col>
         <ion-col col-4 class="threeElements">
           <div class="centerMe">
@@ -107,6 +110,9 @@
               {{party.peopleMaybe}}
             </button>
           </div>
+          <div class="centerMe">
+            <label>{{party.numberOfMenMaybe}} M / {{party.peopleMaybe - party.numberOfMenMaybe}} F</label>
+          </div>
         </ion-col>
         <ion-col col-4 class="threeElements">
           <div class="centerMe">
@@ -116,6 +122,9 @@
             <button ion-button [color]="primary" style="color: black;" (click)='changeAttendanceStatus("Invited");'>
               {{party.peopleInvited}}
             </button>
+          </div>
+          <div class="centerMe">
+            <label>{{party.numberOfMenInvited}} M / {{party.peopleInvited - party.numberOfMenInvited}} F</label>
           </div>
         </ion-col>
     </ion-row>

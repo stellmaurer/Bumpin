@@ -1,6 +1,7 @@
 import { Bar, Attendee } from './bar';
 import { Party } from './party';
 import { Person } from './person';
+import { Friend } from './friend';
 import { Query } from "./query";
 import { Http } from '@angular/http';
 import { Component } from '@angular/core';
@@ -23,6 +24,7 @@ export class AllMyData{
     public invitedTo : Party[];
     public barsCloseToMe : Bar[];
     public thePartyOrBarIAmAt : any;
+    public friends : Friend[];
     
     public events : Events;
 
@@ -33,6 +35,7 @@ export class AllMyData{
         this.invitedTo = new Array<Party>();
         this.barsCloseToMe = new Array<Bar>();
         this.thePartyOrBarIAmAt = null;
+        this.friends = new Array<Friend>();
     }
 
     public startPeriodicDataRetrieval(http : Http){

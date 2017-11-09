@@ -1,24 +1,27 @@
 import { Component, ViewChild, ElementRef } from '@angular/core';
-import { NavController } from 'ionic-angular';
+import { NavParams, NavController} from 'ionic-angular';
 import { Person } from '../../model/person';
 import { AllMyData} from '../../model/allMyData';
-import { Party } from '../../model/party';
+import { Party, Invitee } from '../../model/party';
 import { Bar } from '../../model/bar';
 import { Geolocation, Geoposition, Geocoder} from 'ionic-native';
+import { EditInviteeListPage } from './editInviteeList';
+import { EditHostListPage } from './editHostList';
 
 declare var google;
 
 @Component({
-  selector: 'page-createParty',
-  templateUrl: 'createParty.html'
+  selector: 'page-editParty',
+  templateUrl: 'editParty.html'
 })
-export class CreatePartyPage {
+export class EditPartyPage {
 
-  @ViewChild('mapForCreateParty') mapElement: ElementRef;
+  @ViewChild('map') mapElement: ElementRef;
   public map: any;
   geocoder : any;
   private myLocationMarker : any;
 
+  private party : Party;
   private title : string = "";
   private details : string = "";
   private address : string = "";
@@ -26,14 +29,14 @@ export class CreatePartyPage {
   private endDate : string;
   private startTime : string;
   private endTime : string;
-  private invitesForNewInvitees : number = 0;
   private drinksProvided : boolean = false;
   private feeForDrinks : boolean = true;
+  private invitesForNewInvitees : number = 0;
 
   private partyMarker : any;
 
-  constructor(public allMyData : AllMyData, private navCtrl: NavController) {
-    console.log("In createParty.ts");
+  constructor(public allMyData : AllMyData, private navCtrl: NavController, params : NavParams) {
+    this.party = params.get("party");
   }
 
   ionViewDidLoad(){
@@ -54,7 +57,10 @@ export class CreatePartyPage {
         let mapOptions = {
           center: latLng,
           zoom: 15,
-          mapTypeId: google.maps.MapTypeId.ROADMAP
+          mapTypeId: google.maps.MapTypeId.ROADMAP,
+          zoomControl: false,
+          mapTypeControl: false,
+          streetViewControl: true,
         }
         this.map = new google.maps.Map(this.mapElement.nativeElement, mapOptions);
 
@@ -107,5 +113,13 @@ export class CreatePartyPage {
 
   private toggleFeeForDrinks(){
     this.feeForDrinks = !this.feeForDrinks;
+  }
+
+  private editHostsButtonClicked(){
+    this.navCtrl.push(EditHostListPage, {party:this.party}, {animate: false});
+  }
+
+  private editInviteesButtonClicked(){
+    this.navCtrl.push(EditInviteeListPage, {party:this.party, initialInviteeList:this.party.invitees}, {animate: false});
   }
 }

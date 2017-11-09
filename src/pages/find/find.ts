@@ -119,6 +119,21 @@ export class FindPage {
       });
     });
 
+    this.events.subscribe("aDifferentUserJustLoggedIn",() => {
+      Promise.all([this.allMyData.refreshBarsCloseToMe(this.myCoordinates, this.http), this.allMyData.refreshParties(this.http)]).then(thePromise => {
+        //console.log("parties have been refreshed");
+        return thePromise;
+      })
+      .then((res) => {
+        this.refreshPartyMarkers();
+        this.refreshBarMarkers();
+        //console.log("Just updated the map with party and bar changes.");
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+    });
+
     this.events.subscribe("timeToUpdateUI",() => {
         console.log("********************* Updating the find tab UI now");
         this.updateTheUI();
@@ -151,7 +166,10 @@ export class FindPage {
         let mapOptions = {
           center: latLng,
           zoom: 15,
-          mapTypeId: google.maps.MapTypeId.ROADMAP
+          mapTypeId: google.maps.MapTypeId.ROADMAP,
+          zoomControl: false,
+          mapTypeControl: false,
+          streetViewControl: false,
         }
         
         this.map = new google.maps.Map(this.mapElement.nativeElement, mapOptions);

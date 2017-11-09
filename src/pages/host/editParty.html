@@ -1,6 +1,11 @@
 <ion-header>
   <ion-navbar>
-    <ion-title>Create Party</ion-title>
+    <ion-title *ngIf="this.party.partyID == 'New Party'">
+      Create Party
+    </ion-title>
+    <ion-title *ngIf="this.party.partyID != 'New Party'">
+      Edit Party
+    </ion-title>
     <ion-buttons end>
       
     </ion-buttons>
@@ -85,6 +90,28 @@
       <ion-label range-left>0</ion-label>
       <ion-label range-right>100</ion-label>
     </ion-range>
+  </ion-item>
+
+  <ion-item>
+    <ion-grid>
+        <ion-row>
+            <ion-col col-6 class="twoElementsMedium">
+              <div class="centerMe">
+                  <button ion-button [color]="'primary'" [style.color]="'black'" (click)='editHostsButtonClicked();' [disabled]="this.party.hosts.get(this.allMyData.me.facebookID).isMainHost == false">
+                    Edit Hosts
+                  </button>
+              </div>
+            </ion-col>
+            <ion-col col-6 class="twoElementsMedium">
+              <div class="centerMe">
+                  <button ion-button [color]="'primary'" [style.color]="'black'" (click)='editInviteesButtonClicked();'>
+                    Edit Invitees
+                  </button>
+              </div>
+            </ion-col>
+        </ion-row>
+
+    </ion-grid>
   </ion-item>
 
 </ion-content>

@@ -2,10 +2,10 @@ import { Component } from '@angular/core';
 import { NavController } from 'ionic-angular';
 import { Person } from '../../model/person';
 import { AllMyData} from '../../model/allMyData';
-import { Party } from '../../model/party';
+import { Party, Host } from '../../model/party';
 import { Bar } from '../../model/bar';
-import { CreatePartyPage } from './createParty';
-import { CreateBarPage } from './createBar';
+import { EditPartyPage } from './editParty';
+import { EditBarPage } from './editBar';
 
 
 @Component({
@@ -13,17 +13,25 @@ import { CreateBarPage } from './createBar';
   templateUrl: 'create.html'
 })
 export class CreatePage {
-
+  private party : Party;
   constructor(public allMyData : AllMyData, private navCtrl: NavController) {
-    console.log("In create.ts");
-    
+    this.party = new Party();
+    this.setMeAsTheMainHost();
+  }
+
+  private setMeAsTheMainHost(){
+    var mainHost : Host = new Host();
+    mainHost.isMainHost = true;
+    mainHost.name = this.allMyData.me.name;
+    mainHost.status = "Accepted";
+    this.party.hosts.set(this.allMyData.me.facebookID, mainHost);
   }
 
   goToCreatePartyPage(){
-    this.navCtrl.push(CreatePartyPage, {}, {animate: false});
+    this.navCtrl.push(EditPartyPage, {party:this.party}, {animate: false});
   }
 
   goToCreateBarPage(){
-    this.navCtrl.push(CreateBarPage, {}, {animate: false});
+    this.navCtrl.push(EditBarPage, {}, {animate: false});
   }
 }

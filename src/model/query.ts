@@ -1,6 +1,7 @@
 import { Bar } from './bar';
 import { Party } from './party';
 import { Person } from './person';
+import { Friend } from './friend';
 import { AllMyData } from './allMyData';
 import { Http, Headers, RequestOptions } from '@angular/http';
 import { deserialize } from "serializer.ts/Serializer";
@@ -25,16 +26,12 @@ export class Query{
     public refreshMyDataFromFacebook(accessToken : string){
         //console.log("Query.ts: in refreshMyDataFromFacebook");
         return new Promise((resolve, reject) => {
-            var url = "https://graph.facebook.com/me?fields=id,name,gender,friends&access_token=" + accessToken;
+            var url = "https://graph.facebook.com/me?fields=id,name,gender,friends{id,name,gender}&access_token=" + accessToken;
             //console.log("Sending the Facebook request now");
             this.http.get(url).map(res => res.json()).subscribe(data => {
                 //console.log("Facebook data retrieved.");
                 // TODO: Might need to eventually check for an error here.
-                console.log("This is the data from Facebook: " + "id = " + data.id + ", gender = " + data.gender + ", name = " + data.name);
-                console.log("This is my friend's list: ");
-                for(let i = 0; i < data.friends.data.length; i++){
-                    console.log("Friend " + i + " is " + data.friends.data[i].name);
-                }
+                this.createMyFriendList(data);
                 this.allMyData.me.facebookID = data.id;
                 if(data.gender == "male"){
                     this.allMyData.me.isMale = true;
@@ -45,6 +42,22 @@ export class Query{
                 resolve(data);
             });
         });
+    }
+
+    private createMyFriendList(data : any)
+    {
+        for(let i = 0; i < data.friends.data.length; i++){
+            var friend : Friend = new Friend();
+            friend.facebookID = data.friends.data[i].id;
+            friend.name = data.friends.data[i].name;
+            if(data.friends.data[i].gender == "male"){
+                friend.isMale = true;
+            }else{
+                friend.isMale = false;
+            }
+            this.allMyData.friends.push(friend);
+            console.log("Friend added: FacebookID=" + friend.facebookID + ", Name= " + friend.name + ", Male=" + friend.isMale);
+        }
     }
     
     public getPerson(facebookID : string){

@@ -9,17 +9,18 @@ import {deserialize} from "serializer.ts/Serializer";
 import {AllMyData} from "../../model/allMyData"
 import { NativeStorage } from 'ionic-native';
 import { Injectable } from '@angular/core';
+import { LocationTracker } from '../../providers/location-tracker';
 
 @Injectable()
 export class Login {
-  constructor(private allMyData : AllMyData, private http:Http, private events : Events, private fb : Facebook) {}
+  constructor(private allMyData : AllMyData, private http:Http, private events : Events, private fb : Facebook, private locationTracker: LocationTracker) {}
 
   public login(){
     return new Promise((resolve, reject) => {
       this.fb.getLoginStatus()
       .then((response: FacebookLoginResponse) => {
         if (response.status === 'connected') {
-          console.log("You are logged into Facebook already.")
+          console.log("You are logged into Facebook already.");
           // the user is logged in and has authenticated your
           // app, and response.authResponse supplies
           // the user's ID, a valid access token, a signed
@@ -28,14 +29,17 @@ export class Login {
           let accessToken = response.authResponse.accessToken;
           this.createOrUpdatePersonWithFacebookInfo(accessToken)
           .then((res) => {
+            console.log("createOrUpdatePersonWithFacebookInfo function successfully completed.");
             resolve("Login process completed.");
           })
           .catch(err => {
+            console.log("Error in createOrUpdatePersonWithFacebookInfo function.");
             reject(err);
           });
         } else if (response.status === 'not_authorized') {
           // the user is logged in to Facebook, 
           // but has not authenticated your app
+          console.log("User hasn't authenticated app - whatever that means...");
           reject("User hasn't authenticated app - whatever that means...");
         } else {
           // the user isn't logged in to Facebook.
@@ -65,6 +69,7 @@ export class Login {
                   resolve("Login process completed.");
                 })
                 .catch(err => {
+                  console.log("Error in createOrUpdatePersonWithFacebookInfo function.");
                   reject(err);
                 });
               })
@@ -92,11 +97,17 @@ export class Login {
       this.fb.logout()
       .then((response: FacebookLoginResponse) => {
         console.log("Logged out successfully.");
-        this.login();
-        resolve(response);
+        this.login()
+        .then((res) => {
+          this.events.publish("aDifferentUserJustLoggedIn");
+          resolve("Logged out and back in successfully.");
+        })
+        .catch((err) => {
+          reject(err);
+        });
       })
       .catch(e => {
-        console.log('Error checking status of login.', e);
+        console.log('Error logging out.', e);
         reject(e);
       });
     });
@@ -109,7 +120,7 @@ export class Login {
       .then((res) => {
         this.allMyData.createOrUpdatePerson(this.http)
         .then((res) => {
-          resolve("Just created or updated Person in DynamoDB with new Facebook info.")
+          resolve("Just created or updated Person in DynamoDB with new Facebook info.");
         })
         .catch((err) => {
           reject(err);

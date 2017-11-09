@@ -7,13 +7,13 @@ import { Bar } from '../../model/bar';
 
 
 @Component({
-  selector: 'page-createBar',
-  templateUrl: 'createBar.html'
+  selector: 'page-editBar',
+  templateUrl: 'editBar.html'
 })
-export class CreateBarPage {
+export class EditBarPage {
 
   constructor(public allMyData : AllMyData, private navCtrl: NavController) {
-    console.log("In createBar.ts");
+    console.log("In editBar.ts");
     
   }
 }

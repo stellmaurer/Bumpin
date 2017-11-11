@@ -7,6 +7,7 @@ import { Bar } from '../../model/bar';
 import { Geolocation, Geoposition, Geocoder} from 'ionic-native';
 import { EditInviteeListPage } from './editInviteeList';
 import { EditHostListPage } from './editHostList';
+import { Utility } from "../../model/utility";
 
 declare var google;
 
@@ -22,21 +23,31 @@ export class EditPartyPage {
   private myLocationMarker : any;
 
   private party : Party;
-  private title : string = "";
-  private details : string = "";
-  private address : string = "";
-  private startDate : string;
-  private endDate : string;
-  private startTime : string;
-  private endTime : string;
-  private drinksProvided : boolean = false;
-  private feeForDrinks : boolean = true;
-  private invitesForNewInvitees : number = 0;
 
   private partyMarker : any;
 
   constructor(public allMyData : AllMyData, private navCtrl: NavController, params : NavParams) {
     this.party = params.get("party");
+  }
+
+  ionViewWillLeave(){
+    this.party.startTime = this.createDateTimeInISOFormat(this.party.startDateOnly, this.party.startTimeOnly);
+    this.party.endTime = this.createDateTimeInISOFormat(this.party.endDateOnly, this.party.endTimeOnly);
+
+    console.log(this.party);
+
+    
+    
+  }
+
+  private createDateTimeInISOFormat(dateOnly : string, timeOnly : string){
+    let splitOfDateOnly = dateOnly.split("-");
+    let splitOfTimeOnly = timeOnly.split(":");
+    let localDateTime: Date = new Date();
+    localDateTime.setFullYear(Number.parseInt(splitOfDateOnly[0]), Number.parseInt(splitOfDateOnly[1]) - 1, Number.parseInt(splitOfDateOnly[2]));
+    localDateTime.setHours(Number.parseInt(splitOfTimeOnly[0]), Number.parseInt(splitOfTimeOnly[1]), 0);
+    let utcDateTime = Utility.convertDateTimeToISOFormat(localDateTime);
+    return utcDateTime;
   }
 
   ionViewDidLoad(){
@@ -85,7 +96,7 @@ export class EditPartyPage {
   }
 
   private updateMapMarker(){
-    this.codeAddress(this.address);
+    this.codeAddress(this.party.address);
   }
 
   private codeAddress(address : string) {
@@ -100,6 +111,8 @@ export class EditPartyPage {
             position: results[0].geometry.location,
             icon: image
         });
+        tempThis.party.latitude = Number.parseFloat(results[0].geometry.location.lat());
+        tempThis.party.longitude = Number.parseFloat(results[0].geometry.location.lng());
       } else {
         tempThis.partyMarker.setMap(null);
         console.log('Geocode was not successful for the following reason: ' + status);
@@ -108,11 +121,11 @@ export class EditPartyPage {
   }
 
   private toggleDrinksProvided(){
-    this.drinksProvided = !this.drinksProvided;
+    this.party.drinksProvided = !this.party.drinksProvided;
   }
 
   private toggleFeeForDrinks(){
-    this.feeForDrinks = !this.feeForDrinks;
+    this.party.feeForDrinks = !this.party.feeForDrinks;
   }
 
   private editHostsButtonClicked(){

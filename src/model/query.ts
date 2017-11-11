@@ -56,8 +56,17 @@ export class Query{
                 friend.isMale = false;
             }
             this.allMyData.friends.push(friend);
-            console.log("Friend added: FacebookID=" + friend.facebookID + ", Name= " + friend.name + ", Male=" + friend.isMale);
+            //console.log("Friend added: FacebookID=" + friend.facebookID + ", Name= " + friend.name + ", Male=" + friend.isMale);
         }
+        this.allMyData.friends.sort(function(a, b){
+            if(b.name < a.name){
+                return 1;
+            }
+            if(b.name > a.name){
+                return -1;
+            }
+            return 0;
+        });
     }
     
     public getPerson(facebookID : string){

@@ -236,7 +236,7 @@ export class LocationTracker {
         closestPartyOrBar = bar;
       }
     }
-    console.log("This is how far away the closest party/bar is: " + max);
+    //console.log("This is how far away the closest party/bar is: " + max);
     if((closestPartyOrBar == null) || (max > 20)){
       return null;
     }

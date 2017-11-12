@@ -41,6 +41,11 @@ export class Party {
     public percentageOfMenInvited : number;
     public percentageOfWomenInvited : number;
 
+    public startDateOnly : string;
+    public endDateOnly : string;
+    public startTimeOnly : string;
+    public endTimeOnly : string;
+
     public localStartTime : string;
     public localEndTime : string;
 
@@ -49,6 +54,13 @@ export class Party {
         this.hosts = new Map<string,Host>();
         this.keysInHostsMap = Array.from(this.hosts.keys());
         this.invitees = new Map<string,Invitee>();
+        this.invitesForNewInvitees = 0;
+        this.drinksProvided = false;
+        this.feeForDrinks = true;
+        this.startDateOnly = "";
+        this.endDateOnly = "";
+        this.startTimeOnly = "";
+        this.endTimeOnly = "";
         this.averageRating = "None";
         this.averageRatingNumber = 0;
         this.bumpinRatings = 0;

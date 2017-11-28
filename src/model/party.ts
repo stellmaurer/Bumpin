@@ -54,13 +54,18 @@ export class Party {
         this.hosts = new Map<string,Host>();
         this.keysInHostsMap = Array.from(this.hosts.keys());
         this.invitees = new Map<string,Invitee>();
-        this.invitesForNewInvitees = 0;
-        this.drinksProvided = false;
-        this.feeForDrinks = true;
+        this.title = "";
+        this.details = "";
+        this.address = "";
+        this.latitude = 1000; // represents an illegitimate address
+        this.longitude = 1000; // represents an illegitimate address
         this.startDateOnly = "";
         this.endDateOnly = "";
         this.startTimeOnly = "";
         this.endTimeOnly = "";
+        this.drinksProvided = false;
+        this.feeForDrinks = true;
+        this.invitesForNewInvitees = 0;
         this.averageRating = "None";
         this.averageRatingNumber = 0;
         this.bumpinRatings = 0;
@@ -152,7 +157,7 @@ export class Party {
                         this.averageRatingNumber = this.averageRatingNumber+4;
                         break;
                     }
-                    case "Heat'n Up": {
+                    case "Heat'n-up": {
                         this.heatingUpRatings++;
                         this.averageRatingNumber = this.averageRatingNumber+3;
                         break;
@@ -234,7 +239,7 @@ export class Party {
                     break;
                 }
                 case 3: {
-                    this.averageRating = "Heat'n Up";
+                    this.averageRating = "Heat'n-up";
                     break;
                 }
                 case 2: {

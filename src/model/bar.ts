@@ -124,7 +124,7 @@ export class Bar {
                         this.averageRatingNumber = this.averageRatingNumber+4;
                         break;
                     }
-                    case "Heat'n Up": {
+                    case "Heat'n-up": {
                         this.heatingUpRatings++;
                         this.averageRatingNumber = this.averageRatingNumber+3;
                         break;
@@ -191,7 +191,7 @@ export class Bar {
                     break;
                 }
                 case 3: {
-                    this.averageRating = "Heat'n Up";
+                    this.averageRating = "Heat'n-up";
                     break;
                 }
                 case 2: {

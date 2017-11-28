@@ -20,7 +20,7 @@
     </ion-row>
   </ion-grid>
 
-  <ion-list *ngIf="(this.allMyData.partyHostFor.length != 0) && (this.allMyData.barHostFor.length != 0)">
+  <ion-list *ngIf="(this.allMyData.partyHostFor.length != 0) || (this.allMyData.barHostFor.length != 0)">
     <button ion-item *ngFor="let party of this.allMyData.partyHostFor" (click)="partySelected(party)">
       {{ party.title }}
     </button>

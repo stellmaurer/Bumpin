@@ -8,8 +8,8 @@ import { FindPage } from '../pages/find/find';
 import { PartyPopover } from '../pages/find/partyPopover'
 import { BarPopover } from '../pages/find/barPopover'
 import { TabsPage } from '../pages/tabs/tabs';
-import { EditPartyPage } from '../pages/host/editParty';
-import { EditBarPage } from '../pages/host/editBar';
+import { CreatePartyPage } from '../pages/host/createParty';
+import { CreateBarPage } from '../pages/host/createBar';
 import { CreatePage } from '../pages/host/create';
 import { EditHostListPage } from '../pages/host/editHostList';
 import { EditInviteeListPage } from '../pages/host/editInviteeList';
@@ -45,8 +45,8 @@ const cloudSettings: CloudSettings = {
     RatePage,
     HostPage,
     FindPage,
-    EditPartyPage,
-    EditBarPage,
+    CreatePartyPage,
+    CreateBarPage,
     CreatePage,
     EditHostListPage,
     EditInviteeListPage,
@@ -68,8 +68,8 @@ const cloudSettings: CloudSettings = {
     RatePage,
     HostPage,
     FindPage,
-    EditPartyPage,
-    EditBarPage,
+    CreatePartyPage,
+    CreateBarPage,
     CreatePage,
     EditHostListPage,
     EditInviteeListPage,

@@ -287,12 +287,40 @@ export class AllMyData{
     public refreshParties(http : Http){
         return new Promise((resolve, reject) => {
             var query = new Query(this, http);
-            query.getParties()
+            query.getPartiesImInvitedTo()
             .then((res) => {
-                resolve("getParties query succeeded.");
+                resolve("getPartiesImInvitedTo query succeeded.");
             })
             .catch((err) => {
                 reject(err);
+            });
+        });
+    }
+
+    public createParty(party : Party, http : Http){
+        return new Promise((resolve, reject) => {
+            var query = new Query(this, http);
+            query.createParty(party)
+            .then((res) => {
+                resolve("createParty query succeeded.");
+            })
+            .catch((err) => {
+                reject(err);
+            });
+        });
+    }
+
+    public refreshPartiesImHosting(http : Http){
+        return new Promise((resolve, reject) => {
+            var query = new Query(this, http);
+            this.zone.run(() => {
+                query.getPartiesImHosting()
+                .then((res) => {
+                    resolve("getPartiesImHosting query succeeded.");
+                })
+                .catch((err) => {
+                    reject(err);
+                });
             });
         });
     }

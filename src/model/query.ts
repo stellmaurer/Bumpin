@@ -46,6 +46,7 @@ export class Query{
 
     private createMyFriendList(data : any)
     {
+        this.allMyData.friends = new Array<Friend>();
         for(let i = 0; i < data.friends.data.length; i++){
             var friend : Friend = new Friend();
             friend.facebookID = data.friends.data[i].id;
@@ -211,7 +212,7 @@ export class Query{
         });
     }
 
-    public getParties(){
+    public getPartiesImInvitedTo(){
         return new Promise((resolve, reject) => {
             var partiesImInvitedTo : string = "";
             if(this.allMyData.me.invitedTo != null){
@@ -236,6 +237,36 @@ export class Query{
                         this.allMyData.invitedTo[i].preparePartyObjectForTheUI();
                     }
                     console.log("new party data fixed and ready");
+                    resolve(data);
+                }else{
+                    reject(data);
+                }
+            });
+        });
+    }
+
+    public getPartiesImHosting(){
+        return new Promise((resolve, reject) => {
+            var partiesImHosting : string = "";
+            if(this.allMyData.me.partyHostFor != null){
+                for(var key in this.allMyData.me.partyHostFor){
+                    partiesImHosting += key + ",";
+                }
+                if(partiesImHosting.length >= 1){
+                    partiesImHosting = partiesImHosting.substr(0, partiesImHosting.length-1); // take off the last comma
+                }
+            }
+            var url = "http://bumpin-env.us-west-2.elasticbeanstalk.com:80/myParties?partyIDs=" + partiesImHosting;
+            this.http.get(url).map(res => res.json()).subscribe(data => {
+                if(data.succeeded){
+                    this.allMyData.partyHostFor = deserialize<Party[]>(Party, data.parties);
+                    if(this.allMyData.partyHostFor == null){
+                        this.allMyData.partyHostFor = new Array<Party>();
+                    }
+                    for(let i = 0; i < this.allMyData.partyHostFor.length; i++){
+                        this.allMyData.partyHostFor[i].fixMaps();
+                        this.allMyData.partyHostFor[i].preparePartyObjectForTheUI();
+                    }
                     resolve(data);
                 }else{
                     reject(data);
@@ -270,5 +301,82 @@ export class Query{
             });
             
         });
+    }
+
+    // curl http://bumpin-env.us-west-2.elasticbeanstalk.com:80/createParty -d "facebookID=123050841787812&
+    //          isMale=false&name=Melody%20Panil&address=120%20N%20Breese%20Terrace%20Madison%20WI%2053726&
+    //          drinksProvided=true&endTime=2017-11-27T08:00:00Z&feeForDrinks=true&invitesForNewInvitees=4&details=none&
+    //          latitude=43.070860&longitude=-89.413948&startTime=2017-11-27T01:00:00Z&title=Breese%20Through%20It&
+    //          additionsListFacebookID=107798829983852,111354699627054&additionsListIsMale=false,false&
+    //          additionsListName=Nancy%20Greeneescu,Betty%20Chaison&hostListFacebookIDs=122107341882417,115693492525474
+    //          &hostListNames=Lisa%20Chengberg,Linda%20Qinstein"
+    public createParty(party : Party){
+        return new Promise((resolve, reject) => {
+            var url = "http://bumpin-env.us-west-2.elasticbeanstalk.com:80/createParty";
+            let body = "facebookID=" + this.allMyData.me.facebookID + "&isMale=" + this.allMyData.me.isMale + 
+                       "&name=" + encodeURIComponent(this.allMyData.me.name) + "&address=" + encodeURIComponent(party.address) +
+                       "&drinksProvided=" + party.drinksProvided + "&endTime=" + party.endTime + 
+                       "&feeForDrinks=" + party.feeForDrinks + "&invitesForNewInvitees=" + party.invitesForNewInvitees +
+                       "&details=" + encodeURIComponent(party.details) + "&latitude=" + party.latitude + 
+                       "&longitude=" + party.longitude + "&startTime=" + party.startTime + 
+                       "&title=" + encodeURIComponent(party.title);
+            body += this.createHostListParametersForCreatePartyQuery(party);
+            body += this.createInviteeListParametersForCreatePartyQuery(party);
+            var headers = new Headers();
+            headers.append('content-type', "application/x-www-form-urlencoded");
+            let options= new RequestOptions({headers: headers});
+            this.http.post(url, body, options).map(res => res.json()).subscribe(data => {
+                if(data.succeeded){
+                    party.partyID = data.error; // backend is set up so that data.error contains the partyID
+                    resolve(data);
+                }else{
+                    reject(data);
+                }
+            });
+            resolve();
+        });
+    }
+
+    // &hostListNames=Lisa%20Chengberg,Linda%20Qinstein
+    // &hostListFacebookIDs=122107341882417,115693492525474
+    private createHostListParametersForCreatePartyQuery(party : Party){
+        let hostListNames : string = "";
+        let hostListFacebookIDs : string = "";
+        if(party.hosts.size >= 2){
+            hostListNames += "&hostListNames=";
+            hostListFacebookIDs += "&hostListFacebookIDs=";
+        }
+        party.hosts.forEach((value: any, key: string) => {
+            if(party.hosts.get(key).isMainHost == false){
+                hostListNames += encodeURIComponent(party.hosts.get(key).name) + ",";
+                hostListFacebookIDs += key + ",";
+            }
+        });
+        hostListNames = hostListNames.slice(0, hostListNames.length - 1);
+        hostListFacebookIDs = hostListFacebookIDs.slice(0, hostListFacebookIDs.length - 1);
+        return hostListNames + hostListFacebookIDs;
+    }
+
+    // &additionsListName=Nancy%20Greeneescu,Betty%20Chaison
+    // &additionsListFacebookID=107798829983852,111354699627054
+    // &additionsListIsMale=false,false
+    private createInviteeListParametersForCreatePartyQuery(party : Party){
+        let additionsListName : string = "";
+        let additionsListFacebookID : string = "";
+        let additionsListIsMale : string = "";
+        if(party.invitees.size >= 1){
+            additionsListName += "&additionsListName=";
+            additionsListFacebookID += "&additionsListFacebookID=";
+            additionsListIsMale += "&additionsListIsMale=";
+        }
+        party.invitees.forEach((value: any, key: string) => {
+            additionsListName += encodeURIComponent(party.invitees.get(key).name) + ",";
+            additionsListFacebookID += key + ",";
+            additionsListIsMale += party.invitees.get(key).isMale + ",";
+        });
+        additionsListName = additionsListName.slice(0, additionsListName.length - 1);
+        additionsListFacebookID = additionsListFacebookID.slice(0, additionsListFacebookID.length - 1);
+        additionsListIsMale = additionsListIsMale.slice(0, additionsListIsMale.length - 1);
+        return additionsListName + additionsListFacebookID + additionsListIsMale;
     }
 }

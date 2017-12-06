@@ -17,7 +17,7 @@ export class CreatePage {
   constructor(public allMyData : AllMyData, private navCtrl: NavController) {
     this.party = new Party();
     this.setMeAsTheMainHost();
-    this.setDefaultStartAndEndTimesForParty();
+    this.party.setDefaultStartAndEndTimesForParty();
   }
 
   private setMeAsTheMainHost(){
@@ -26,20 +26,6 @@ export class CreatePage {
     mainHost.name = this.allMyData.me.name;
     mainHost.status = "Accepted";
     this.party.hosts.set(this.allMyData.me.facebookID, mainHost);
-  }
-
-  private setDefaultStartAndEndTimesForParty(){
-    // "startDateOnly":"2017-01-01","startTimeOnly":"13:00"
-    let date: Date = new Date();
-    let year = date.getFullYear();
-    let month = (date.getMonth()+1).toString().length == 1 ? '0'+(date.getMonth()+1) : (date.getMonth()+1);
-    let day = date.getDate().toString().length == 1 ? '0'+date.getDate() : date.getDate();
-    let hour = date.getHours().toString().length == 1 ? '0'+date.getHours() : date.getHours();
-    let minutes = date.getMinutes().toString().length == 1 ? '0'+date.getMinutes() : date.getMinutes();
-    this.party.startDateOnly = year + "-" + month + "-" + day;
-    this.party.startTimeOnly = hour + ":" + minutes;
-    this.party.endDateOnly = year + "-" + month + "-" + day;
-    this.party.endTimeOnly = hour + ":" + minutes;
   }
 
   goToCreatePartyPage(){

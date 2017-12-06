@@ -1,0 +1,130 @@
+<ion-header>
+    <ion-navbar>
+      <ion-title>
+        Edit Party
+      </ion-title>
+      <ion-buttons end>
+        
+      </ion-buttons>
+    </ion-navbar>
+  </ion-header>
+  
+  <ion-content class="home" scrollY="true">
+  
+    <ion-item>
+      <ion-label stacked>Title</ion-label>
+      <ion-input type="text" [(ngModel)]="party.title"></ion-input>
+    </ion-item>
+  
+    <ion-item>
+      <ion-label stacked>Details</ion-label>
+      <ion-input type="text" [(ngModel)]="party.details"></ion-input>
+    </ion-item>
+  
+    <ion-item>
+      <ion-label stacked>Address</ion-label>
+      <ion-input type="text" [(ngModel)]="party.address" (blur)="updateMapMarker();"></ion-input>
+    </ion-item>
+  
+    <div class="theMap oneElement">
+        <div #map id="mapForCreateParty"></div>
+    </div>
+  
+    <ion-item>
+      <ion-label>Start Date</ion-label>
+      <ion-datetime displayFormat="DDDD MMM DD, YYYY" pickerFormat="MMM DD YYYY" [(ngModel)]="party.startDateOnly"></ion-datetime>
+    </ion-item>
+  
+    <ion-item>
+      <ion-label>End Date</ion-label>
+      <ion-datetime displayFormat="DDDD MMM DD, YYYY" pickerFormat="MMM DD YYYY" [(ngModel)]="party.endDateOnly"></ion-datetime>
+    </ion-item>
+  
+    <ion-item>
+      <ion-label>Start Time</ion-label>
+      <ion-datetime displayFormat="h:mm A" pickerFormat="h mm A" [(ngModel)]="party.startTimeOnly"></ion-datetime>
+    </ion-item>
+  
+    <ion-item>
+      <ion-label>End Time</ion-label>
+      <ion-datetime displayFormat="h:mm A" pickerFormat="h mm A" [(ngModel)]="party.endTimeOnly"></ion-datetime>
+    </ion-item>
+  
+    <ion-item>
+      <ion-grid>
+          <ion-row>
+            <ion-col col-6 class="twoElementsSmall">
+              <div class="centerMe">
+                <label>Drinks Provided?</label>
+              </div>
+              <div class="centerMe">
+                <button ion-button [color]="{true: 'primary', false: 'danger'}[party.drinksProvided]" [style.color]="{true: 'black', false: 'white'}[party.drinksProvided]" (click)='toggleDrinksProvided();'>
+                  {{party.drinksProvided ? "yes" : "no"}}
+                </button>
+              </div>
+            </ion-col>
+            <ion-col col-6 class="twoElementsSmall">
+              <div class="centerMe">
+                <label>Fee For Drinks?</label>
+              </div>
+              <div class="centerMe">
+                <button ion-button [color]="{true: 'danger', false: 'primary'}[party.feeForDrinks]" [style.color]="{true: 'white', false: 'black'}[party.feeForDrinks]" (click)='toggleFeeForDrinks();'>
+                  {{party.feeForDrinks ? "yes" : "no"}}
+                </button>
+              </div>
+            </ion-col>
+          </ion-row>
+      </ion-grid>
+    </ion-item>
+  
+    <ion-item>
+      <ion-label># of invites invitees can give out <ion-badge style="margin-left: 10px;" [color]="'primary'" [style.color]="'black'">{{party.invitesForNewInvitees}}</ion-badge></ion-label>
+      <ion-range min="0" max="100" [(ngModel)]="party.invitesForNewInvitees" item-bottom>
+        <ion-label range-left>0</ion-label>
+        <ion-label range-right>100</ion-label>
+      </ion-range>
+    </ion-item>
+  
+    <ion-item>
+      <ion-grid>
+          <ion-row>
+              <ion-col col-6 class="twoElementsMedium">
+                <div class="centerMe">
+                    <button ion-button [color]="'primary'" [style.color]="'black'" (click)='editHostsButtonClicked();' [disabled]="party.hosts.get(this.allMyData.me.facebookID).isMainHost == false">
+                      Edit Hosts ({{party.hosts.size}})
+                    </button>
+                </div>
+              </ion-col>
+              <ion-col col-6 class="twoElementsMedium">
+                <div class="centerMe">
+                    <button ion-button [color]="'primary'" [style.color]="'black'" (click)='editInviteesButtonClicked();'>
+                      Edit Invitees ({{party.invitees.size}})
+                    </button>
+                </div>
+              </ion-col>
+          </ion-row>
+      </ion-grid>
+    </ion-item>
+  
+    <ion-item>
+      <ion-grid style="margin-top: 10px;">
+        <ion-row>
+            <ion-col col-6 class="twoElementsMedium">
+                <div class="centerMe">
+                    <button ion-button [color]="'danger'" [style.color]="'white'" (click)='deleteButtonClicked();'>
+                        Delete
+                    </button>
+                </div>
+            </ion-col>
+            <ion-col col-6 class="twoElementsMedium">
+                <div class="centerMe">
+                    <button ion-button [color]="'primary'" [style.color]="'black'" (click)='saveButtonClicked();'>
+                        Save
+                    </button>
+                </div>
+            </ion-col>
+        </ion-row>
+      </ion-grid>
+    </ion-item>
+  
+  </ion-content>

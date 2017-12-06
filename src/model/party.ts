@@ -89,10 +89,49 @@ export class Party {
         this.percentageOfWomenInvited = 0;
     }
 
+    public createShallowCopy() : Party{
+        let copy : Party = new Party();
+        copy.address = this.address;
+        copy.details = this.details;
+        copy.drinksProvided = this.drinksProvided;
+        copy.endTime = this.endTime;
+        copy.feeForDrinks = this.feeForDrinks;
+        copy.hosts = this.createCopyOfHostsMap();
+        copy.invitees = this.createCopyOfInviteesMap();
+        copy.invitesForNewInvitees = this.invitesForNewInvitees;
+        copy.latitude = this.latitude;
+        copy.longitude = this.longitude;
+        copy.partyID = this.partyID;
+        copy.startTime = this.startTime;
+        copy.title = this.title;
+        copy.startDateOnly = this.startDateOnly;
+        copy.endDateOnly = this.endDateOnly;
+        copy.startTimeOnly = this.startTimeOnly;
+        copy.endTimeOnly = this.endTimeOnly;
+        return copy;
+    }
+
+    private createCopyOfHostsMap() : Map<string,Host> {
+        let hostsCopy = new Map<string,Host>();
+        this.hosts.forEach((value: any, key: string) => {
+            hostsCopy.set(key,value);
+        });
+        return hostsCopy;
+    }
+
+    private createCopyOfInviteesMap() : Map<string,Invitee> {
+        let inviteesCopy = new Map<string,Invitee>();
+        this.invitees.forEach((value: any, key: string) => {
+            inviteesCopy.set(key,value);
+        });
+        return inviteesCopy;
+    }
+
     public preparePartyObjectForTheUI(){
         this.localStartTime = Utility.convertTimeToLocalTimeAndFormatForUI(new Date(this.startTime));
         this.localEndTime = Utility.convertTimeToLocalTimeAndFormatForUI(new Date(this.endTime));
         this.refreshPartyStats();
+        this.preparePartyForEditPartyPage();
     }
 
     public fixMaps(){
@@ -255,6 +294,48 @@ export class Party {
             this.averageRatingNumber = 0;
             this.averageRating = "None";
         }
+    }
+
+    private preparePartyForEditPartyPage(){
+        this.setStartAndEndTimesForParty();
+    }
+
+    private setStartAndEndTimesForParty(){
+        // "startDateOnly":"2017-01-01","startTimeOnly":"13:00"
+        let startDate : Date = new Date(this.startTime);
+        let endDate : Date = new Date(this.endTime);
+
+        let startYear = startDate.getFullYear();
+        let startMonth = (startDate.getMonth()+1).toString().length == 1 ? '0'+(startDate.getMonth()+1) : (startDate.getMonth()+1);
+        let startDay = startDate.getDate().toString().length == 1 ? '0'+startDate.getDate() : startDate.getDate();
+        let startHour = startDate.getHours().toString().length == 1 ? '0'+startDate.getHours() : startDate.getHours();
+        let startMinutes = startDate.getMinutes().toString().length == 1 ? '0'+startDate.getMinutes() : startDate.getMinutes();
+
+        this.startDateOnly = startYear + "-" + startMonth + "-" + startDay;
+        this.startTimeOnly = startHour + ":" + startMinutes;
+
+        let endYear = endDate.getFullYear();
+        let endMonth = (endDate.getMonth()+1).toString().length == 1 ? '0'+(endDate.getMonth()+1) : (endDate.getMonth()+1);
+        let endDay = endDate.getDate().toString().length == 1 ? '0'+endDate.getDate() : endDate.getDate();
+        let endHour = endDate.getHours().toString().length == 1 ? '0'+endDate.getHours() : endDate.getHours();
+        let endMinutes = endDate.getMinutes().toString().length == 1 ? '0'+endDate.getMinutes() : endDate.getMinutes();
+
+        this.endDateOnly = endYear + "-" + endMonth + "-" + endDay;
+        this.endTimeOnly = endHour + ":" + endMinutes;
+    }
+
+    public setDefaultStartAndEndTimesForParty(){
+        // "startDateOnly":"2017-01-01","startTimeOnly":"13:00"
+        let date: Date = new Date();
+        let year = date.getFullYear();
+        let month = (date.getMonth()+1).toString().length == 1 ? '0'+(date.getMonth()+1) : (date.getMonth()+1);
+        let day = date.getDate().toString().length == 1 ? '0'+date.getDate() : date.getDate();
+        let hour = date.getHours().toString().length == 1 ? '0'+date.getHours() : date.getHours();
+        let minutes = date.getMinutes().toString().length == 1 ? '0'+date.getMinutes() : date.getMinutes();
+        this.startDateOnly = year + "-" + month + "-" + day;
+        this.startTimeOnly = hour + ":" + minutes;
+        this.endDateOnly = year + "-" + month + "-" + day;
+        this.endTimeOnly = hour + ":" + minutes;
     }
 }
 

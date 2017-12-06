@@ -5,7 +5,8 @@ import { AllMyData} from '../../model/allMyData';
 import { Party } from '../../model/party';
 import { Bar } from '../../model/bar';
 import { CreatePage } from './create';
-import {Http} from '@angular/http';
+import { EditPartyPage } from './editParty';
+import { Http } from '@angular/http';
 
 @Component({
   selector: 'page-host',
@@ -14,7 +15,6 @@ import {Http} from '@angular/http';
 export class HostPage {
 
   constructor(public allMyData : AllMyData, private http:Http, private navCtrl: NavController) {
-    console.log(allMyData.me.name);
   }
 
   ionViewDidLoad(){
@@ -37,7 +37,7 @@ export class HostPage {
   }
 
   partySelected(party : Party) {
-    
+    this.navCtrl.push(EditPartyPage, {party: party}, {animate: false});
   }
 
   barSelected(bar : Bar) {

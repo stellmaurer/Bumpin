@@ -1,5 +1,5 @@
 import { Bar, Attendee } from './bar';
-import { Party } from './party';
+import { Party, Invitee, Host } from './party';
 import { Person } from './person';
 import { Friend } from './friend';
 import { Query } from "./query";
@@ -303,6 +303,32 @@ export class AllMyData{
             query.createParty(party)
             .then((res) => {
                 resolve("createParty query succeeded.");
+            })
+            .catch((err) => {
+                reject(err);
+            });
+        });
+    }
+
+    public editParty(party : Party, inviteesToAdd : Map<string,Invitee>, inviteesToRemove : Map<string,Invitee>, hostsToAdd : Map<string,Host>, hostsToRemove : Map<string,Host>, http : Http){
+        return new Promise((resolve, reject) => {
+            var query = new Query(this, http);
+            query.editParty(party, inviteesToAdd, inviteesToRemove, hostsToAdd, hostsToRemove)
+            .then((res) => {
+                resolve("editParty query succeeded.");
+            })
+            .catch((err) => {
+                reject(err);
+            });
+        });
+    }
+
+    public deleteParty(party : Party, http : Http){
+        return new Promise((resolve, reject) => {
+            var query = new Query(this, http);
+            query.deleteParty(party)
+            .then((res) => {
+                resolve("deleteParty query succeeded.");
             })
             .catch((err) => {
                 reject(err);

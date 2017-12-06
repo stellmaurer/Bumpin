@@ -9,6 +9,7 @@ import { PartyPopover } from '../pages/find/partyPopover'
 import { BarPopover } from '../pages/find/barPopover'
 import { TabsPage } from '../pages/tabs/tabs';
 import { CreatePartyPage } from '../pages/host/createParty';
+import { EditPartyPage } from '../pages/host/editParty';
 import { CreateBarPage } from '../pages/host/createBar';
 import { CreatePage } from '../pages/host/create';
 import { EditHostListPage } from '../pages/host/editHostList';
@@ -46,6 +47,7 @@ const cloudSettings: CloudSettings = {
     HostPage,
     FindPage,
     CreatePartyPage,
+    EditPartyPage,
     CreateBarPage,
     CreatePage,
     EditHostListPage,
@@ -69,6 +71,7 @@ const cloudSettings: CloudSettings = {
     HostPage,
     FindPage,
     CreatePartyPage,
+    EditPartyPage,
     CreateBarPage,
     CreatePage,
     EditHostListPage,

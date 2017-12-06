@@ -1,5 +1,5 @@
 import { Bar } from './bar';
-import { Party } from './party';
+import { Party, Invitee, Host } from './party';
 import { Person } from './person';
 import { Friend } from './friend';
 import { AllMyData } from './allMyData';
@@ -378,5 +378,118 @@ export class Query{
         additionsListFacebookID = additionsListFacebookID.slice(0, additionsListFacebookID.length - 1);
         additionsListIsMale = additionsListIsMale.slice(0, additionsListIsMale.length - 1);
         return additionsListName + additionsListFacebookID + additionsListIsMale;
+    }
+
+    // curl http://localhost:5000/updateParty -d "partyID=13078678500578502570&address=8124%20N%20Seneca%20Rd
+    //      &details=Steve%20=%20The%20Bomb&drinksProvided=true&endTime=2017-12-25T02:00:00Z&feeForDrinks=false
+    //      &invitesForNewInvitees=3&latitude=43.1647483&longitude=-87.90766209999998&startTime=2017-12-23T19:02:00Z
+    //      &title=Steves%20DA%20BOMB%20Party&additionsListFacebookID=107798829983852,111354699627054
+    //      &additionsListIsMale=false,false&additionsListName=Nancy%20Greeneescu,Betty%20Chaison
+    //      &hostsToAddFacebookIDs=122107341882417,115693492525474&hostsToAddNames=Lisa%20Chengberg,Linda%20Qinstein"
+    public editParty(party : Party, inviteesToAdd : Map<string,Invitee>, inviteesToRemove : Map<string,Invitee>, hostsToAdd : Map<string,Host>, hostsToRemove : Map<string,Host>){
+        return new Promise((resolve, reject) => {
+            var url = "http://bumpin-env.us-west-2.elasticbeanstalk.com:80/updateParty";
+            let body = "partyID=" + party.partyID + "&facebookID=" + this.allMyData.me.facebookID + "&isMale=" + this.allMyData.me.isMale + 
+                       "&name=" + encodeURIComponent(this.allMyData.me.name) + "&address=" + encodeURIComponent(party.address) +
+                       "&drinksProvided=" + party.drinksProvided + "&endTime=" + party.endTime + 
+                       "&feeForDrinks=" + party.feeForDrinks + "&invitesForNewInvitees=" + party.invitesForNewInvitees +
+                       "&details=" + encodeURIComponent(party.details) + "&latitude=" + party.latitude + 
+                       "&longitude=" + party.longitude + "&startTime=" + party.startTime + 
+                       "&title=" + encodeURIComponent(party.title);
+            body += this.createHostListParametersForEditPartyQuery(party, hostsToAdd, hostsToRemove);
+            body += this.createInviteeListParametersForEditPartyQuery(party, inviteesToAdd, inviteesToRemove);
+            var headers = new Headers();
+            headers.append('content-type', "application/x-www-form-urlencoded");
+            let options= new RequestOptions({headers: headers});
+            this.http.post(url, body, options).map(res => res.json()).subscribe(data => {
+                if(data.succeeded){
+                    resolve(data);
+                }else{
+                    reject(data);
+                }
+            });
+            resolve();
+        });
+    }
+
+    // &hostsToAddFacebookIDs=122107341882417,115693492525474
+    // &hostsToAddNames=Lisa%20Chengberg,Linda%20Qinstein
+    // &hostsToRemoveFacebookIDs=122107341882417,115693492525474"
+    private createHostListParametersForEditPartyQuery(party : Party, hostsToAdd : Map<string,Host>, hostsToRemove : Map<string,Host>){
+        let hostsToAddFacebookIDs : string = "";
+        let hostsToAddNames : string = "";
+        let hostsToRemoveFacebookIDs : string = "";
+        if(hostsToAdd.size >= 1){
+            hostsToAddNames += "&hostsToAddNames=";
+            hostsToAddFacebookIDs += "&hostsToAddFacebookIDs=";
+        }
+        hostsToAdd.forEach((value: any, key: string) => {
+            hostsToAddNames += encodeURIComponent(hostsToAdd.get(key).name) + ",";
+            hostsToAddFacebookIDs += key + ",";
+        });
+        hostsToAddNames = hostsToAddNames.slice(0, hostsToAddNames.length - 1);
+        hostsToAddFacebookIDs = hostsToAddFacebookIDs.slice(0, hostsToAddFacebookIDs.length - 1);
+
+        if(hostsToRemove.size >= 1){
+            hostsToRemoveFacebookIDs += "&hostsToRemoveFacebookIDs=";
+        }
+        hostsToRemove.forEach((value: any, key: string) => {
+            hostsToRemoveFacebookIDs += key + ",";
+        });
+        hostsToRemoveFacebookIDs = hostsToRemoveFacebookIDs.slice(0, hostsToRemoveFacebookIDs.length - 1);
+
+        return hostsToAddNames + hostsToAddFacebookIDs + hostsToRemoveFacebookIDs;
+    }
+
+    // &additionsListName=Nancy%20Greeneescu,Betty%20Chaison
+    // &additionsListFacebookID=107798829983852,111354699627054
+    // &additionsListIsMale=false,false
+    // &removalsListFacebookID=107798829983852,111354699627054
+    private createInviteeListParametersForEditPartyQuery(party : Party, inviteesToAdd : Map<string,Invitee>, inviteesToRemove : Map<string,Invitee>){
+        let additionsListName : string = "";
+        let additionsListFacebookID : string = "";
+        let additionsListIsMale : string = "";
+        let removalsListFacebookID : string = "";
+        if(inviteesToAdd.size >= 1){
+            additionsListName += "&additionsListName=";
+            additionsListFacebookID += "&additionsListFacebookID=";
+            additionsListIsMale += "&additionsListIsMale=";
+        }
+        inviteesToAdd.forEach((value: any, key: string) => {
+            additionsListName += encodeURIComponent(inviteesToAdd.get(key).name) + ",";
+            additionsListFacebookID += key + ",";
+            additionsListIsMale += inviteesToAdd.get(key).isMale + ",";
+        });
+        additionsListName = additionsListName.slice(0, additionsListName.length - 1);
+        additionsListFacebookID = additionsListFacebookID.slice(0, additionsListFacebookID.length - 1);
+        additionsListIsMale = additionsListIsMale.slice(0, additionsListIsMale.length - 1);
+
+        if(inviteesToRemove.size >= 1){
+            removalsListFacebookID += "&removalsListFacebookID=";
+        }
+        inviteesToRemove.forEach((value: any, key: string) => {
+            removalsListFacebookID += key + ",";
+        });
+        removalsListFacebookID = removalsListFacebookID.slice(0, removalsListFacebookID.length - 1);
+
+        return additionsListName + additionsListFacebookID + additionsListIsMale + removalsListFacebookID;
+    }
+
+    // curl http://bumpin-env.us-west-2.elasticbeanstalk.com:80/deleteParty -d "partyID=5233516922553495941"
+    public deleteParty(party : Party){
+        return new Promise((resolve, reject) => {
+            var url = "http://bumpin-env.us-west-2.elasticbeanstalk.com:80/deleteParty";
+            let body = "partyID=" + party.partyID;
+            var headers = new Headers();
+            headers.append('content-type', "application/x-www-form-urlencoded");
+            let options= new RequestOptions({headers: headers});
+            this.http.post(url, body, options).map(res => res.json()).subscribe(data => {
+                if(data.succeeded){
+                    resolve(data);
+                }else{
+                    reject(data);
+                }
+            });
+        });
     }
 }

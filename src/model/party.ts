@@ -135,10 +135,10 @@ export class Party {
     }
 
     public fixMaps(){
-        var fixedHostsMap = new Map<string,Host>();
-        var fixedInviteesMap = new Map<string,Invitee>();
-        var hosts = this.hosts;
-        var invitees = this.invitees;
+        let fixedHostsMap = new Map<string,Host>();
+        let fixedInviteesMap = new Map<string,Invitee>();
+        let hosts = this.hosts;
+        let invitees = this.invitees;
         Object.keys(hosts).forEach(function (key) {
             // do something with obj[key]
             fixedHostsMap.set(key, hosts[key]);
@@ -326,16 +326,27 @@ export class Party {
 
     public setDefaultStartAndEndTimesForParty(){
         // "startDateOnly":"2017-01-01","startTimeOnly":"13:00"
-        let date: Date = new Date();
-        let year = date.getFullYear();
-        let month = (date.getMonth()+1).toString().length == 1 ? '0'+(date.getMonth()+1) : (date.getMonth()+1);
-        let day = date.getDate().toString().length == 1 ? '0'+date.getDate() : date.getDate();
-        let hour = date.getHours().toString().length == 1 ? '0'+date.getHours() : date.getHours();
-        let minutes = date.getMinutes().toString().length == 1 ? '0'+date.getMinutes() : date.getMinutes();
-        this.startDateOnly = year + "-" + month + "-" + day;
-        this.startTimeOnly = hour + ":" + minutes;
-        this.endDateOnly = year + "-" + month + "-" + day;
-        this.endTimeOnly = hour + ":" + minutes;
+        let today: Date = new Date();
+        let startYear = today.getFullYear();
+        let startMonth = (today.getMonth()+1).toString().length == 1 ? '0'+(today.getMonth()+1) : (today.getMonth()+1);
+        let startDay = today.getDate().toString().length == 1 ? '0'+today.getDate() : today.getDate();
+        // Start time should be 9:30 PM
+        let startHour = "21";
+        let startMinutes = "30";
+
+        let tomorrow: Date = new Date();
+        tomorrow.setDate(today.getDate() + 1);
+        let endYear = tomorrow.getFullYear();
+        let endMonth = (tomorrow.getMonth()+1).toString().length == 1 ? '0'+(tomorrow.getMonth()+1) : (tomorrow.getMonth()+1);
+        let endDay = tomorrow.getDate().toString().length == 1 ? '0'+tomorrow.getDate() : tomorrow.getDate();
+        // End time should be 2:00 AM the next day
+        let endHour = "02";
+        let endMinutes = "00";
+
+        this.startDateOnly = startYear + "-" + startMonth + "-" + startDay;
+        this.startTimeOnly = startHour + ":" + startMinutes;
+        this.endDateOnly = endYear + "-" + endMonth + "-" + endDay;
+        this.endTimeOnly = endHour + ":" + endMinutes;
     }
 }
 

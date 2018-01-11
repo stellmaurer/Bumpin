@@ -203,7 +203,9 @@
             <label>Hosts</label>
           </div>
           <div class="centerMe backgroundIncluded needsPadding">
-            <label class="hosts" style="display: inline-block;" *ngFor='let key of party.keysInHostsMap'>{{party.hosts.get(key).name}}</label>
+            <div class="container">
+                <label class="hosts" *ngFor='let key of party.keysInHostsMap'>{{party.hosts.get(key).name}}</label>
+            </div>
           </div>
         </ion-col>
     </ion-row>

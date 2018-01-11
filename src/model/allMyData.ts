@@ -350,4 +350,74 @@ export class AllMyData{
             });
         });
     }
+
+    public refreshBarsImHosting(http : Http){
+        return new Promise((resolve, reject) => {
+            var query = new Query(this, http);
+            this.zone.run(() => {
+                query.getBarsImHosting()
+                .then((res) => {
+                    resolve("getBarsImHosting query succeeded.");
+                })
+                .catch((err) => {
+                    reject(err);
+                });
+            });
+        });
+    }
+
+    public getAddressForBarKey(bar: Bar, http: Http){
+        return new Promise((resolve, reject) => {
+            var query = new Query(this, http);
+            query.getAddressForBarKey(bar)
+            .then((res : any) => {
+                this.zone.run(() => {
+                    bar.address = res.error;
+                });
+                resolve("getBarKey query succeeded.");
+            })
+            .catch((err) => {
+                reject(err);
+            });
+        });
+    }
+
+    public createBar(bar : Bar, http : Http){
+        return new Promise((resolve, reject) => {
+            var query = new Query(this, http);
+            query.createBar(bar)
+            .then((res) => {
+                resolve("createBar query succeeded.");
+            })
+            .catch((err) => {
+                reject(err);
+            });
+        });
+    }
+
+    public editBar(bar : Bar, hostsToAdd : Map<string,Host>, hostsToRemove : Map<string,Host>, http : Http){
+        return new Promise((resolve, reject) => {
+            var query = new Query(this, http);
+            query.editBar(bar, hostsToAdd, hostsToRemove)
+            .then((res) => {
+                resolve("editBar query succeeded.");
+            })
+            .catch((err) => {
+                reject(err);
+            });
+        });
+    }
+
+    public deleteBar(bar : Bar, http : Http){
+        return new Promise((resolve, reject) => {
+            var query = new Query(this, http);
+            query.deleteBar(bar)
+            .then((res) => {
+                resolve("deleteBar query succeeded.");
+            })
+            .catch((err) => {
+                reject(err);
+            });
+        });
+    }
 }

@@ -26,9 +26,12 @@ export class CreatePartyPage {
   private party : Party;
   private partyMarker : any;
   private inputError : string;
+  
+  private datePickerMinYear : number;
 
   constructor(public allMyData : AllMyData, private http:Http, private navCtrl: NavController, params : NavParams, public alertCtrl: AlertController) {
     this.party = params.get("party");
+    this.datePickerMinYear = (new Date()).getFullYear();
   }
 
   ionViewWillLeave(){

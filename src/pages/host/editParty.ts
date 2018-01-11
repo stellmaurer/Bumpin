@@ -59,7 +59,7 @@ export class EditPartyPage {
   ionViewDidLoad(){
     this.loadMap()
     .then((res) => {
-      
+      this.updateMapMarker();
     })
     .catch((err) => {
         console.log(err);
@@ -166,7 +166,8 @@ export class EditPartyPage {
         this.determineWhichInviteesWereAddedAndWhichWereRemoved();
         this.allMyData.editParty(this.party, this.inviteesToAdd, this.inviteesToRemove, this.hostsToAdd, this.hostsToRemove, this.http)
         .then((res) => {
-            this.navCtrl.popTo(this.navCtrl.getByIndex(this.navCtrl.length()-3));
+          this.updateMyLocalDataToEnsureUserSeesChanges();
+          this.navCtrl.popTo(this.navCtrl.getByIndex(this.navCtrl.length()-3));
         })
         .catch((err) => {
             this.inputError = "Unknown error - please try editing the party again.";
@@ -175,6 +176,23 @@ export class EditPartyPage {
         });
     }else{
       this.showEditPartyErrorAlert();
+    }
+  }
+
+  private updateMyLocalDataToEnsureUserSeesChanges(){
+    // If the user has a bad internet connection, data might not appear changed, but
+    //    with this, it will appear changed.
+    for(let i = 0; i < this.allMyData.partyHostFor.length; i++){
+      if(this.allMyData.partyHostFor[i].partyID == this.party.partyID){
+        this.allMyData.partyHostFor[i] = this.party;
+        break;
+      }
+    }
+    for(let i = 0; i < this.allMyData.invitedTo.length; i++){
+      if(this.allMyData.invitedTo[i].partyID == this.party.partyID){
+        this.allMyData.invitedTo[i] = this.party;
+        break;
+      }
     }
   }
 

@@ -6,6 +6,7 @@ import { Party } from '../../model/party';
 import { Bar } from '../../model/bar';
 import { CreatePage } from './create';
 import { EditPartyPage } from './editParty';
+import { EditBarPage } from './editBar';
 import { Http } from '@angular/http';
 
 @Component({
@@ -24,12 +25,21 @@ export class HostPage {
   ionViewDidEnter(){
     this.allMyData.refreshPerson(this.http)
     .then((res) => {
+
       this.allMyData.refreshPartiesImHosting(this.http)
       .then((res) => {
       })
       .catch((err) => {
         console.log(err);
       });
+
+      this.allMyData.refreshBarsImHosting(this.http)
+      .then((res) => {
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+
     })
     .catch((err) => {
       console.log(err);
@@ -37,11 +47,13 @@ export class HostPage {
   }
 
   partySelected(party : Party) {
+    console.log(party.title + " selected");
     this.navCtrl.push(EditPartyPage, {party: party}, {animate: false});
   }
 
   barSelected(bar : Bar) {
-    
+    console.log(bar.name + " selected");
+    this.navCtrl.push(EditBarPage, {bar: bar}, {animate: false});
   }
 
   goToCreatePage(){

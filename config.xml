@@ -30,9 +30,6 @@
     <feature name="StatusBar">
         <param name="ios-package" onload="true" value="CDVStatusBar" />
     </feature>
-    <engine name="android" spec="^6.2.3" />
-    <engine name="ios" spec="^4.4.0" />
-    <engine name="browser" spec="^5.0.0" />
     <plugin name="cordova-plugin-console" spec="1.0.5" />
     <plugin name="cordova-plugin-device" spec="1.1.4" />
     <plugin name="cordova-plugin-facebook4" spec="~1.7.4">
@@ -47,4 +44,7 @@
     <plugin name="ionic-plugin-keyboard" spec="~2.2.1" />
     <plugin name="cordova-plugin-geolocation" spec="~2.4.2" />
     <plugin name="cordova-plugin-mauron85-background-geolocation" spec="~2.2.5" />
+    <engine name="android" spec="^6.2.3" />
+    <engine name="ios" spec="^4.4.0" />
+    <engine name="browser" spec="^5.0.0" />
 </widget>

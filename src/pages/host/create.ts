@@ -14,8 +14,11 @@ import { CreateBarPage } from './createBar';
 })
 export class CreatePage {
   private party : Party;
+  private bar : Bar;
+
   constructor(public allMyData : AllMyData, private navCtrl: NavController) {
     this.party = new Party();
+    this.bar = new Bar();
     this.setMeAsTheMainHost();
     this.party.setDefaultStartAndEndTimesForParty();
   }
@@ -26,6 +29,7 @@ export class CreatePage {
     mainHost.name = this.allMyData.me.name;
     mainHost.status = "Accepted";
     this.party.hosts.set(this.allMyData.me.facebookID, mainHost);
+    this.bar.hosts.set(this.allMyData.me.facebookID, mainHost);
   }
 
   goToCreatePartyPage(){
@@ -33,6 +37,6 @@ export class CreatePage {
   }
 
   goToCreateBarPage(){
-    this.navCtrl.push(CreateBarPage, {}, {animate: false});
+    this.navCtrl.push(CreateBarPage, {bar:this.bar}, {animate: false});
   }
 }

@@ -17,10 +17,17 @@
         </ion-row>
     </ion-grid>
     
-    <ion-list *ngIf="this.allMyData.friends.length != 0">
+    <ion-list *ngIf="this.allMyData.friends.length != 0 && bar === undefined">
         <ion-item *ngFor="let friend of this.allMyData.friends">
             <ion-label [color]="party.hosts.has(friend.facebookID) == true ? {'Accepted': 'primary', 'Waiting': 'secondary', 'Declined': 'danger'}[party.hosts.get(friend.facebookID).status] : 'white'">{{ friend.name }}</ion-label>
             <ion-checkbox [color]="party.hosts.has(friend.facebookID) == true ? {'Accepted': 'primary', 'Waiting': 'secondary', 'Declined': 'danger'}[party.hosts.get(friend.facebookID).status] : 'white'" [style.color]="'#000000'" [checked]="party.hosts.has(friend.facebookID)" (click)="friendSelected(friend)"></ion-checkbox>
+        </ion-item>
+    </ion-list>
+
+    <ion-list *ngIf="this.allMyData.friends.length != 0 && party === undefined">
+        <ion-item *ngFor="let friend of this.allMyData.friends">
+            <ion-label [color]="bar.hosts.has(friend.facebookID) == true ? {'Accepted': 'primary', 'Waiting': 'secondary', 'Declined': 'danger'}[bar.hosts.get(friend.facebookID).status] : 'white'">{{ friend.name }}</ion-label>
+            <ion-checkbox [color]="bar.hosts.has(friend.facebookID) == true ? {'Accepted': 'primary', 'Waiting': 'secondary', 'Declined': 'danger'}[bar.hosts.get(friend.facebookID).status] : 'white'" [style.color]="'#000000'" [checked]="bar.hosts.has(friend.facebookID)" (click)="friendSelected(friend)"></ion-checkbox>
         </ion-item>
     </ion-list>
 </ion-content>    

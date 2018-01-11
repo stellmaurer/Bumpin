@@ -318,7 +318,7 @@ export class FindPage {
           bar : value
         });
         marker.addListener('click', function() {
-          thisInstance.presentPartyPopover(this.bar);
+          thisInstance.presentBarPopover(this.bar);
         });
       }
       this.barMarkersOnMap.set(key, marker); // update the bar markers list with the new bar info

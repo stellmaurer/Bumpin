@@ -4,6 +4,7 @@ import { Injectable } from "@angular/core";
 import { Utility } from "./utility";
 
 export class Bar {
+    public key: string;
     public address : string;
     public attendees : Map<string, Attendee>;
     public barID : string;
@@ -15,6 +16,8 @@ export class Bar {
     public name : string;
     public phoneNumber : string;
     public schedule : Map<string,Schedule>;
+    public timeZone : number;
+    public attendeesMapCleanUpHourInZulu : number;
 
     public averageRating : string;
     public averageRatingNumber : number;
@@ -35,9 +38,20 @@ export class Bar {
     public percentageOfWomenMaybe : number;
 
     constructor() {
+        this.key = "";
+        this.address = "";
+        this.attendees = new Map<string,Attendee>();
+        this.barID = "New Bar";
+        this.details = "";
         this.hosts = new Map<string,Host>();
         this.keysInHostsMap = Array.from(this.hosts.keys());
-        this.attendees = new Map<string,Attendee>();
+        this.latitude = -1000;
+        this.longitude = -1000;
+        this.name = "";
+        this.phoneNumber = "";
+        this.initializeSchedule();
+        this.timeZone = 0; // not worrying about this now (only matters if the person who creates the bar is in a time zone much different than the time zone of the bar)
+        this.setAttendeesMapCleanUpHourInZulu();
         this.averageRating = "None";
         this.averageRatingNumber = 0;
         this.bumpinRatings = 0;
@@ -57,29 +71,86 @@ export class Bar {
         this.percentageOfWomenMaybe = 0;
     }
 
+    public createShallowCopy() : Bar{
+        let copy : Bar = new Bar();
+        copy.key = this.key;
+        copy.address = this.address;
+        copy.barID = this.barID;
+        copy.details = this.details;
+        copy.hosts = this.createCopyOfHostsMap();
+        copy.latitude = this.latitude;
+        copy.longitude = this.longitude;
+        copy.name = this.name;
+        copy.phoneNumber = this.phoneNumber;
+        copy.schedule = this.createCopyOfScheduleMap();
+        copy.timeZone = this.timeZone;
+        copy.attendeesMapCleanUpHourInZulu = this.attendeesMapCleanUpHourInZulu;
+        return copy;
+    }
+
+    private createCopyOfHostsMap() : Map<string,Host> {
+        let hostsCopy = new Map<string,Host>();
+        this.hosts.forEach((value: any, key: string) => {
+            hostsCopy.set(key,value);
+        });
+        return hostsCopy;
+    }
+
+    private createCopyOfScheduleMap() : Map<string,Schedule> {
+        let scheduleCopy = new Map<string,Schedule>();
+        this.schedule.forEach((value: any, key: string) => {
+            scheduleCopy.set(key, new Schedule(value.lastCall, value.open));
+        });
+        return scheduleCopy;
+    }
+
+    private initializeSchedule(){
+        this.schedule = new Map<string,Schedule>();
+        let defaultLastCallTime = "1:45 AM";
+        let defaultOpenTime = "11 AM - 2 AM";
+        this.schedule.set("Monday", new Schedule(defaultLastCallTime, defaultOpenTime));
+        this.schedule.set("Tuesday", new Schedule(defaultLastCallTime, defaultOpenTime));
+        this.schedule.set("Wednesday", new Schedule(defaultLastCallTime, defaultOpenTime));
+        this.schedule.set("Thursday", new Schedule(defaultLastCallTime, defaultOpenTime));
+        this.schedule.set("Friday", new Schedule(defaultLastCallTime, defaultOpenTime));
+        this.schedule.set("Saturday", new Schedule(defaultLastCallTime, defaultOpenTime));
+        this.schedule.set("Sunday", new Schedule(defaultLastCallTime, defaultOpenTime));
+    }
+
     public prepareBarObjectForTheUI(){
         this.refreshBarStats();
     }
 
-    public fixMaps(){
-        var fixedHostsMap = new Map<string,Host>();
-        var fixedAttendeesMap = new Map<string,Attendee>();
+    private setAttendeesMapCleanUpHourInZulu(){
+        let sevenAM : Date = (new Date());
+        sevenAM.setHours(7);
+        this.attendeesMapCleanUpHourInZulu = sevenAM.getUTCHours();
+    }
 
-        var hosts = this.hosts;
+    public fixMaps(){
+        let fixedHostsMap = new Map<string,Host>();
+        let fixedAttendeesMap = new Map<string,Attendee>();
+        let fixedSchedulesMap = new Map<string,Schedule>();
+
+        let hosts = this.hosts;
         Object.keys(hosts).forEach(function (key) {
-            // do something with obj[key]
             fixedHostsMap.set(key, hosts[key]);
         });
         this.hosts = fixedHostsMap;
 
         if(this.attendees != null){
-            var attendees = this.attendees;
+            let attendees = this.attendees;
             Object.keys(attendees).forEach(function (key) {
-                // do something with obj[key]
                 fixedAttendeesMap.set(key, attendees[key]);
             });
         }
         this.attendees = fixedAttendeesMap;
+
+        let schedules = this.schedule;
+        Object.keys(schedules).forEach(function (key) {
+            fixedSchedulesMap.set(key, schedules[key]);
+        });
+        this.schedule = fixedSchedulesMap;
 
         this.keysInHostsMap = Array.from(this.hosts.keys());
     }
@@ -231,5 +302,8 @@ export class Host {
 export class Schedule {
     public lastCall : string;
     public open : string;
-    constructor() {}
+    constructor(lastCall : string, open : string) {
+        this.lastCall = lastCall;
+        this.open = open;
+    }
 }

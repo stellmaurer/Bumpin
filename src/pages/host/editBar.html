@@ -11,13 +11,27 @@
       
 <ion-content class="home" scrollY="true">
 
-    <ion-item>
+    <ion-item *ngIf="bar.hosts.get(this.allMyData.me.facebookID).isMainHost == false">
         <ion-grid>
             <ion-row>
                 <ion-col col-12 class="oneElement">
                 <div class="centerMe">
-                    <button ion-button [color]="'primary'" [style.color]="'black'" (click)='editHostsButtonClicked();' [disabled]="bar.hosts.get(this.allMyData.me.facebookID).isMainHost == false">
-                        Edit Hosts ({{bar.hosts.size}})
+                    <button ion-button [color]="'primary'" [style.color]="'black'" (click)='stopHostingButtonClicked();'>
+                        Stop Hosting This Bar
+                    </button>
+                </div>
+                </ion-col>
+            </ion-row>
+        </ion-grid>
+    </ion-item>
+
+    <ion-item *ngIf="bar.hosts.get(this.allMyData.me.facebookID).isMainHost == true">
+        <ion-grid>
+            <ion-row>
+                <ion-col col-12 class="oneElement">
+                <div class="centerMe">
+                    <button ion-button [color]="'primary'" [style.color]="'black'" (click)='editHostsButtonClicked();'>
+                        Edit Hosts ({{bar.hosts.size - 1}})
                     </button>
                 </div>
                 </ion-col>
@@ -59,7 +73,7 @@
             <ion-row>
                 <ion-col col-6 class="twoElementsMedium">
                     <div class="centerMe">
-                        <button ion-button [color]="'danger'" [style.color]="'white'" (click)='deleteButtonClicked();'>
+                        <button ion-button [color]="'danger'" [style.color]="'white'" (click)='deleteButtonClicked();' [disabled]="bar.hosts.get(this.allMyData.me.facebookID).isMainHost == false">
                             Delete
                         </button>
                     </div>

@@ -204,7 +204,9 @@
           </div>
           <div class="centerMe backgroundIncluded needsPadding">
             <div class="container">
-                <label class="hosts" *ngFor='let key of party.keysInHostsMap'>{{party.hosts.get(key).name}}</label>
+              <div *ngFor='let key of party.keysInHostsMap'>
+                <label class="hosts" *ngIf="party.hosts.get(key).status == 'Accepted'">{{party.hosts.get(key).name}}</label>
+              </div>
             </div>
           </div>
         </ion-col>

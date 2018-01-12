@@ -212,6 +212,122 @@ export class Query{
         });
     }
 
+    // curl http://bumpin-env.us-west-2.elasticbeanstalk.com:80/acceptInvitationToHostParty -d "partyID=2507077996928339051&facebookID=113057999456597&isMale=false&name=Ruth%20Sidhuson"
+    public acceptInvitationToHostParty(party: Party){
+        return new Promise((resolve, reject) => {
+            var url = "http://bumpin-env.us-west-2.elasticbeanstalk.com:80/acceptInvitationToHostParty";
+            let body = "partyID=" + party.partyID +
+                       "&facebookID=" + this.allMyData.me.facebookID +
+                       "&isMale=" + this.allMyData.me.isMale +
+                       "&name=" + encodeURIComponent(this.allMyData.me.name);
+            var headers = new Headers();
+            headers.append('content-type', "application/x-www-form-urlencoded");
+            let options= new RequestOptions({headers: headers});
+            this.http.post(url, body, options).map(res => res.json()).subscribe(data => {
+                if(data.succeeded){
+                    resolve(data);
+                }else{
+                    reject(data);
+                }
+            });
+        });
+    }
+
+    // curl http://localhost:5000/declineInvitationToHostParty -d "partyID=1&facebookID=90"
+    public declineInvitationToHostParty(party: Party){
+        return new Promise((resolve, reject) => {
+            var url = "http://bumpin-env.us-west-2.elasticbeanstalk.com:80/declineInvitationToHostParty";
+            let body = "partyID=" + party.partyID +
+                       "&facebookID=" + this.allMyData.me.facebookID;
+            var headers = new Headers();
+            headers.append('content-type', "application/x-www-form-urlencoded");
+            let options= new RequestOptions({headers: headers});
+            this.http.post(url, body, options).map(res => res.json()).subscribe(data => {
+                if(data.succeeded){
+                    resolve(data);
+                }else{
+                    reject(data);
+                }
+            });
+        });
+    }
+
+    // curl http://bumpin-env.us-west-2.elasticbeanstalk.com:80/acceptInvitationToHostBar -d "barID=1&facebookID=1"
+    public acceptInvitationToHostBar(bar: Bar){
+        return new Promise((resolve, reject) => {
+            var url = "http://bumpin-env.us-west-2.elasticbeanstalk.com:80/acceptInvitationToHostBar";
+            let body = "barID=" + bar.barID +
+                       "&facebookID=" + this.allMyData.me.facebookID;
+            var headers = new Headers();
+            headers.append('content-type', "application/x-www-form-urlencoded");
+            let options= new RequestOptions({headers: headers});
+            this.http.post(url, body, options).map(res => res.json()).subscribe(data => {
+                if(data.succeeded){
+                    resolve(data);
+                }else{
+                    reject(data);
+                }
+            });
+        });
+    }
+
+    // curl http://localhost:5000/declineInvitationToHostBar -d "barID=1&facebookID=90"
+    public declineInvitationToHostBar(bar: Bar){
+        return new Promise((resolve, reject) => {
+            var url = "http://bumpin-env.us-west-2.elasticbeanstalk.com:80/declineInvitationToHostBar";
+            let body = "barID=" + bar.barID +
+                       "&facebookID=" + this.allMyData.me.facebookID;
+            var headers = new Headers();
+            headers.append('content-type', "application/x-www-form-urlencoded");
+            let options= new RequestOptions({headers: headers});
+            this.http.post(url, body, options).map(res => res.json()).subscribe(data => {
+                if(data.succeeded){
+                    resolve(data);
+                }else{
+                    reject(data);
+                }
+            });
+        });
+    }
+
+    // curl http://localhost:5000/removePartyHost -d "partyID=1&facebookID=90"
+    public removeYourselfAsHostForParty(party: Party){
+        return new Promise((resolve, reject) => {
+            var url = "http://bumpin-env.us-west-2.elasticbeanstalk.com:80/removePartyHost";
+            let body = "partyID=" + party.partyID +
+                       "&facebookID=" + this.allMyData.me.facebookID;
+            var headers = new Headers();
+            headers.append('content-type', "application/x-www-form-urlencoded");
+            let options= new RequestOptions({headers: headers});
+            this.http.post(url, body, options).map(res => res.json()).subscribe(data => {
+                if(data.succeeded){
+                    resolve(data);
+                }else{
+                    reject(data);
+                }
+            });
+        });
+    }
+
+    // curl http://localhost:5000/removeBarHost -d "barID=1&facebookID=90"
+    public removeYourselfAsHostForBar(bar: Bar){
+        return new Promise((resolve, reject) => {
+            var url = "http://bumpin-env.us-west-2.elasticbeanstalk.com:80/removeBarHost";
+            let body = "barID=" + bar.barID +
+                       "&facebookID=" + this.allMyData.me.facebookID;
+            var headers = new Headers();
+            headers.append('content-type', "application/x-www-form-urlencoded");
+            let options= new RequestOptions({headers: headers});
+            this.http.post(url, body, options).map(res => res.json()).subscribe(data => {
+                if(data.succeeded){
+                    resolve(data);
+                }else{
+                    reject(data);
+                }
+            });
+        });
+    }
+
     public getPartiesImInvitedTo(){
         return new Promise((resolve, reject) => {
             var partiesImInvitedTo : string = "";

@@ -82,7 +82,6 @@ export class CreateBarPage {
   }
 
   private keyPressedInBarKeyInput(event : any){
-    console.log("keyCode = " + event.keyCode);
     if(event.keyCode == 13){
       this.getAddressForBarKey();
     }

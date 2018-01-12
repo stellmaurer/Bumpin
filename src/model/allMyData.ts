@@ -269,6 +269,84 @@ export class AllMyData{
         });
     }
 
+    public acceptInvitationToHostParty(party : Party, http : Http){
+        return new Promise((resolve, reject) => {
+            var query = new Query(this, http);
+            query.acceptInvitationToHostParty(party)
+            .then((res) => {
+                resolve("acceptInvitationToHostParty query succeeded.");
+            })
+            .catch((err) => {
+                reject(err);
+            });
+        });
+    }
+
+    public declineInvitationToHostParty(party : Party, http : Http){
+        return new Promise((resolve, reject) => {
+            var query = new Query(this, http);
+            query.declineInvitationToHostParty(party)
+            .then((res) => {
+                resolve("declineInvitationToHostParty query succeeded.");
+            })
+            .catch((err) => {
+                reject(err);
+            });
+        });
+    }
+
+    public acceptInvitationToHostBar(bar : Bar, http : Http){
+        return new Promise((resolve, reject) => {
+            var query = new Query(this, http);
+            query.acceptInvitationToHostBar(bar)
+            .then((res) => {
+                resolve("acceptInvitationToHostBar query succeeded.");
+            })
+            .catch((err) => {
+                reject(err);
+            });
+        });
+    }
+
+    public declineInvitationToHostBar(bar : Bar, http : Http){
+        return new Promise((resolve, reject) => {
+            var query = new Query(this, http);
+            query.declineInvitationToHostBar(bar)
+            .then((res) => {
+                resolve("declineInvitationToHostBar query succeeded.");
+            })
+            .catch((err) => {
+                reject(err);
+            });
+        });
+    }
+
+    public removeYourselfAsHostForParty(party : Party, http : Http){
+        return new Promise((resolve, reject) => {
+            var query = new Query(this, http);
+            query.removeYourselfAsHostForParty(party)
+            .then((res) => {
+                resolve("removeYourselfAsHostForParty query succeeded.");
+            })
+            .catch((err) => {
+                reject(err);
+            });
+        });
+    }
+
+    public removeYourselfAsHostForBar(bar : Bar, http : Http){
+        return new Promise((resolve, reject) => {
+            var query = new Query(this, http);
+            query.removeYourselfAsHostForBar(bar)
+            .then((res) => {
+                resolve("removeYourselfAsHostForBar query succeeded.");
+            })
+            .catch((err) => {
+                reject(err);
+            });
+        });
+    }
+
     public refreshBarsCloseToMe(coordinates : any, http : Http){
         return new Promise((resolve, reject) => {
             //console.log(coordinates);

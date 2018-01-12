@@ -113,20 +113,16 @@ export class EditBarPage {
     });
   }
 
+  private stopHostingButtonClicked(){
+    this.showStopHostingBarAlert();
+  }
+
   private editHostsButtonClicked(){
     this.navCtrl.push(EditHostListPage, {bar:this.bar}, {animate: false});
   }
 
   private deleteButtonClicked(){
-      this.allMyData.deleteBar(this.bar, this.http)
-      .then((res) => {
-        this.navCtrl.popTo(this.navCtrl.getByIndex(this.navCtrl.length()-3));
-      })
-      .catch((err) => {
-        this.inputError = "Unknown error - please try deleting the bar again.";
-        this.showEditBarErrorAlert();
-        console.log(err);
-      });
+      this.showDeleteBarAlert();
   }
 
   private saveButtonClicked(){
@@ -211,7 +207,7 @@ export class EditBarPage {
     alert.present();
   }
 
-  private showDeleteBarErrorAlert() {
+  private showDeleteBarAlert() {
     let alert = this.alertCtrl.create({
       title: 'Are you sure you want to delete this bar?'
     });
@@ -227,8 +223,39 @@ export class EditBarPage {
             this.allMyData.deleteBar(this.bar, this.http)
             .then((res) => {
                 this.removeTheDeletedBarLocally();
+                this.navCtrl.popTo(this.navCtrl.getByIndex(this.navCtrl.length()-3));
             })
             .catch((err) => {
+                this.inputError = "Unknown error - please try deleting the bar again.";
+                this.showEditBarErrorAlert();
+                console.log(err);
+            });
+        }
+    });
+    alert.present();
+  }
+
+  private showStopHostingBarAlert() {
+    let alert = this.alertCtrl.create({
+      title: 'Are you sure you want to stop hosting this bar?'
+    });
+    alert.addButton({
+        text: 'No',
+        handler: data => {
+            
+        }
+    });
+    alert.addButton({
+        text: 'Yes',
+        handler: data => {
+            this.allMyData.removeYourselfAsHostForBar(this.bar, this.http)
+            .then((res) => {
+                this.removeTheDeletedBarLocally();
+                this.navCtrl.popTo(this.navCtrl.getByIndex(this.navCtrl.length()-3));
+            })
+            .catch((err) => {
+                this.inputError = "Unknown error - please try removing yourself as a host again.";
+                this.showEditBarErrorAlert();
                 console.log(err);
             });
         }

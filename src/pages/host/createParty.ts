@@ -26,12 +26,14 @@ export class CreatePartyPage {
   private party : Party;
   private partyMarker : any;
   private inputError : string;
+  private addressInputTimer : any;
   
   private datePickerMinYear : number;
 
   constructor(public allMyData : AllMyData, private http:Http, private navCtrl: NavController, params : NavParams, public alertCtrl: AlertController) {
     this.party = params.get("party");
     this.datePickerMinYear = (new Date()).getFullYear();
+    this.addressInputTimer = null;
   }
 
   ionViewWillLeave(){
@@ -56,6 +58,15 @@ export class CreatePartyPage {
     .catch((err) => {
         console.log(err);
     });
+  }
+
+  private keyPressedInAddressInput(event : any){
+    let tempThis = this;
+    clearTimeout(this.addressInputTimer);
+    this.addressInputTimer = setTimeout(function(){ tempThis.updateMapMarker(); }, 1500);
+    if(event.keyCode == 13){
+      this.updateMapMarker();
+    }
   }
 
   private loadMap(){

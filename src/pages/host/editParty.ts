@@ -32,6 +32,7 @@ export class EditPartyPage {
 
   private partyMarker : any;
   private inputError : string;
+  private addressInputTimer : any;
 
   constructor(public allMyData : AllMyData, private http:Http, private navCtrl: NavController, params : NavParams, public alertCtrl: AlertController) {
     this.originalParty = params.get("party");
@@ -44,6 +45,10 @@ export class EditPartyPage {
 
   ionViewWillLeave(){
     
+  }
+
+  private stopHostingButtonClicked(){
+    this.showStopHostingPartyAlert();
   }
 
   private createDateTimeInISOFormat(dateOnly : string, timeOnly : string){
@@ -64,6 +69,15 @@ export class EditPartyPage {
     .catch((err) => {
         console.log(err);
     });
+  }
+
+  private keyPressedInAddressInput(event : any){
+    let tempThis = this;
+    clearTimeout(this.addressInputTimer);
+    this.addressInputTimer = setTimeout(function(){ tempThis.updateMapMarker(); }, 1500);
+    if(event.keyCode == 13){
+      this.updateMapMarker();
+    }
   }
 
   private loadMap(){
@@ -145,15 +159,7 @@ export class EditPartyPage {
   }
 
   private deleteButtonClicked(){
-      this.allMyData.deleteParty(this.party, this.http)
-      .then((res) => {
-        this.navCtrl.popTo(this.navCtrl.getByIndex(this.navCtrl.length()-3));
-      })
-      .catch((err) => {
-        this.inputError = "Unknown error - please try deleting the party again.";
-        this.showEditPartyErrorAlert();
-        console.log(err);
-      });
+    this.showDeletePartyAlert();
   }
 
   private saveButtonClicked(){
@@ -272,7 +278,36 @@ export class EditPartyPage {
     alert.present();
   }
 
-  private showDeletePartyErrorAlert() {
+  private showStopHostingPartyAlert() {
+    let alert = this.alertCtrl.create({
+      title: 'Are you sure you want to stop hosting this party?'
+    });
+    alert.addButton({
+        text: 'No',
+        handler: data => {
+            
+        }
+    });
+    alert.addButton({
+        text: 'Yes',
+        handler: data => {
+            this.allMyData.removeYourselfAsHostForParty(this.party, this.http)
+            .then((res) => {
+                this.removeTheDeletedPartyLocally();
+                this.party.hosts.delete(this.allMyData.me.facebookID);
+                this.navCtrl.popTo(this.navCtrl.getByIndex(this.navCtrl.length()-3));
+            })
+            .catch((err) => {
+                this.inputError = "Unknown error - please try removing yourself as a host again.";
+                this.showEditPartyErrorAlert();
+                console.log(err);
+            });
+        }
+    });
+    alert.present();
+  }
+
+  private showDeletePartyAlert() {
     let alert = this.alertCtrl.create({
       title: 'Are you sure you want to delete this party?'
     });
@@ -288,8 +323,11 @@ export class EditPartyPage {
             this.allMyData.deleteParty(this.party, this.http)
             .then((res) => {
                 this.removeTheDeletedPartyLocally();
+                this.navCtrl.popTo(this.navCtrl.getByIndex(this.navCtrl.length()-3));
             })
             .catch((err) => {
+                this.inputError = "Unknown error - please try deleting the party again.";
+                this.showEditPartyErrorAlert();
                 console.log(err);
             });
         }

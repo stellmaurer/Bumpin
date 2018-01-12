@@ -23,7 +23,7 @@
 
   <ion-item>
     <ion-label stacked>Address</ion-label>
-    <ion-input type="text" [(ngModel)]="party.address" (blur)="updateMapMarker();"></ion-input>
+    <ion-input type="text" [(ngModel)]="party.address" (blur)="updateMapMarker();" (keypress)="keyPressedInAddressInput($event);"></ion-input>
   </ion-item>
 
   <div class="theMap oneElement">
@@ -91,7 +91,7 @@
             <ion-col col-6 class="twoElementsMedium">
               <div class="centerMe">
                   <button ion-button [color]="'primary'" [style.color]="'black'" (click)='editHostsButtonClicked();' [disabled]="party.hosts.get(this.allMyData.me.facebookID).isMainHost == false">
-                    Edit Hosts ({{party.hosts.size}})
+                    Edit Hosts ({{party.hosts.size - 1}})
                   </button>
               </div>
             </ion-col>

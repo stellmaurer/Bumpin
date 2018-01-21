@@ -54,13 +54,18 @@ export class Party {
         this.hosts = new Map<string,Host>();
         this.keysInHostsMap = Array.from(this.hosts.keys());
         this.invitees = new Map<string,Invitee>();
-        this.invitesForNewInvitees = 0;
-        this.drinksProvided = false;
-        this.feeForDrinks = true;
+        this.title = "";
+        this.details = "";
+        this.address = "";
+        this.latitude = 1000; // represents an illegitimate address
+        this.longitude = 1000; // represents an illegitimate address
         this.startDateOnly = "";
         this.endDateOnly = "";
         this.startTimeOnly = "";
         this.endTimeOnly = "";
+        this.drinksProvided = false;
+        this.feeForDrinks = true;
+        this.invitesForNewInvitees = 0;
         this.averageRating = "None";
         this.averageRatingNumber = 0;
         this.bumpinRatings = 0;
@@ -84,17 +89,56 @@ export class Party {
         this.percentageOfWomenInvited = 0;
     }
 
+    public createShallowCopy() : Party{
+        let copy : Party = new Party();
+        copy.address = this.address;
+        copy.details = this.details;
+        copy.drinksProvided = this.drinksProvided;
+        copy.endTime = this.endTime;
+        copy.feeForDrinks = this.feeForDrinks;
+        copy.hosts = this.createCopyOfHostsMap();
+        copy.invitees = this.createCopyOfInviteesMap();
+        copy.invitesForNewInvitees = this.invitesForNewInvitees;
+        copy.latitude = this.latitude;
+        copy.longitude = this.longitude;
+        copy.partyID = this.partyID;
+        copy.startTime = this.startTime;
+        copy.title = this.title;
+        copy.startDateOnly = this.startDateOnly;
+        copy.endDateOnly = this.endDateOnly;
+        copy.startTimeOnly = this.startTimeOnly;
+        copy.endTimeOnly = this.endTimeOnly;
+        return copy;
+    }
+
+    private createCopyOfHostsMap() : Map<string,Host> {
+        let hostsCopy = new Map<string,Host>();
+        this.hosts.forEach((value: any, key: string) => {
+            hostsCopy.set(key,value);
+        });
+        return hostsCopy;
+    }
+
+    private createCopyOfInviteesMap() : Map<string,Invitee> {
+        let inviteesCopy = new Map<string,Invitee>();
+        this.invitees.forEach((value: any, key: string) => {
+            inviteesCopy.set(key,value);
+        });
+        return inviteesCopy;
+    }
+
     public preparePartyObjectForTheUI(){
         this.localStartTime = Utility.convertTimeToLocalTimeAndFormatForUI(new Date(this.startTime));
         this.localEndTime = Utility.convertTimeToLocalTimeAndFormatForUI(new Date(this.endTime));
         this.refreshPartyStats();
+        this.preparePartyForEditPartyPage();
     }
 
     public fixMaps(){
-        var fixedHostsMap = new Map<string,Host>();
-        var fixedInviteesMap = new Map<string,Invitee>();
-        var hosts = this.hosts;
-        var invitees = this.invitees;
+        let fixedHostsMap = new Map<string,Host>();
+        let fixedInviteesMap = new Map<string,Invitee>();
+        let hosts = this.hosts;
+        let invitees = this.invitees;
         Object.keys(hosts).forEach(function (key) {
             // do something with obj[key]
             fixedHostsMap.set(key, hosts[key]);
@@ -152,7 +196,7 @@ export class Party {
                         this.averageRatingNumber = this.averageRatingNumber+4;
                         break;
                     }
-                    case "Heat'n Up": {
+                    case "Heat'n-up": {
                         this.heatingUpRatings++;
                         this.averageRatingNumber = this.averageRatingNumber+3;
                         break;
@@ -234,7 +278,7 @@ export class Party {
                     break;
                 }
                 case 3: {
-                    this.averageRating = "Heat'n Up";
+                    this.averageRating = "Heat'n-up";
                     break;
                 }
                 case 2: {
@@ -250,6 +294,59 @@ export class Party {
             this.averageRatingNumber = 0;
             this.averageRating = "None";
         }
+    }
+
+    private preparePartyForEditPartyPage(){
+        this.setStartAndEndTimesForParty();
+    }
+
+    private setStartAndEndTimesForParty(){
+        // "startDateOnly":"2017-01-01","startTimeOnly":"13:00"
+        let startDate : Date = new Date(this.startTime);
+        let endDate : Date = new Date(this.endTime);
+
+        let startYear = startDate.getFullYear();
+        let startMonth = (startDate.getMonth()+1).toString().length == 1 ? '0'+(startDate.getMonth()+1) : (startDate.getMonth()+1);
+        let startDay = startDate.getDate().toString().length == 1 ? '0'+startDate.getDate() : startDate.getDate();
+        let startHour = startDate.getHours().toString().length == 1 ? '0'+startDate.getHours() : startDate.getHours();
+        let startMinutes = startDate.getMinutes().toString().length == 1 ? '0'+startDate.getMinutes() : startDate.getMinutes();
+
+        this.startDateOnly = startYear + "-" + startMonth + "-" + startDay;
+        this.startTimeOnly = startHour + ":" + startMinutes;
+
+        let endYear = endDate.getFullYear();
+        let endMonth = (endDate.getMonth()+1).toString().length == 1 ? '0'+(endDate.getMonth()+1) : (endDate.getMonth()+1);
+        let endDay = endDate.getDate().toString().length == 1 ? '0'+endDate.getDate() : endDate.getDate();
+        let endHour = endDate.getHours().toString().length == 1 ? '0'+endDate.getHours() : endDate.getHours();
+        let endMinutes = endDate.getMinutes().toString().length == 1 ? '0'+endDate.getMinutes() : endDate.getMinutes();
+
+        this.endDateOnly = endYear + "-" + endMonth + "-" + endDay;
+        this.endTimeOnly = endHour + ":" + endMinutes;
+    }
+
+    public setDefaultStartAndEndTimesForParty(){
+        // "startDateOnly":"2017-01-01","startTimeOnly":"13:00"
+        let today: Date = new Date();
+        let startYear = today.getFullYear();
+        let startMonth = (today.getMonth()+1).toString().length == 1 ? '0'+(today.getMonth()+1) : (today.getMonth()+1);
+        let startDay = today.getDate().toString().length == 1 ? '0'+today.getDate() : today.getDate();
+        // Start time should be 9:30 PM
+        let startHour = "21";
+        let startMinutes = "30";
+
+        let tomorrow: Date = new Date();
+        tomorrow.setDate(today.getDate() + 1);
+        let endYear = tomorrow.getFullYear();
+        let endMonth = (tomorrow.getMonth()+1).toString().length == 1 ? '0'+(tomorrow.getMonth()+1) : (tomorrow.getMonth()+1);
+        let endDay = tomorrow.getDate().toString().length == 1 ? '0'+tomorrow.getDate() : tomorrow.getDate();
+        // End time should be 2:00 AM the next day
+        let endHour = "02";
+        let endMinutes = "00";
+
+        this.startDateOnly = startYear + "-" + startMonth + "-" + startDay;
+        this.startTimeOnly = startHour + ":" + startMinutes;
+        this.endDateOnly = endYear + "-" + endMonth + "-" + endDay;
+        this.endTimeOnly = endHour + ":" + endMinutes;
     }
 }
 

@@ -25,6 +25,7 @@ export class RatePage {
   constructor(private allMyData : AllMyData, private events : Events, private http:Http, public navCtrl: NavController) {}
 
   ionViewWillEnter(){
+    console.log("updating the rate tab UI");
       this.updateTheUI();
       this.events.subscribe("timeToUpdateUI",() => {
         console.log("********************* updating the rate tab UI now");
@@ -33,8 +34,6 @@ export class RatePage {
   }
 
   updateTheUI(){
-      this.synchronizeLatestPartyData();
-      this.synchronizeLatestBarData();
       if(this.allMyData.thePartyOrBarIAmAt == null){
           this.party = null;
           this.bar = null;
@@ -49,6 +48,9 @@ export class RatePage {
           this.bar = null;
           console.log("There's a bug somewhere in the findThePartyOrBarIAmAt function.");
       }
+      this.synchronizeLatestPartyData();
+      this.synchronizeLatestBarData();
+      console.log(this.party.invitees);
   }
 
 

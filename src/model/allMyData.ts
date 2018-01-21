@@ -1,5 +1,5 @@
 import { Bar, Attendee } from './bar';
-import { Party } from './party';
+import { Party, Invitee, Host } from './party';
 import { Person } from './person';
 import { Friend } from './friend';
 import { Query } from "./query";
@@ -269,6 +269,84 @@ export class AllMyData{
         });
     }
 
+    public acceptInvitationToHostParty(party : Party, http : Http){
+        return new Promise((resolve, reject) => {
+            var query = new Query(this, http);
+            query.acceptInvitationToHostParty(party)
+            .then((res) => {
+                resolve("acceptInvitationToHostParty query succeeded.");
+            })
+            .catch((err) => {
+                reject(err);
+            });
+        });
+    }
+
+    public declineInvitationToHostParty(party : Party, http : Http){
+        return new Promise((resolve, reject) => {
+            var query = new Query(this, http);
+            query.declineInvitationToHostParty(party)
+            .then((res) => {
+                resolve("declineInvitationToHostParty query succeeded.");
+            })
+            .catch((err) => {
+                reject(err);
+            });
+        });
+    }
+
+    public acceptInvitationToHostBar(bar : Bar, http : Http){
+        return new Promise((resolve, reject) => {
+            var query = new Query(this, http);
+            query.acceptInvitationToHostBar(bar)
+            .then((res) => {
+                resolve("acceptInvitationToHostBar query succeeded.");
+            })
+            .catch((err) => {
+                reject(err);
+            });
+        });
+    }
+
+    public declineInvitationToHostBar(bar : Bar, http : Http){
+        return new Promise((resolve, reject) => {
+            var query = new Query(this, http);
+            query.declineInvitationToHostBar(bar)
+            .then((res) => {
+                resolve("declineInvitationToHostBar query succeeded.");
+            })
+            .catch((err) => {
+                reject(err);
+            });
+        });
+    }
+
+    public removeYourselfAsHostForParty(party : Party, http : Http){
+        return new Promise((resolve, reject) => {
+            var query = new Query(this, http);
+            query.removeYourselfAsHostForParty(party)
+            .then((res) => {
+                resolve("removeYourselfAsHostForParty query succeeded.");
+            })
+            .catch((err) => {
+                reject(err);
+            });
+        });
+    }
+
+    public removeYourselfAsHostForBar(bar : Bar, http : Http){
+        return new Promise((resolve, reject) => {
+            var query = new Query(this, http);
+            query.removeYourselfAsHostForBar(bar)
+            .then((res) => {
+                resolve("removeYourselfAsHostForBar query succeeded.");
+            })
+            .catch((err) => {
+                reject(err);
+            });
+        });
+    }
+
     public refreshBarsCloseToMe(coordinates : any, http : Http){
         return new Promise((resolve, reject) => {
             //console.log(coordinates);
@@ -287,9 +365,133 @@ export class AllMyData{
     public refreshParties(http : Http){
         return new Promise((resolve, reject) => {
             var query = new Query(this, http);
-            query.getParties()
+            query.getPartiesImInvitedTo()
             .then((res) => {
-                resolve("getParties query succeeded.");
+                resolve("getPartiesImInvitedTo query succeeded.");
+            })
+            .catch((err) => {
+                reject(err);
+            });
+        });
+    }
+
+    public createParty(party : Party, http : Http){
+        return new Promise((resolve, reject) => {
+            var query = new Query(this, http);
+            query.createParty(party)
+            .then((res) => {
+                resolve("createParty query succeeded.");
+            })
+            .catch((err) => {
+                reject(err);
+            });
+        });
+    }
+
+    public editParty(party : Party, inviteesToAdd : Map<string,Invitee>, inviteesToRemove : Map<string,Invitee>, hostsToAdd : Map<string,Host>, hostsToRemove : Map<string,Host>, http : Http){
+        return new Promise((resolve, reject) => {
+            var query = new Query(this, http);
+            query.editParty(party, inviteesToAdd, inviteesToRemove, hostsToAdd, hostsToRemove)
+            .then((res) => {
+                resolve("editParty query succeeded.");
+            })
+            .catch((err) => {
+                reject(err);
+            });
+        });
+    }
+
+    public deleteParty(party : Party, http : Http){
+        return new Promise((resolve, reject) => {
+            var query = new Query(this, http);
+            query.deleteParty(party)
+            .then((res) => {
+                resolve("deleteParty query succeeded.");
+            })
+            .catch((err) => {
+                reject(err);
+            });
+        });
+    }
+
+    public refreshPartiesImHosting(http : Http){
+        return new Promise((resolve, reject) => {
+            var query = new Query(this, http);
+            this.zone.run(() => {
+                query.getPartiesImHosting()
+                .then((res) => {
+                    resolve("getPartiesImHosting query succeeded.");
+                })
+                .catch((err) => {
+                    reject(err);
+                });
+            });
+        });
+    }
+
+    public refreshBarsImHosting(http : Http){
+        return new Promise((resolve, reject) => {
+            var query = new Query(this, http);
+            this.zone.run(() => {
+                query.getBarsImHosting()
+                .then((res) => {
+                    resolve("getBarsImHosting query succeeded.");
+                })
+                .catch((err) => {
+                    reject(err);
+                });
+            });
+        });
+    }
+
+    public getAddressForBarKey(bar: Bar, http: Http){
+        return new Promise((resolve, reject) => {
+            var query = new Query(this, http);
+            query.getAddressForBarKey(bar)
+            .then((res : any) => {
+                this.zone.run(() => {
+                    bar.address = res.error;
+                });
+                resolve("getBarKey query succeeded.");
+            })
+            .catch((err) => {
+                reject(err);
+            });
+        });
+    }
+
+    public createBar(bar : Bar, http : Http){
+        return new Promise((resolve, reject) => {
+            var query = new Query(this, http);
+            query.createBar(bar)
+            .then((res) => {
+                resolve("createBar query succeeded.");
+            })
+            .catch((err) => {
+                reject(err);
+            });
+        });
+    }
+
+    public editBar(bar : Bar, hostsToAdd : Map<string,Host>, hostsToRemove : Map<string,Host>, http : Http){
+        return new Promise((resolve, reject) => {
+            var query = new Query(this, http);
+            query.editBar(bar, hostsToAdd, hostsToRemove)
+            .then((res) => {
+                resolve("editBar query succeeded.");
+            })
+            .catch((err) => {
+                reject(err);
+            });
+        });
+    }
+
+    public deleteBar(bar : Bar, http : Http){
+        return new Promise((resolve, reject) => {
+            var query = new Query(this, http);
+            query.deleteBar(bar)
+            .then((res) => {
+                resolve("deleteBar query succeeded.");
             })
             .catch((err) => {
                 reject(err);

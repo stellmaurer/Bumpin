@@ -1,20 +1,92 @@
 <ion-header>
-  <ion-navbar>
-    <ion-title>Create Bar</ion-title>
-    <ion-buttons end>
-      
-    </ion-buttons>
-  </ion-navbar>
+    <ion-navbar>
+        <ion-title>
+            Edit Bar
+        </ion-title>
+        <ion-buttons end>
+        
+        </ion-buttons>
+    </ion-navbar>
 </ion-header>
+      
+<ion-content class="home" scrollY="true">
 
-<ion-content padding>
-  <ion-grid *ngIf="(this.allMyData.partyHostFor.length == 0) && (this.allMyData.barHostFor.length == 0)">
-    <ion-row>
-      <ion-col col-12 class="oneElement">
-        <div class="centerMe">
-          
-        </div>
-      </ion-col>
-    </ion-row>
-  </ion-grid>
+    <ion-item *ngIf="bar.hosts.get(this.allMyData.me.facebookID).isMainHost == false">
+        <ion-grid>
+            <ion-row>
+                <ion-col col-12 class="oneElement">
+                <div class="centerMe">
+                    <button ion-button [color]="'primary'" [style.color]="'black'" (click)='stopHostingButtonClicked();'>
+                        Stop Hosting This Bar
+                    </button>
+                </div>
+                </ion-col>
+            </ion-row>
+        </ion-grid>
+    </ion-item>
+
+    <ion-item *ngIf="bar.hosts.get(this.allMyData.me.facebookID).isMainHost == true">
+        <ion-grid>
+            <ion-row>
+                <ion-col col-12 class="oneElement">
+                <div class="centerMe">
+                    <button ion-button [color]="'primary'" [style.color]="'black'" (click)='editHostsButtonClicked();'>
+                        Edit Hosts ({{bar.hosts.size - 1}})
+                    </button>
+                </div>
+                </ion-col>
+            </ion-row>
+        </ion-grid>
+    </ion-item>
+
+    <ion-item>
+        <ion-label stacked>Address</ion-label>
+        <ion-input readonly="true" placeholder="Enter a bar key to generate this" type="text" [(ngModel)]="bar.address"></ion-input>
+    </ion-item>
+
+    <div class="theMap oneElement">
+        <div #map id="mapForEditBar"></div>
+    </div>
+
+    <ion-item>
+        <ion-label stacked>Bar Name</ion-label>
+        <ion-input type="text" [(ngModel)]="bar.name"></ion-input>
+    </ion-item>
+
+    <ion-item>
+        <ion-label stacked>Details</ion-label>
+        <ion-input type="text" [(ngModel)]="bar.details"></ion-input>
+    </ion-item>
+
+    <ion-item>
+        <ion-label stacked>Phone Number</ion-label>
+        <ion-input type="text" [(ngModel)]="bar.phoneNumber"></ion-input>
+    </ion-item>
+
+    <ion-item *ngFor="let day of daysOfTheWeek">
+        <ion-label stacked>{{day}} Hours</ion-label>
+        <ion-input type="text" [(ngModel)]="bar.schedule.get(day).open"></ion-input>
+    </ion-item>
+
+    <ion-item>
+        <ion-grid style="margin-top: 10px;">
+            <ion-row>
+                <ion-col col-6 class="twoElementsMedium">
+                    <div class="centerMe">
+                        <button ion-button [color]="'danger'" [style.color]="'white'" (click)='deleteButtonClicked();' [disabled]="bar.hosts.get(this.allMyData.me.facebookID).isMainHost == false">
+                            Delete
+                        </button>
+                    </div>
+                </ion-col>
+                <ion-col col-6 class="twoElementsMedium">
+                    <div class="centerMe">
+                        <button ion-button [color]="'primary'" [style.color]="'black'" (click)='saveButtonClicked();'>
+                            Save
+                        </button>
+                    </div>
+                </ion-col>
+            </ion-row>
+        </ion-grid>
+    </ion-item>
+
 </ion-content>

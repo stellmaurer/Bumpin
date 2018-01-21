@@ -1,9 +1,9 @@
 import { Component, ViewChild, ElementRef } from '@angular/core';
-import { Http, Headers, RequestOptions } from '@angular/http';
+import {Http, Headers, RequestOptions} from '@angular/http';
 import { NavParams, NavController, AlertController} from 'ionic-angular';
 import { Person } from '../../model/person';
 import { AllMyData} from '../../model/allMyData';
-import { Party, Invitee, Host } from '../../model/party';
+import { Party, Invitee } from '../../model/party';
 import { Bar } from '../../model/bar';
 import { Geolocation, Geoposition, Geocoder} from 'ionic-native';
 import { EditInviteeListPage } from './editInviteeList';
@@ -14,41 +14,30 @@ import { Utility } from "../../model/utility";
 declare var google;
 
 @Component({
-  selector: 'page-editParty',
-  templateUrl: 'editParty.html'
+  selector: 'page-createParty',
+  templateUrl: 'createParty.html'
 })
-export class EditPartyPage {
+export class CreatePartyPage {
 
   @ViewChild('map') mapElement: ElementRef;
   public map: any;
   geocoder : any;
   private myLocationMarker : any;
-  private originalParty : Party;
   private party : Party;
-  private inviteesToAdd : Map<string,Invitee>;
-  private inviteesToRemove : Map<string,Invitee>;
-  private hostsToAdd : Map<string,Host>;
-  private hostsToRemove : Map<string,Host>;
-
   private partyMarker : any;
   private inputError : string;
   private addressInputTimer : any;
+  
+  private datePickerMinYear : number;
 
   constructor(public allMyData : AllMyData, private http:Http, private navCtrl: NavController, params : NavParams, public alertCtrl: AlertController) {
-    this.originalParty = params.get("party");
-    this.party = this.originalParty.createShallowCopy();
-    this.inviteesToAdd = new Map<string,Invitee>();
-    this.inviteesToRemove = new Map<string,Invitee>();
-    this.hostsToAdd = new Map<string,Host>();
-    this.hostsToRemove = new Map<string,Host>();
+    this.party = params.get("party");
+    this.datePickerMinYear = (new Date()).getFullYear();
+    this.addressInputTimer = null;
   }
 
   ionViewWillLeave(){
-    
-  }
-
-  private stopHostingButtonClicked(){
-    this.showStopHostingPartyAlert();
+    console.log(this.party);
   }
 
   private createDateTimeInISOFormat(dateOnly : string, timeOnly : string){
@@ -64,7 +53,7 @@ export class EditPartyPage {
   ionViewDidLoad(){
     this.loadMap()
     .then((res) => {
-      this.updateMapMarker();
+      
     })
     .catch((err) => {
         console.log(err);
@@ -158,81 +147,27 @@ export class EditPartyPage {
     this.navCtrl.push(EditInviteeListPage, {party:this.party, initialInviteeList:this.party.invitees}, {animate: false});
   }
 
-  private deleteButtonClicked(){
-    this.showDeletePartyAlert();
-  }
-
-  private saveButtonClicked(){
+  private submitButtonClicked(){
     this.party.startTime = this.createDateTimeInISOFormat(this.party.startDateOnly, this.party.startTimeOnly);
     this.party.endTime = this.createDateTimeInISOFormat(this.party.endDateOnly, this.party.endTimeOnly);
     
-    this.validateEditPartyInput();
+    this.validateCreatePartyInput();
     if(this.inputError == ""){
-        this.determineWhichHostsWereAddedAndWhichWereRemoved();
-        this.determineWhichInviteesWereAddedAndWhichWereRemoved();
-        this.allMyData.editParty(this.party, this.inviteesToAdd, this.inviteesToRemove, this.hostsToAdd, this.hostsToRemove, this.http)
-        .then((res) => {
-          this.updateMyLocalDataToEnsureUserSeesChanges();
-          this.navCtrl.popTo(this.navCtrl.getByIndex(this.navCtrl.length()-3));
-        })
-        .catch((err) => {
-            this.inputError = "Unknown error - please try editing the party again.";
-            this.showEditPartyErrorAlert();
-            console.log(err);
-        });
+      this.allMyData.createParty(this.party, this.http)
+      .then((res) => {
+        this.navCtrl.popTo(this.navCtrl.getByIndex(this.navCtrl.length()-3));
+      })
+      .catch((err) => {
+        this.inputError = "Unknown error - please try creating the party again.";
+        this.showCreatePartyErrorAlert();
+        console.log(err);
+      });
     }else{
-      this.showEditPartyErrorAlert();
+      this.showCreatePartyErrorAlert();
     }
   }
 
-  private updateMyLocalDataToEnsureUserSeesChanges(){
-    // If the user has a bad internet connection, data might not appear changed, but
-    //    with this, it will appear changed.
-    for(let i = 0; i < this.allMyData.partyHostFor.length; i++){
-      if(this.allMyData.partyHostFor[i].partyID == this.party.partyID){
-        this.allMyData.partyHostFor[i] = this.party;
-        break;
-      }
-    }
-    for(let i = 0; i < this.allMyData.invitedTo.length; i++){
-      if(this.allMyData.invitedTo[i].partyID == this.party.partyID){
-        this.allMyData.invitedTo[i] = this.party;
-        break;
-      }
-    }
-  }
-
-  private determineWhichHostsWereAddedAndWhichWereRemoved(){
-    this.originalParty.hosts.forEach((value: any, key: string) => {
-        if(this.party.hosts.has(key) == false){
-            // person is in the old list but not the new, so they should be in the list to remove
-            this.hostsToRemove.set(key, value);
-        }
-    });
-    this.party.hosts.forEach((value: any, key: string) => {
-        if(this.originalParty.hosts.has(key) == false){
-            // person is in the new list but not the old, so they should be in the list to add
-            this.hostsToAdd.set(key, value);
-        }
-    });
-  }
-
-  private determineWhichInviteesWereAddedAndWhichWereRemoved(){
-    this.originalParty.invitees.forEach((value: any, key: string) => {
-        if(this.party.invitees.has(key) == false){
-            // person is in the old list but not the new, so they should be in the list to remove
-            this.inviteesToRemove.set(key, value);
-        }
-    });
-    this.party.invitees.forEach((value: any, key: string) => {
-        if(this.originalParty.invitees.has(key) == false){
-            // person is in the new list but not the old, so they should be in the list to add
-            this.inviteesToAdd.set(key, value);
-        }
-    });
-  }
-
-  private validateEditPartyInput(){
+  private validateCreatePartyInput(){
     this.inputError = "";
     if(this.party.title == ""){
       this.inputError = "Please give your party a title.";
@@ -269,96 +204,12 @@ export class EditPartyPage {
     }
   }
 
-  private showEditPartyErrorAlert() {
+  private showCreatePartyErrorAlert() {
     let alert = this.alertCtrl.create({
       title: 'Error!',
       subTitle: this.inputError,
       buttons: ['OK']
     });
     alert.present();
-  }
-
-  private showStopHostingPartyAlert() {
-    let alert = this.alertCtrl.create({
-      title: 'Are you sure you want to stop hosting this party?'
-    });
-    alert.addButton({
-        text: 'No',
-        handler: data => {
-            
-        }
-    });
-    alert.addButton({
-        text: 'Yes',
-        handler: data => {
-            this.allMyData.removeYourselfAsHostForParty(this.party, this.http)
-            .then((res) => {
-                this.removeTheDeletedPartyLocally();
-                this.party.hosts.delete(this.allMyData.me.facebookID);
-                this.navCtrl.popTo(this.navCtrl.getByIndex(this.navCtrl.length()-3));
-            })
-            .catch((err) => {
-                this.inputError = "Unknown error - please try removing yourself as a host again.";
-                this.showEditPartyErrorAlert();
-                console.log(err);
-            });
-        }
-    });
-    alert.present();
-  }
-
-  private showDeletePartyAlert() {
-    let alert = this.alertCtrl.create({
-      title: 'Are you sure you want to delete this party?'
-    });
-    alert.addButton({
-        text: 'No',
-        handler: data => {
-            
-        }
-    });
-    alert.addButton({
-        text: 'Yes',
-        handler: data => {
-            this.allMyData.deleteParty(this.party, this.http)
-            .then((res) => {
-                this.removeTheDeletedPartyLocally();
-                this.navCtrl.popTo(this.navCtrl.getByIndex(this.navCtrl.length()-3));
-            })
-            .catch((err) => {
-                this.inputError = "Unknown error - please try deleting the party again.";
-                this.showEditPartyErrorAlert();
-                console.log(err);
-            });
-        }
-    });
-    alert.present();
-  }
-
-  private removeTheDeletedPartyLocally(){
-    this.removePartyFromInvitedTo();
-    this.removePartyFromPartyHostFor();
-  }
-
-  private removePartyFromInvitedTo(){
-    let indexToRemove = this.allMyData.invitedTo.indexOf[this.party.partyID];
-    let invitedTo = new Array<Party>();
-    for(let i = 0; i < invitedTo.length; i++){
-        if(i != indexToRemove){
-            invitedTo.push(this.allMyData.invitedTo[i]);
-        }
-    }
-    this.allMyData.invitedTo = invitedTo;
-  }
-
-  private removePartyFromPartyHostFor(){
-    let indexToRemove = this.allMyData.partyHostFor.indexOf[this.party.partyID];
-    let partyHostFor = new Array<Party>();
-    for(let i = 0; i < partyHostFor.length; i++){
-        if(i != indexToRemove){
-            partyHostFor.push(this.allMyData.partyHostFor[i]);
-        }
-    }
-    this.allMyData.partyHostFor = partyHostFor;
   }
 }

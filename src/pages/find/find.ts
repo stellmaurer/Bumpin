@@ -71,6 +71,10 @@ export class FindPage {
     });
   }
 
+  ionViewWillEnter(){
+    this.allMyData.events.publish("timeToRefreshPartyAndBarData");
+  }
+
   private setupThePage(){
     this.loadMap()
     .then((res) => {
@@ -97,18 +101,31 @@ export class FindPage {
         console.log(err);
     });
 
+    this.allMyData.refreshPerson(this.http)
+    .then((res) => {
+      this.allMyData.refreshPartiesImHosting(this.http)
+      .then((res) => {
+        
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+
     this.allMyData.startPeriodicDataRetrieval(this.http);
     this.events.subscribe("timeToRefreshPartyAndBarData",() => {
+      console.log("in subscription for timeToRefreshPartyAndBarData");
       this.allMyData.refreshPerson(this.http)
       .then((res) => {
         Promise.all([this.allMyData.refreshBarsCloseToMe(this.myCoordinates, this.http), this.allMyData.refreshParties(this.http)]).then(thePromise => {
-          //console.log("parties have been refreshed");
           return thePromise;
         })
         .then((res) => {
           this.refreshPartyMarkers();
           this.refreshBarMarkers();
-          //console.log("Just updated the map with party and bar changes.");
         })
         .catch((err) => {
           console.log(err);
@@ -121,13 +138,11 @@ export class FindPage {
 
     this.events.subscribe("aDifferentUserJustLoggedIn",() => {
       Promise.all([this.allMyData.refreshBarsCloseToMe(this.myCoordinates, this.http), this.allMyData.refreshParties(this.http)]).then(thePromise => {
-        //console.log("parties have been refreshed");
         return thePromise;
       })
       .then((res) => {
         this.refreshPartyMarkers();
         this.refreshBarMarkers();
-        //console.log("Just updated the map with party and bar changes.");
       })
       .catch((err) => {
         console.log(err);
@@ -135,7 +150,6 @@ export class FindPage {
     });
 
     this.events.subscribe("timeToUpdateUI",() => {
-        console.log("********************* Updating the find tab UI now");
         this.updateTheUI();
     });
   }
@@ -174,7 +188,6 @@ export class FindPage {
         
         this.map = new google.maps.Map(this.mapElement.nativeElement, mapOptions);
         var image = 'assets/greencircle.png';
-        //console.log("UserLocationMarker has been created.");
         this.userLocationMarker = new google.maps.Marker({
           map: this.map,
           position: {lat: position.coords.latitude, lng: position.coords.longitude},
@@ -201,9 +214,7 @@ export class FindPage {
     Case 3 : this party isn't on the map
   */
   private refreshPartyMarkers(){
-    //console.log(this.allMyData.invitedTo);
     var thisInstance = this;
-    //console.log(thisInstance.partyMarkersOnMap);
     // Transform party array into a hashmap for quick access in Case 1
     var parties = this.allMyData.invitedTo;
     var partiesMap : Map<string,Party> = new Map<string,Party>();
@@ -222,19 +233,14 @@ export class FindPage {
 
     // Case 2 and 3
     partiesMap.forEach((value: Party, key: string) => {
-      //console.log(value);
       var marker : any;
       // Case 2 : this party is on the map
       if(this.partyMarkersOnMap.has(key) == true){
         marker = this.partyMarkersOnMap.get(key);
-        //console.log(marker);
         // the party might have new myCoordinates
         var coordinates = {lat: value.latitude, lng: value.longitude};
         marker.setPosition(coordinates);
         marker.party = value;
-        //console.log(coordinates);
-        //console.log(value);
-        //console.log(marker);
       }
       // Case 3 : this party isn't on the map
       else{
@@ -272,9 +278,7 @@ export class FindPage {
     Case 3 : this bar isn't on the map
   */
   private refreshBarMarkers(){
-    //console.log(this.allMyData.invitedTo);
     var thisInstance = this;
-    //console.log(thisInstance.barMarkersOnMap);
     // Transform bar array into a hashmap for quick access in Case 1
     var bars = this.allMyData.barsCloseToMe;
     var barsMap : Map<string,Bar> = new Map<string,Bar>();
@@ -293,7 +297,6 @@ export class FindPage {
 
     // Case 2 and 3
     barsMap.forEach((value: Bar, key: string) => {
-      //console.log(value);
       var marker : any;
       // Case 2 : this bar is on the map
       if(this.barMarkersOnMap.has(key) == true){
@@ -303,9 +306,6 @@ export class FindPage {
         var coordinates = {lat: value.latitude, lng: value.longitude};
         marker.setPosition(coordinates);
         marker.bar = value;
-        //console.log(coordinates);
-        //console.log(value);
-        //console.log(marker);
       }
       // Case 3 : this bar isn't on the map
       else{
@@ -318,11 +318,10 @@ export class FindPage {
           bar : value
         });
         marker.addListener('click', function() {
-          thisInstance.presentPartyPopover(this.bar);
+          thisInstance.presentBarPopover(this.bar);
         });
       }
       this.barMarkersOnMap.set(key, marker); // update the bar markers list with the new bar info
-      //console.log(this.barMarkersOnMap.get(key));
     });
   }
 

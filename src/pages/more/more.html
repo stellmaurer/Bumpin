@@ -9,11 +9,17 @@
 <ion-content class="home">
   <ion-grid>
     <ion-row justify-content-center class="firstRow">
-      <ion-col col-3 text-center>Feel free to logout :)</ion-col>
+        <ion-col col-12 class="oneElement">
+          <div class="centerMe">
+            <h1 [style.color]="'#32db64'">Feel free to logout :)</h1>
+          </div>
+        </ion-col>
     </ion-row>
     <ion-row justify-content-center class="secondRow">
-      <ion-col col-3 text-center>
-        <button ion-button round color="primary" (click)="login.logout();">Logout</button>
+      <ion-col col-12 class="oneElement">
+        <div class="centerMe">
+            <button ion-button round color="primary" (click)="login.logout();">Logout</button>
+        </div>
       </ion-col>
     </ion-row>
   </ion-grid>

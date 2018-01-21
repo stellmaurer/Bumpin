@@ -4,6 +4,16 @@ page-partyPopover {
 
     .home {
         
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            .hosts {
+                padding-left: 10px;
+                padding-right: 10px;
+                flex-grow: 1;
+            }
+        }
 
         ion-grid {
             height: 100%;
@@ -12,11 +22,6 @@ page-partyPopover {
 
         .needsPadding {
             padding: 10px;
-        }
-
-        .hosts {
-            padding-left: 10px;
-            padding-right: 10px;
         }
 
         .blocksRow {

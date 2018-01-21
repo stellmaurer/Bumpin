@@ -1,6 +1,6 @@
 {
   "name": "Bumpin",
-  "app_id": "383d1262",
-  "v2": true,
-  "typescript": true
+  "app_id": "111fb7d7",
+  "integrations": {},
+  "type": "ionic-angular"
 }

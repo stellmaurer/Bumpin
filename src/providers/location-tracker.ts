@@ -16,12 +16,20 @@ export class LocationTracker {
   public lat: number = 0;
   public lng: number = 0;
   private appWasJustStarted : boolean;
+  private vicinityDistance: number;
+  private partiesThatWereInMyVicinity : Map<string,Party>;
+  private partiesThatAreInMyVicinity : Map<string,Party>;
+  private barsThatAreInMyVicinity: Map<string,Bar>;
+  private barsThatWereInMyVicinity: Map<string,Bar>;
  
   constructor(private allMyData : AllMyData, private events : Events, public zone: NgZone, private backgroundGeolocation: BackgroundGeolocation, private geolocation: Geolocation, private http : Http) {
     this.appWasJustStarted = true;
+    this.vicinityDistance = 300;
+    this.partiesThatAreInMyVicinity = new Map<string,Party>();
+    this.partiesThatWereInMyVicinity = new Map<string,Party>();
+    this.barsThatAreInMyVicinity = new Map<string,Bar>();
+    this.barsThatWereInMyVicinity = new Map<string,Bar>();
   }
-
-
  
   startTracking() {
     let foregroundConfig = {
@@ -37,15 +45,18 @@ export class LocationTracker {
     this.backgroundGeolocation.configure(backgroundConfig);
     this.watch = this.geolocation.watchPosition(foregroundConfig).filter((p: any) => p.code === undefined);
     this.watch.subscribe((position: Geoposition) => {
+      console.log("updating position");
       //this.findClosestPartyOrBar(position.coords.latitude, position.coords.longitude);
-      var thePartyOrBarIAmCurrentlyAt = this.findThePartyOrBarIAmAt(position.coords.latitude, position.coords.longitude);
+      // var thePartyOrBarIAmCurrentlyAt = this.findThePartyOrBarIAmAt(position.coords.latitude, position.coords.longitude);
       // This is checking an atParty/atBar edge case
-      if(this.appWasJustStarted == true){
+      /*if(this.appWasJustStarted == true){
         this.checkAndUpdateIfYouNeedToSetYourAttendanceToFalse();
       }
 
       let shouldUpdateUI = this.updateMyAtPartyOrAtBarStatuses(this.allMyData.thePartyOrBarIAmAt, thePartyOrBarIAmCurrentlyAt);
-
+      */
+      var thePartyOrBarIAmCurrentlyAt = this.findPartiesOrBarsInMyVicinity(position.coords.latitude, position.coords.longitude);
+      let shouldUpdateUI = this.updateMyAtBarStatuses() || this.updateMyAtPartyStatuses();
       // Run update inside of Angular's zone
       this.zone.run(() => {
         this.allMyData.thePartyOrBarIAmAt = thePartyOrBarIAmCurrentlyAt;
@@ -62,73 +73,85 @@ export class LocationTracker {
     //this.backgroundGeolocation.start();
   }
 
-  // if you are at a party/bar and close the app, then leave the part/bar and reopen the app,
-  //  it still thinks you're there until the expiration time (15 minutes).
-  checkAndUpdateIfYouNeedToSetYourAttendanceToFalse(){
-    if((this.lat == 0) || (this.lng == 0)){
-      return null;
-    }
-    if((this.allMyData.invitedTo.length == 0) && (this.allMyData.barsCloseToMe.length == 0)){
-      return null;
-    }
-    this.appWasJustStarted = false;
-
-    // Based off my current location, am I at a party or bar?
-    let partyImActuallyAt : Party = null;
-    let barImActuallyAt : Bar = null;
-    if(this.allMyData.thePartyOrBarIAmAt instanceof Party){
-      partyImActuallyAt = this.allMyData.thePartyOrBarIAmAt;
-    }else{
-      barImActuallyAt = this.allMyData.thePartyOrBarIAmAt;
-    }
-
-    // Based off the database, am I at a party or bar?
-    let partyImAtInTheDatabase : Party = null;
-    let barImAtInTheDatabase : Bar = null;
-    for(let i = 0; i < this.allMyData.invitedTo.length; i++){
-      if(this.allMyData.invitedTo[i].invitees.get(this.allMyData.me.facebookID).atParty == true){
-        partyImAtInTheDatabase = this.allMyData.invitedTo[i];
-        break;
-      }
-    }
-    if(partyImAtInTheDatabase == null){
-      for(let i = 0; i < this.allMyData.barsCloseToMe.length; i++){
-        if(this.allMyData.barsCloseToMe[i].attendees.has(this.allMyData.me.facebookID) == true){
-          if(this.allMyData.barsCloseToMe[i].attendees.get(this.allMyData.me.facebookID).atBar == true){
-            barImAtInTheDatabase = this.allMyData.barsCloseToMe[i];
-            break;
-          }
-        }
-      }
-    }
-
-    // Determine if I need to update the database
-    if(partyImAtInTheDatabase != null){
-      if(partyImActuallyAt != null){
-        if(partyImAtInTheDatabase.partyID != partyImActuallyAt.partyID){
-          this.allMyData.changeAtPartyStatus(partyImAtInTheDatabase, false, this.http);
-        }
-      }else{
-        this.allMyData.changeAtPartyStatus(partyImAtInTheDatabase, false, this.http);
-      }
-    }
-    if(barImAtInTheDatabase != null){
-      if(barImActuallyAt != null){
-        if(barImAtInTheDatabase.barID != barImActuallyAt.barID){
-          this.allMyData.changeAtBarStatus(barImAtInTheDatabase, false, this.http);
-        }
-      }else{
-        this.allMyData.changeAtBarStatus(barImAtInTheDatabase, false, this.http);
-      }
-    }
-    // If there aren't any parties or bars in the database that have me with atParty or atBar = true, then
-    //      I don't need to do anything
-  }
- 
   stopTracking() {
     console.log('stopTracking');
     this.watch.unsubscribe();
     this.backgroundGeolocation.stop();
+  }
+
+  updateMyAtPartyStatuses() : boolean{
+    let needToUpdateUI = false;
+    this.partiesThatWereInMyVicinity.forEach((value: Party, key: string) => {
+      if(this.partiesThatAreInMyVicinity.has(key)){ // was at the party and still am
+        this.allMyData.changeAtPartyStatus(value, true, this.http);
+      }else{ // was at the party and now I'm not there
+        this.allMyData.changeAtPartyStatus(value, false, this.http);
+      }
+      needToUpdateUI = true;
+    });
+    this.partiesThatAreInMyVicinity.forEach((value: Party, key: string) => {
+      if(this.partiesThatWereInMyVicinity.has(key)){ // am at the party, and was at the party
+        // already covered this case above
+      }else{ // at the party and wasn't at the party before
+        this.allMyData.changeAtPartyStatus(value, true, this.http);
+        needToUpdateUI = true;
+      }
+    });
+    return needToUpdateUI;
+  }
+
+  updateMyAtBarStatuses() : boolean{
+    let needToUpdateUI = false;
+    this.barsThatWereInMyVicinity.forEach((value: Bar, key: string) => {
+      if(this.barsThatAreInMyVicinity.has(key)){ // was at the bar and still am
+        this.allMyData.changeAtBarStatus(value, true, this.http);
+      }else{ // was at the bar and now I'm not there
+        this.allMyData.changeAtBarStatus(value, false, this.http);
+      }
+      needToUpdateUI = true;
+    });
+    this.barsThatAreInMyVicinity.forEach((value: Bar, key: string) => {
+      if(this.barsThatWereInMyVicinity.has(key)){ // am at the bar, and was at the bar
+        // already covered this case above
+      }else{ // at the bar and wasn't at the bar before
+        this.allMyData.changeAtBarStatus(value, true, this.http);
+        needToUpdateUI = true;
+      }
+    });
+    return needToUpdateUI;
+  }
+
+  findPartiesOrBarsInMyVicinity(myLatitude : number, myLongitude : number) : any{
+    let closestPartyOrBar = null;
+    let min = Number.MAX_VALUE;
+    if((myLatitude == null) || (myLongitude == null)){
+      return;
+    }
+    this.partiesThatWereInMyVicinity = this.partiesThatAreInMyVicinity;
+    this.barsThatWereInMyVicinity = this.barsThatAreInMyVicinity;
+    this.partiesThatAreInMyVicinity = new Map<string,Party>();
+    this.barsThatAreInMyVicinity = new Map<string,Bar>();
+    for(let bar of this.allMyData.barsCloseToMe){
+      let distanceToBar = Utility.getDistanceInMetersBetweenCoordinates(myLatitude, myLongitude, bar.latitude, bar.longitude);
+      if(distanceToBar <= this.vicinityDistance){
+        this.barsThatAreInMyVicinity.set(bar.barID, bar);
+        if(distanceToBar <= min){
+          min = distanceToBar;
+          closestPartyOrBar = bar;
+        }
+      }
+    }
+    for(let party of this.allMyData.invitedTo){
+      let distanceToParty = Utility.getDistanceInMetersBetweenCoordinates(myLatitude, myLongitude, party.latitude, party.longitude);
+      if(distanceToParty <= this.vicinityDistance){
+        this.partiesThatAreInMyVicinity.set(party.partyID, party);
+        if(distanceToParty <= min){
+          min = distanceToParty;
+          closestPartyOrBar = party;
+        }
+      }
+    }
+    return closestPartyOrBar;
   }
 
   updateMyAtPartyOrAtBarStatuses(partyOrBarIWasAt : any, partyOrBarIAmAt : any){
@@ -210,7 +233,70 @@ export class LocationTracker {
     return true;
   }
 
-  // returns null if I am not within 20 meters of a party or bar
+  // if you are at a party/bar and close the app, then leave the part/bar and reopen the app,
+  //  it still thinks you're there until the expiration time (15 minutes).
+  checkAndUpdateIfYouNeedToSetYourAttendanceToFalse(){
+    if((this.lat == 0) || (this.lng == 0)){
+      return null;
+    }
+    if((this.allMyData.invitedTo.length == 0) && (this.allMyData.barsCloseToMe.length == 0)){
+      return null;
+    }
+    this.appWasJustStarted = false;
+
+    // Based off my current location, am I at a party or bar?
+    let partyImActuallyAt : Party = null;
+    let barImActuallyAt : Bar = null;
+    if(this.allMyData.thePartyOrBarIAmAt instanceof Party){
+      partyImActuallyAt = this.allMyData.thePartyOrBarIAmAt;
+    }else{
+      barImActuallyAt = this.allMyData.thePartyOrBarIAmAt;
+    }
+
+    // Based off the database, am I at a party or bar?
+    let partyImAtInTheDatabase : Party = null;
+    let barImAtInTheDatabase : Bar = null;
+    for(let i = 0; i < this.allMyData.invitedTo.length; i++){
+      if(this.allMyData.invitedTo[i].invitees.get(this.allMyData.me.facebookID).atParty == true){
+        partyImAtInTheDatabase = this.allMyData.invitedTo[i];
+        break;
+      }
+    }
+    if(partyImAtInTheDatabase == null){
+      for(let i = 0; i < this.allMyData.barsCloseToMe.length; i++){
+        if(this.allMyData.barsCloseToMe[i].attendees.has(this.allMyData.me.facebookID) == true){
+          if(this.allMyData.barsCloseToMe[i].attendees.get(this.allMyData.me.facebookID).atBar == true){
+            barImAtInTheDatabase = this.allMyData.barsCloseToMe[i];
+            break;
+          }
+        }
+      }
+    }
+
+    // Determine if I need to update the database
+    if(partyImAtInTheDatabase != null){
+      if(partyImActuallyAt != null){
+        if(partyImAtInTheDatabase.partyID != partyImActuallyAt.partyID){
+          this.allMyData.changeAtPartyStatus(partyImAtInTheDatabase, false, this.http);
+        }
+      }else{
+        this.allMyData.changeAtPartyStatus(partyImAtInTheDatabase, false, this.http);
+      }
+    }
+    if(barImAtInTheDatabase != null){
+      if(barImActuallyAt != null){
+        if(barImAtInTheDatabase.barID != barImActuallyAt.barID){
+          this.allMyData.changeAtBarStatus(barImAtInTheDatabase, false, this.http);
+        }
+      }else{
+        this.allMyData.changeAtBarStatus(barImAtInTheDatabase, false, this.http);
+      }
+    }
+    // If there aren't any parties or bars in the database that have me with atParty or atBar = true, then
+    //      I don't need to do anything
+  }
+
+  // returns null if I am not within 40 meters of a party or bar
   findThePartyOrBarIAmAt(myLatitude : number, myLongitude : number){
     if((myLatitude == null) || (myLongitude == null)){
       return null;
@@ -219,25 +305,25 @@ export class LocationTracker {
       return null;
     }
     let closestPartyOrBar = null;
-    let max = Number.MAX_VALUE;
+    let min = Number.MAX_VALUE;
     for(let party of this.allMyData.invitedTo){
       let distanceToParty = Utility.getDistanceInMetersBetweenCoordinates(myLatitude, myLongitude, party.latitude, party.longitude);
       //console.log("Distance to " + party.title + " = " + distanceToParty + " meters away.");
-      if(distanceToParty <= max){
-        max = distanceToParty;
+      if(distanceToParty <= min){
+        min = distanceToParty;
         closestPartyOrBar = party;
       }
     }
     for(let bar of this.allMyData.barsCloseToMe){
       let distanceToBar = Utility.getDistanceInMetersBetweenCoordinates(myLatitude, myLongitude, bar.latitude, bar.longitude);
       //console.log("Distance to " + bar.name + " = " + distanceToBar + " meters away.");
-      if(distanceToBar <= max){
-        max = distanceToBar;
+      if(distanceToBar <= min){
+        min = distanceToBar;
         closestPartyOrBar = bar;
       }
     }
     //console.log("This is how far away the closest party/bar is: " + max);
-    if((closestPartyOrBar == null) || (max > 20)){
+    if((closestPartyOrBar == null) || (min > 40)){
       return null;
     }
     
@@ -253,7 +339,7 @@ export class LocationTracker {
     return closestPartyOrBar;
   }
  
-  findClosestPartyOrBar(myLatitude : number, myLongitude : number){
+  findClosestPartyOrBar(myLatitude : number, myLongitude : number) : any{
     if((myLatitude == null) || (myLongitude == null)){
       return null;
     }

@@ -12,6 +12,7 @@ import { Events } from 'ionic-angular';
 @Injectable()
 export class LocationTracker {
  
+  private analyticsID: string = "Location Tracker";
   public watch: any;    
   public lat: number = 0;
   public lng: number = 0;
@@ -45,19 +46,10 @@ export class LocationTracker {
     this.backgroundGeolocation.configure(backgroundConfig);
     this.watch = this.geolocation.watchPosition(foregroundConfig).filter((p: any) => p.code === undefined);
     this.watch.subscribe((position: Geoposition) => {
-      console.log("updating position");
-      //this.findClosestPartyOrBar(position.coords.latitude, position.coords.longitude);
-      // var thePartyOrBarIAmCurrentlyAt = this.findThePartyOrBarIAmAt(position.coords.latitude, position.coords.longitude);
-      // This is checking an atParty/atBar edge case
-      /*if(this.appWasJustStarted == true){
-        this.checkAndUpdateIfYouNeedToSetYourAttendanceToFalse();
-      }
-
-      let shouldUpdateUI = this.updateMyAtPartyOrAtBarStatuses(this.allMyData.thePartyOrBarIAmAt, thePartyOrBarIAmCurrentlyAt);
-      */
       var thePartyOrBarIAmCurrentlyAt = this.findPartiesOrBarsInMyVicinity(position.coords.latitude, position.coords.longitude);
-      let shouldUpdateUI = this.updateMyAtBarStatuses() || this.updateMyAtPartyStatuses();
-      // Run update inside of Angular's zone
+      let needToUpdateAtBarStatuses = this.updateMyAtBarStatuses();
+      let needToUpdateAtPartyStatuses = this.updateMyAtPartyStatuses();
+      let shouldUpdateUI = needToUpdateAtBarStatuses || needToUpdateAtPartyStatuses;
       this.zone.run(() => {
         this.allMyData.thePartyOrBarIAmAt = thePartyOrBarIAmCurrentlyAt;
         if(shouldUpdateUI == true){
@@ -65,16 +57,27 @@ export class LocationTracker {
         }
         this.lat = position.coords.latitude;
         this.lng = position.coords.longitude;
-        //console.log("Latitude: " + this.lat + ", " + "Longitude: " + this.lng);
       });
       //this.backgroundGeolocation.finish();
     });
     // Turn ON the background-geolocation system.
     //this.backgroundGeolocation.start();
+
+    this.events.subscribe("updateMyAtBarAndAtPartyStatuses",() => {
+      var thePartyOrBarIAmCurrentlyAt = this.findPartiesOrBarsInMyVicinity(this.lat, this.lng);
+      let needToUpdateAtBarStatuses = this.updateMyAtBarStatuses();
+      let needToUpdateAtPartyStatuses = this.updateMyAtPartyStatuses();
+      let shouldUpdateUI = needToUpdateAtBarStatuses || needToUpdateAtPartyStatuses;
+      this.zone.run(() => {
+        this.allMyData.thePartyOrBarIAmAt = thePartyOrBarIAmCurrentlyAt;
+        if(shouldUpdateUI == true){
+          this.events.publish("timeToUpdateUI");
+        }
+      });
+    });
   }
 
   stopTracking() {
-    console.log('stopTracking');
     this.watch.unsubscribe();
     this.backgroundGeolocation.stop();
   }
@@ -83,9 +86,21 @@ export class LocationTracker {
     let needToUpdateUI = false;
     this.partiesThatWereInMyVicinity.forEach((value: Party, key: string) => {
       if(this.partiesThatAreInMyVicinity.has(key)){ // was at the party and still am
-        this.allMyData.changeAtPartyStatus(value, true, this.http);
+        this.allMyData.changeAtPartyStatus(value, true, this.http)
+        .then((res) => {
+        
+        })
+        .catch((err) => {
+          this.allMyData.logError(this.analyticsID, "server", "changeAtPartyStatus query error : Err msg = " + err, this.http);
+        });
       }else{ // was at the party and now I'm not there
-        this.allMyData.changeAtPartyStatus(value, false, this.http);
+        this.allMyData.changeAtPartyStatus(value, false, this.http)
+        .then((res) => {
+        
+        })
+        .catch((err) => {
+          this.allMyData.logError(this.analyticsID, "server", "changeAtPartyStatus query error : Err msg = " + err, this.http);
+        });
       }
       needToUpdateUI = true;
     });
@@ -93,7 +108,13 @@ export class LocationTracker {
       if(this.partiesThatWereInMyVicinity.has(key)){ // am at the party, and was at the party
         // already covered this case above
       }else{ // at the party and wasn't at the party before
-        this.allMyData.changeAtPartyStatus(value, true, this.http);
+        this.allMyData.changeAtPartyStatus(value, true, this.http)
+        .then((res) => {
+        
+        })
+        .catch((err) => {
+          this.allMyData.logError(this.analyticsID, "server", "changeAtPartyStatus query error : Err msg = " + err, this.http);
+        });
         needToUpdateUI = true;
       }
     });
@@ -104,9 +125,21 @@ export class LocationTracker {
     let needToUpdateUI = false;
     this.barsThatWereInMyVicinity.forEach((value: Bar, key: string) => {
       if(this.barsThatAreInMyVicinity.has(key)){ // was at the bar and still am
-        this.allMyData.changeAtBarStatus(value, true, this.http);
+        this.allMyData.changeAtBarStatus(value, true, this.http)
+        .then((res) => {
+        
+        })
+        .catch((err) => {
+          this.allMyData.logError(this.analyticsID, "server", "changeAtBarStatus query error : Err msg = " + err, this.http);
+        });
       }else{ // was at the bar and now I'm not there
-        this.allMyData.changeAtBarStatus(value, false, this.http);
+        this.allMyData.changeAtBarStatus(value, false, this.http)
+        .then((res) => {
+        
+        })
+        .catch((err) => {
+          this.allMyData.logError(this.analyticsID, "server", "changeAtBarStatus query error : Err msg = " + err, this.http);
+        });
       }
       needToUpdateUI = true;
     });
@@ -114,7 +147,13 @@ export class LocationTracker {
       if(this.barsThatWereInMyVicinity.has(key)){ // am at the bar, and was at the bar
         // already covered this case above
       }else{ // at the bar and wasn't at the bar before
-        this.allMyData.changeAtBarStatus(value, true, this.http);
+        this.allMyData.changeAtBarStatus(value, true, this.http)
+        .then((res) => {
+        
+        })
+        .catch((err) => {
+          this.allMyData.logError(this.analyticsID, "server", "changeAtBarStatus query error : Err msg = " + err, this.http);
+        });
         needToUpdateUI = true;
       }
     });
@@ -122,6 +161,8 @@ export class LocationTracker {
   }
 
   findPartiesOrBarsInMyVicinity(myLatitude : number, myLongitude : number) : any{
+    console.log("********************************************");
+    console.log("");
     let closestPartyOrBar = null;
     let min = Number.MAX_VALUE;
     if((myLatitude == null) || (myLongitude == null)){
@@ -131,8 +172,10 @@ export class LocationTracker {
     this.barsThatWereInMyVicinity = this.barsThatAreInMyVicinity;
     this.partiesThatAreInMyVicinity = new Map<string,Party>();
     this.barsThatAreInMyVicinity = new Map<string,Bar>();
+    console.log("Bars close to me = " + this.allMyData.barsCloseToMe.length);
     for(let bar of this.allMyData.barsCloseToMe){
       let distanceToBar = Utility.getDistanceInMetersBetweenCoordinates(myLatitude, myLongitude, bar.latitude, bar.longitude);
+      console.log("Distance to bar is " + distanceToBar + " meters.");
       if(distanceToBar <= this.vicinityDistance){
         this.barsThatAreInMyVicinity.set(bar.barID, bar);
         if(distanceToBar <= min){
@@ -141,16 +184,24 @@ export class LocationTracker {
         }
       }
     }
+    console.log("Parties close to me = " + this.allMyData.invitedTo.length);
     for(let party of this.allMyData.invitedTo){
-      let distanceToParty = Utility.getDistanceInMetersBetweenCoordinates(myLatitude, myLongitude, party.latitude, party.longitude);
-      if(distanceToParty <= this.vicinityDistance){
-        this.partiesThatAreInMyVicinity.set(party.partyID, party);
-        if(distanceToParty <= min){
-          min = distanceToParty;
-          closestPartyOrBar = party;
+      if(Utility.hasThisPartyStarted(party)){
+        let distanceToParty = Utility.getDistanceInMetersBetweenCoordinates(myLatitude, myLongitude, party.latitude, party.longitude);
+        console.log("Distance to party is " + distanceToParty + " meters.");
+        if(distanceToParty <= this.vicinityDistance){
+          this.partiesThatAreInMyVicinity.set(party.partyID, party);
+          if(distanceToParty <= min){
+            min = distanceToParty;
+            closestPartyOrBar = party;
+          }
         }
       }
     }
+    console.log("Parties in my vicinity = " + this.partiesThatAreInMyVicinity.size);
+    console.log("Bars in my vicinity = " + this.barsThatAreInMyVicinity.size);
+    console.log("");
+    console.log("********************************************");
     return closestPartyOrBar;
   }
 
@@ -168,24 +219,46 @@ export class LocationTracker {
     if((partyOrBarIWasAt == null) && (partyOrBarIAmAt != null)){
       // I wasn't previously at a bar/party, but now am, so I just need to communicate that I'm at
       //    this new party/bar.
-      console.log("I wasn't previously at a bar/party, but now am, so I just need to communicate that I'm at this new party/bar.");
       if(partyOrBarIAmAt instanceof Party){
         party = partyOrBarIAmAt;
-        this.allMyData.changeAtPartyStatus(party, true, this.http);
+        this.allMyData.changeAtPartyStatus(party, true, this.http)
+        .then((res) => {
+        
+        })
+        .catch((err) => {
+          this.allMyData.logError(this.analyticsID, "server", "changeAtPartyStatus query error : Err msg = " + err, this.http);
+        });
       }else{
         bar = partyOrBarIAmAt;
-        this.allMyData.changeAtBarStatus(bar, true, this.http);
+        this.allMyData.changeAtBarStatus(bar, true, this.http)
+        .then((res) => {
+        
+        })
+        .catch((err) => {
+          this.allMyData.logError(this.analyticsID, "server", "changeAtBarStatus query error : Err msg = " + err, this.http);
+        });
       }
     }else if((partyOrBarIWasAt != null) && (partyOrBarIAmAt == null)){
       // I was at a bar/party, but now I am not, so I just need to communicate that I'm not at that
       //    bar/party anymore.
-      console.log("I was at a bar/party, but now I am not, so I just need to communicate that I'm not at that bar/party anymore.");
       if(partyOrBarIWasAt instanceof Party){
         party = partyOrBarIWasAt;
-        this.allMyData.changeAtPartyStatus(party, false, this.http);
+        this.allMyData.changeAtPartyStatus(party, false, this.http)
+        .then((res) => {
+        
+        })
+        .catch((err) => {
+          this.allMyData.logError(this.analyticsID, "server", "changeAtPartyStatus query error : Err msg = " + err, this.http);
+        });
       }else{
         bar = partyOrBarIWasAt;
-        this.allMyData.changeAtBarStatus(bar, false, this.http);
+        this.allMyData.changeAtBarStatus(bar, false, this.http)
+        .then((res) => {
+        
+        })
+        .catch((err) => {
+          this.allMyData.logError(this.analyticsID, "server", "changeAtBarStatus query error : Err msg = " + err, this.http);
+        });
       }
     }else if((partyOrBarIWasAt != null) && (partyOrBarIAmAt != null)){
       let atTheSamePartyOrBar = false;
@@ -195,8 +268,13 @@ export class LocationTracker {
         let partyIAmAt : Party = partyOrBarIAmAt;
         if(partyIWasAt.partyID == partyIAmAt.partyID){
           // we make a call here because we need to update timeOfLastKnownLocation for the invitee
-          this.allMyData.changeAtPartyStatus(partyIAmAt, true, this.http);
-          console.log("I am at the same party - just updating my timeOfLastKnownLocation.");
+          this.allMyData.changeAtPartyStatus(partyIAmAt, true, this.http)
+          .then((res) => {
+        
+          })
+          .catch((err) => {
+            this.allMyData.logError(this.analyticsID, "server", "changeAtPartyStatus query error : Err msg = " + err, this.http);
+          });
           atTheSamePartyOrBar = true;
         }
       }else if((partyOrBarIWasAt instanceof Bar) && (partyOrBarIAmAt instanceof Bar)){
@@ -204,8 +282,13 @@ export class LocationTracker {
         let barIAmAt : Bar = partyOrBarIAmAt;
         if(barIWasAt.barID == barIAmAt.barID){
           // we make a call here because we need to update timeOfLastKnownLocation for the attendee
-          this.allMyData.changeAtBarStatus(barIAmAt, true, this.http);
-          console.log("I am at the same bar - just updating my timeOfLastKnownLocation.");
+          this.allMyData.changeAtBarStatus(barIAmAt, true, this.http)
+          .then((res) => {
+        
+          })
+          .catch((err) => {
+            this.allMyData.logError(this.analyticsID, "server", "changeAtBarStatus query error : Err msg = " + err, this.http);
+          });
           atTheSamePartyOrBar = true;
         }
       }
@@ -216,17 +299,41 @@ export class LocationTracker {
         console.log("I was at a bar/party, and now I am at another bar/party, so I need to communicate that I'm not at the bar/party I was at, and that I'm at this new bar/party.");
         if(partyOrBarIWasAt instanceof Party){
           party = partyOrBarIWasAt;
-          this.allMyData.changeAtPartyStatus(party, false, this.http);
+          this.allMyData.changeAtPartyStatus(party, false, this.http)
+          .then((res) => {
+        
+          })
+          .catch((err) => {
+            this.allMyData.logError(this.analyticsID, "server", "changeAtPartyStatus query error : Err msg = " + err, this.http);
+          });
         }else{
           bar = partyOrBarIWasAt;
-          this.allMyData.changeAtBarStatus(bar, false, this.http);
+          this.allMyData.changeAtBarStatus(bar, false, this.http)
+          .then((res) => {
+        
+          })
+          .catch((err) => {
+            this.allMyData.logError(this.analyticsID, "server", "changeAtBarStatus query error : Err msg = " + err, this.http);
+          });
         }
         if(partyOrBarIAmAt instanceof Party){
           party = partyOrBarIAmAt;
-          this.allMyData.changeAtPartyStatus(party, true, this.http);
+          this.allMyData.changeAtPartyStatus(party, true, this.http)
+          .then((res) => {
+        
+          })
+          .catch((err) => {
+            this.allMyData.logError(this.analyticsID, "server", "changeAtPartyStatus query error : Err msg = " + err, this.http);
+          });
         }else{
           bar = partyOrBarIAmAt;
-          this.allMyData.changeAtBarStatus(bar, true, this.http);
+          this.allMyData.changeAtBarStatus(bar, true, this.http)
+          .then((res) => {
+        
+          })
+          .catch((err) => {
+            this.allMyData.logError(this.analyticsID, "server", "changeAtBarStatus query error : Err msg = " + err, this.http);
+          });
         }
       }
     }
@@ -277,19 +384,43 @@ export class LocationTracker {
     if(partyImAtInTheDatabase != null){
       if(partyImActuallyAt != null){
         if(partyImAtInTheDatabase.partyID != partyImActuallyAt.partyID){
-          this.allMyData.changeAtPartyStatus(partyImAtInTheDatabase, false, this.http);
+          this.allMyData.changeAtPartyStatus(partyImAtInTheDatabase, false, this.http)
+          .then((res) => {
+        
+          })
+          .catch((err) => {
+            this.allMyData.logError(this.analyticsID, "server", "changeAtPartyStatus query error : Err msg = " + err, this.http);
+          });
         }
       }else{
-        this.allMyData.changeAtPartyStatus(partyImAtInTheDatabase, false, this.http);
+        this.allMyData.changeAtPartyStatus(partyImAtInTheDatabase, false, this.http)
+        .then((res) => {
+        
+        })
+        .catch((err) => {
+          this.allMyData.logError(this.analyticsID, "server", "changeAtPartyStatus query error : Err msg = " + err, this.http);
+        });
       }
     }
     if(barImAtInTheDatabase != null){
       if(barImActuallyAt != null){
         if(barImAtInTheDatabase.barID != barImActuallyAt.barID){
-          this.allMyData.changeAtBarStatus(barImAtInTheDatabase, false, this.http);
+          this.allMyData.changeAtBarStatus(barImAtInTheDatabase, false, this.http)
+          .then((res) => {
+        
+          })
+          .catch((err) => {
+            this.allMyData.logError(this.analyticsID, "server", "changeAtBarStatus query error : Err msg = " + err, this.http);
+          });
         }
       }else{
-        this.allMyData.changeAtBarStatus(barImAtInTheDatabase, false, this.http);
+        this.allMyData.changeAtBarStatus(barImAtInTheDatabase, false, this.http)
+        .then((res) => {
+        
+        })
+        .catch((err) => {
+          this.allMyData.logError(this.analyticsID, "server", "changeAtBarStatus query error : Err msg = " + err, this.http);
+        });
       }
     }
     // If there aren't any parties or bars in the database that have me with atParty or atBar = true, then
@@ -329,12 +460,12 @@ export class LocationTracker {
     
     if(closestPartyOrBar instanceof Party){
       var closestParty : Party = closestPartyOrBar;
-      console.log("You are currently at the party, " + closestParty.title + ".");
+      //console.log("You are currently at the party, " + closestParty.title + ".");
     }else if (closestPartyOrBar instanceof Bar){
       var closestBar : Bar = closestPartyOrBar;
-      console.log("You are currently at the bar, " + closestBar.name + ".");
+      //console.log("You are currently at the bar, " + closestBar.name + ".");
     }else{
-      console.log("You are not currently at a party or bar.");
+      //console.log("You are not currently at a party or bar.");
     }
     return closestPartyOrBar;
   }
@@ -367,15 +498,15 @@ export class LocationTracker {
     if(closestPartyOrBar == null){
       return null;
     }
-    console.log("Distance to closest party or bar is " + max + " meters away.");
+    //console.log("Distance to closest party or bar is " + max + " meters away.");
     if(closestPartyOrBar instanceof Party){
       var closestParty : Party = closestPartyOrBar;
-      console.log(closestParty.title + " is the closest to you.");
+      //console.log(closestParty.title + " is the closest to you.");
     }else if (closestPartyOrBar instanceof Bar){
       var closestBar : Bar = closestPartyOrBar;
-      console.log(closestBar.name + " is the closest to you.");
+      //console.log(closestBar.name + " is the closest to you.");
     }else{
-      console.log("There's an error in the findClosestPartyOrBar function.");
+      //console.log("There's an error in the findClosestPartyOrBar function.");
     }
     return closestPartyOrBar;
   }

@@ -78,7 +78,7 @@ export class Query{
                     this.allMyData.me = deserialize<Person>(Person, data.people[0]);
                     resolve(data);
                 }else{
-                    reject(data);
+                    reject(data.error);
                 }
             });
         });
@@ -96,7 +96,7 @@ export class Query{
                 if(data.succeeded){
                     resolve(data);
                 }else{
-                    reject(data);
+                    reject(data.error);
                 }
             });
         });
@@ -114,7 +114,7 @@ export class Query{
                 if(data.succeeded){
                     resolve(data);
                 }else{
-                    reject(data);
+                    reject(data.error);
                 }
             });
             resolve();
@@ -133,7 +133,7 @@ export class Query{
                 if(data.succeeded){
                     resolve(data);
                 }else{
-                    reject(data);
+                    reject(data.error);
                 }
             });
             resolve();
@@ -152,7 +152,7 @@ export class Query{
                 if(data.succeeded){
                     resolve(data);
                 }else{
-                    reject(data);
+                    reject(data.error);
                 }
             });
         });
@@ -170,7 +170,7 @@ export class Query{
                 if(data.succeeded){
                     resolve(data);
                 }else{
-                    reject(data);
+                    reject(data.error);
                 }
             });
         });
@@ -188,7 +188,7 @@ export class Query{
                 if(data.succeeded){
                     resolve(data);
                 }else{
-                    reject(data);
+                    reject(data.error);
                 }
             });
         });
@@ -206,7 +206,7 @@ export class Query{
                 if(data.succeeded){
                     resolve(data);
                 }else{
-                    reject(data);
+                    reject(data.error);
                 }
             });
         });
@@ -227,7 +227,7 @@ export class Query{
                 if(data.succeeded){
                     resolve(data);
                 }else{
-                    reject(data);
+                    reject(data.error);
                 }
             });
         });
@@ -246,7 +246,7 @@ export class Query{
                 if(data.succeeded){
                     resolve(data);
                 }else{
-                    reject(data);
+                    reject(data.error);
                 }
             });
         });
@@ -265,7 +265,7 @@ export class Query{
                 if(data.succeeded){
                     resolve(data);
                 }else{
-                    reject(data);
+                    reject(data.error);
                 }
             });
         });
@@ -284,7 +284,7 @@ export class Query{
                 if(data.succeeded){
                     resolve(data);
                 }else{
-                    reject(data);
+                    reject(data.error);
                 }
             });
         });
@@ -303,7 +303,7 @@ export class Query{
                 if(data.succeeded){
                     resolve(data);
                 }else{
-                    reject(data);
+                    reject(data.error);
                 }
             });
         });
@@ -322,7 +322,7 @@ export class Query{
                 if(data.succeeded){
                     resolve(data);
                 }else{
-                    reject(data);
+                    reject(data.error);
                 }
             });
         });
@@ -354,7 +354,7 @@ export class Query{
                     console.log("new party data fixed and ready");
                     resolve(data);
                 }else{
-                    reject(data);
+                    reject(data.error);
                 }
             });
         });
@@ -384,7 +384,7 @@ export class Query{
                     }
                     resolve(data);
                 }else{
-                    reject(data);
+                    reject(data.error);
                 }
             });
         });
@@ -414,7 +414,7 @@ export class Query{
                     }
                     resolve(data);
                 }else{
-                    reject(data);
+                    reject(data.error);
                 }
             });
         });
@@ -439,7 +439,7 @@ export class Query{
                     }
                     resolve(data);
                 }else{
-                    reject(data);
+                    reject(data.error);
                 }
             });
             
@@ -473,7 +473,7 @@ export class Query{
                     party.partyID = data.error; // backend is set up so that data.error contains the partyID
                     resolve(data);
                 }else{
-                    reject(data);
+                    reject(data.error);
                 }
             });
             resolve();
@@ -548,7 +548,7 @@ export class Query{
                 if(data.succeeded){
                     resolve(data);
                 }else{
-                    reject(data);
+                    reject(data.error);
                 }
             });
             resolve();
@@ -567,7 +567,7 @@ export class Query{
                 if(data.succeeded){
                     resolve(data);
                 }else{
-                    reject(data);
+                    reject(data.error);
                 }
             });
         });
@@ -647,7 +647,7 @@ export class Query{
                 if(data.succeeded){
                     resolve(data);
                 }else{
-                    reject(data);
+                    reject(data.error);
                 }
             });
         });
@@ -709,7 +709,7 @@ export class Query{
                     resolve(data);
                 }else{
                     console.log("Something went wrong: " + data);
-                    reject(data);
+                    reject(data.error);
                 }
             });
             resolve();
@@ -769,7 +769,7 @@ export class Query{
                 if(data.succeeded){
                     resolve(data);
                 }else{
-                    reject(data);
+                    reject(data.error);
                 }
             });
             resolve();
@@ -788,9 +788,66 @@ export class Query{
                 if(data.succeeded){
                     resolve(data);
                 }else{
-                    reject(data);
+                    reject(data.error);
                 }
             });
+        });
+    }
+
+    // curl http://bumpin-env.us-west-2.elasticbeanstalk.com:80/createBug -d "facebookID=12&description=wow%20it%20works"
+    public createBug(facebookID : string, description : string){
+        return new Promise((resolve, reject) => {
+            var url = "http://bumpin-env.us-west-2.elasticbeanstalk.com:80/createBug";
+            let body = "facebookID=" + facebookID + "&description=" + encodeURIComponent(description);
+            var headers = new Headers();
+            headers.append('content-type', "application/x-www-form-urlencoded");
+            let options= new RequestOptions({headers: headers});
+            this.http.post(url, body, options).map(res => res.json()).subscribe(data => {
+                if(data.succeeded){
+                    resolve(data);
+                }else{
+                    reject(data.error);
+                }
+            });
+            resolve();
+        });
+    }
+
+    // curl http://bumpin-env.us-west-2.elasticbeanstalk.com:80/createFeatureRequest -d "facebookID=12&description=wow%20it%20works"
+    public createFeatureRequest(facebookID : string, description : string){
+        return new Promise((resolve, reject) => {
+            var url = "http://bumpin-env.us-west-2.elasticbeanstalk.com:80/createFeatureRequest";
+            let body = "facebookID=" + facebookID + "&description=" + encodeURIComponent(description);
+            var headers = new Headers();
+            headers.append('content-type', "application/x-www-form-urlencoded");
+            let options= new RequestOptions({headers: headers});
+            this.http.post(url, body, options).map(res => res.json()).subscribe(data => {
+                if(data.succeeded){
+                    resolve(data);
+                }else{
+                    reject(data.error);
+                }
+            });
+            resolve();
+        });
+    }
+
+    // curl http://bumpin-env.us-west-2.elasticbeanstalk.com:80/logError -d "ID=Find%20Tab&errorType=server&errorDescription=Blah%20blah"
+    public logError(pageName : string, errorType : string, errorDescription: string){
+        return new Promise((resolve, reject) => {
+            var url = "http://bumpin-env.us-west-2.elasticbeanstalk.com:80/logError";
+            let body = "ID=" + encodeURIComponent(pageName) + "&errorType=" + encodeURIComponent(errorType) + "&errorDescription=" + encodeURIComponent(errorDescription);
+            var headers = new Headers();
+            headers.append('content-type', "application/x-www-form-urlencoded");
+            let options= new RequestOptions({headers: headers});
+            this.http.post(url, body, options).map(res => res.json()).subscribe(data => {
+                if(data.succeeded){
+                    resolve(data);
+                }else{
+                    reject(data.error);
+                }
+            });
+            resolve();
         });
     }
 }

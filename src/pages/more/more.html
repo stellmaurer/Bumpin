@@ -6,19 +6,58 @@
   </ion-navbar>
 </ion-header>
 
-<ion-content class="home">
-  <ion-grid>
+<ion-content>
+  <ion-grid class="home">
     <ion-row justify-content-center class="firstRow">
         <ion-col col-12 class="oneElement">
           <div class="centerMe">
-            <h1 [style.color]="'#32db64'">Feel free to logout :)</h1>
+            <h1 [style.color]="'#32db64'">Version: 1.0</h1>
           </div>
         </ion-col>
     </ion-row>
-    <ion-row justify-content-center class="secondRow">
+
+    <ion-row class="needsSpaceOnTop">
+        <ion-col col-12 class="oneElement">
+          <div class="centerMe">
+            <label>Having an issue?</label>
+          </div>
+          <div class="centerMe backgroundIncluded needsPadding">
+            <ion-textarea type="text" [(ngModel)]="bugDescription"></ion-textarea>
+          </div>
+        </ion-col>
+    </ion-row>
+
+    <ion-row>
+      <ion-col col-12>
+          <button ion-button block [color]="primary" style="color: black;" (click)='submitBug();'>
+            Submit Bug
+          </button>
+      </ion-col>
+    </ion-row>
+
+    <ion-row class="needsSpaceOnTop">
+        <ion-col col-12 class="oneElement">
+          <div class="centerMe">
+            <label>Want more from the app?</label>
+          </div>
+          <div class="centerMe backgroundIncluded needsPadding">
+            <ion-textarea type="text" [(ngModel)]="featureRequest"></ion-textarea>
+          </div>
+        </ion-col>
+    </ion-row>
+
+    <ion-row>
+      <ion-col col-12>
+          <button ion-button block [color]="primary" style="color: black;" (click)='submitFeatureRequest();'>
+            Request Feature
+          </button>
+      </ion-col>
+    </ion-row>
+
+    <ion-row id="logoutButton" justify-content-center>
       <ion-col col-12 class="oneElement">
         <div class="centerMe">
-            <button ion-button round color="primary" (click)="login.logout();">Logout</button>
+            <button ion-button block color="primary" style="color: black;" (click)="login.logout();">Logout</button>
         </div>
       </ion-col>
     </ion-row>

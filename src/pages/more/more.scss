@@ -1,21 +1,18 @@
 page-more {
     .home {
-        scroll-content {
-            display: flex;
-            flex-direction: column;
-        }
+        display: flex;
+        flex-direction: column;
     
         ion-grid {
             padding: 0;
             height: 100%;
         }
 
-        .firstRow {
-            flex: 5;
-        }
-
-        .secondRow {
-            flex: 1;
+        .text-input {
+            height: 20vh;
+            margin: 0px;
+            padding: 0px;
+            width: 100%;
         }
 
         .oneElement {
@@ -26,6 +23,26 @@ page-more {
     
         .centerMe {
             text-align: center;
+        }
+
+        .backgroundIncluded {
+            border-radius: 5px;
+            background-color: $background-info-color;
+        }
+
+        .needsPadding {
+            padding-left: 10px;
+            padding-right: 10px;
+            padding-top: 2px;
+            padding-bottom: 2px;
+        }
+
+        .needsSpaceOnTop {
+            margin-top: 10px;
+        }
+
+        #logoutButton {
+            margin-top: 20px;
         }
     }
 }

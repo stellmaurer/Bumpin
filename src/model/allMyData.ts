@@ -42,7 +42,7 @@ export class AllMyData{
         var tempThis = this;
         var id = setInterval(function(){
             tempThis.events.publish("timeToRefreshPartyAndBarData");
-        }, 240000);
+        }, 60000);
     }
 
     public refreshMyDataFromFacebook(accessToken : string, http : Http){
@@ -498,4 +498,54 @@ export class AllMyData{
             });
         });
     }
+
+    public createBug(description: string, http : Http){
+        return new Promise((resolve, reject) => {
+            var query = new Query(this, http);
+            query.createBug(this.me.facebookID, description)
+            .then((res) => {
+                resolve("createBug query succeeded.");
+            })
+            .catch((err) => {
+                reject(err);
+            });
+        });
+    }
+
+    public createFeatureRequest(description: string, http : Http){
+        return new Promise((resolve, reject) => {
+            var query = new Query(this, http);
+            query.createFeatureRequest(this.me.facebookID, description)
+            .then((res) => {
+                resolve("createFeatureRequest query succeeded.");
+            })
+            .catch((err) => {
+                reject(err);
+            });
+        });
+    }
+
+    private logErrorHelper(pageName : string, errorType : string, errorDescription: string, http : Http){
+        errorDescription += " | FB ID = " + this.me.facebookID;
+        return new Promise((resolve, reject) => {
+            var query = new Query(this, http);
+            query.logError(pageName, errorType, errorDescription)
+            .then((res) => {
+                resolve("logError query succeeded.");
+            })
+            .catch((err) => {
+                reject(err);
+            });
+        });
+    }
+
+    public logError(pageName : string, errorType : string, errorDescription : string, http : Http){
+        this.logErrorHelper(pageName, errorType, errorDescription, http)
+        .then((res) => {
+          
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+      }
 }

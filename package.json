@@ -33,10 +33,12 @@
     "cordova-android": "^6.2.3",
     "cordova-browser": "^5.0.0",
     "cordova-ios": "^4.4.0",
+    "cordova-plugin-add-swift-support": "^1.7.1",
     "cordova-plugin-console": "1.0.5",
     "cordova-plugin-device": "1.1.4",
     "cordova-plugin-facebook4": "~1.7.4",
     "cordova-plugin-geolocation": "~2.4.2",
+    "cordova-plugin-ionic": "^2.0.4",
     "cordova-plugin-mauron85-background-geolocation": "~2.2.5",
     "cordova-plugin-nativestorage": "~2.2.2",
     "cordova-plugin-splashscreen": "~4.0.1",
@@ -94,7 +96,14 @@
       "cordova-sqlite-storage": {},
       "ionic-plugin-keyboard": {},
       "cordova-plugin-geolocation": {},
-      "cordova-plugin-mauron85-background-geolocation": {}
+      "cordova-plugin-mauron85-background-geolocation": {},
+      "cordova-plugin-ionic": {
+        "APP_ID": "111fb7d7",
+        "CHANNEL_NAME": "Master",
+        "UPDATE_METHOD": "background",
+        "UPDATE_API": "https://api.ionicjs.com",
+        "MAX_STORE": "2"
+      }
     }
   }
 }

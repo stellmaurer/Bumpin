@@ -12,6 +12,7 @@ import {Utility} from "../../model/utility";
 })
 
 export class PartyPopover {
+  private tabName: string = "Find Tab";
   public party : Party;
   private allMyData : AllMyData;
   private http : Http;
@@ -39,7 +40,6 @@ export class PartyPopover {
   synchronizeLatestPartyData(){
     let indexOfParty = Utility.findIndexOfParty(this.party, this.allMyData.invitedTo);
     if(indexOfParty == -1){
-        console.log("Party has been removed. You cannot rate it anymore.");
         return;
     }
     this.party = this.allMyData.invitedTo[indexOfParty];
@@ -49,10 +49,10 @@ export class PartyPopover {
     this.synchronizeLatestPartyData();
     this.allMyData.rateParty(this.party, rating, this.http)
     .then((res) => {
-        //console.log("Rating the party query succeeded.");
+        
     })
     .catch((err) => {
-        console.log(err);
+      this.allMyData.logError(this.tabName, "server", "rateParty query error : Err msg = " + err, this.http);
     });
   }
 
@@ -60,10 +60,10 @@ export class PartyPopover {
     this.synchronizeLatestPartyData();
     this.allMyData.changeAttendanceStatusToParty(this.party, status, this.http)
     .then((res) => {
-        //console.log("Changing attendance status to the party query succeeded.");
+        
     })
     .catch((err) => {
-        console.log(err);
+      this.allMyData.logError(this.tabName, "server", "changeAttendanceStatusToParty query error : Err msg = " + err, this.http);
     });
   }
 }

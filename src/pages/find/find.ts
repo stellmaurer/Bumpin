@@ -25,6 +25,7 @@ declare var google;
 })
 export class FindPage {
  
+  private tabName: string = "Find Tab";
   @ViewChild('map') mapElement: ElementRef;
   public map: any;
 
@@ -63,11 +64,10 @@ export class FindPage {
   ionViewDidLoad(){
     this.login.login()
     .then((res) => {
-      console.log("********************* Login Process Completed");
       this.setupThePage();
     })
     .catch((err) => {
-        console.log("Find.ts: Login err = " + err);
+        // error logging is already done in the Login file
     });
   }
 
@@ -83,22 +83,24 @@ export class FindPage {
       // Get bars that are close to me from the database
       this.allMyData.refreshBarsCloseToMe(this.myCoordinates,this.http)
       .then((res) => {
+        this.events.publish("updateMyAtBarAndAtPartyStatuses");
         this.addBarsToMap(this.allMyData.barsCloseToMe);
       })
       .catch((err) => {
-        console.log(err);
+        this.allMyData.logError(this.tabName, "server", "refreshBarsCloseToMe query error : Err msg = " + err, this.http);
       });
       // Get parties that I'm invited to from the database
       this.allMyData.refreshParties(this.http)
       .then((res) => {
+        this.events.publish("updateMyAtBarAndAtPartyStatuses");
         this.addPartiesToMap(this.allMyData.invitedTo);
       })
       .catch((err) => {
-        console.log(err);
+        this.allMyData.logError(this.tabName, "server", "refreshParties query error : Err msg = " + err, this.http);
       });
     })
     .catch((err) => {
-        console.log(err);
+      this.allMyData.logError(this.tabName, "google maps", "issue loading the google map : Err msg = " + err, this.http);
     });
 
     this.allMyData.refreshPerson(this.http)
@@ -108,31 +110,31 @@ export class FindPage {
         
       })
       .catch((err) => {
-        console.log(err);
+        this.allMyData.logError(this.tabName, "server", "refreshPartiesImHosting query error : Err msg = " + err, this.http);
       });
     })
     .catch((err) => {
-      console.log(err);
+      this.allMyData.logError(this.tabName, "server", "refreshPerson query error : Err msg = " + err, this.http);
     });
 
     this.allMyData.startPeriodicDataRetrieval(this.http);
     this.events.subscribe("timeToRefreshPartyAndBarData",() => {
-      console.log("in subscription for timeToRefreshPartyAndBarData");
       this.allMyData.refreshPerson(this.http)
       .then((res) => {
         Promise.all([this.allMyData.refreshBarsCloseToMe(this.myCoordinates, this.http), this.allMyData.refreshParties(this.http)]).then(thePromise => {
           return thePromise;
         })
         .then((res) => {
+          this.events.publish("updateMyAtBarAndAtPartyStatuses");
           this.refreshPartyMarkers();
           this.refreshBarMarkers();
         })
         .catch((err) => {
-          console.log(err);
+          this.allMyData.logError(this.tabName, "server", "refreshBarsCloseToMe or refreshParties query error : Err msg = " + err, this.http);
         });
       })
       .catch((err) => {
-        console.log(err);
+        this.allMyData.logError(this.tabName, "server", "refreshPerson query error : Err msg = " + err, this.http);
       });
     });
 
@@ -145,7 +147,7 @@ export class FindPage {
         this.refreshBarMarkers();
       })
       .catch((err) => {
-        console.log(err);
+        this.allMyData.logError(this.tabName, "server", "refreshBarsCloseToMe or refreshParties query error : Err msg = " + err, this.http);
       });
     });
 
@@ -423,7 +425,6 @@ export class FindPage {
         this.includePartiesTodayTemp = this.includePartiesToday;
         this.includePartiesThisWeekTemp = this.includePartiesThisWeek;
         this.includeAllPartiesTemp = this.includeAllParties;
-        console.log('Checkbox data:', data);
       }
     });
     alert.addButton({
@@ -434,7 +435,6 @@ export class FindPage {
         this.includePartiesThisWeek = this.includePartiesThisWeekTemp;
         this.includeAllParties = this.includeAllPartiesTemp;
         this.updateMapMarkersVisibility();
-        console.log('Checkbox data:', data);
       }
     });
     alert.present();

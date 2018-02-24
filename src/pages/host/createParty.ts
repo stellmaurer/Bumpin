@@ -19,6 +19,7 @@ declare var google;
 })
 export class CreatePartyPage {
 
+  private tabName: string = "Host Tab";
   @ViewChild('map') mapElement: ElementRef;
   public map: any;
   geocoder : any;
@@ -34,10 +35,6 @@ export class CreatePartyPage {
     this.party = params.get("party");
     this.datePickerMinYear = (new Date()).getFullYear();
     this.addressInputTimer = null;
-  }
-
-  ionViewWillLeave(){
-    console.log(this.party);
   }
 
   private createDateTimeInISOFormat(dateOnly : string, timeOnly : string){
@@ -56,7 +53,7 @@ export class CreatePartyPage {
       
     })
     .catch((err) => {
-        console.log(err);
+      this.allMyData.logError(this.tabName, "google maps", "getCurrentPosition error: Err msg = " + err, this.http);
     });
   }
 
@@ -126,7 +123,6 @@ export class CreatePartyPage {
         tempThis.partyMarker.setMap(null);
         tempThis.party.latitude = 1000; // represents the address being faulty
         tempThis.party.longitude = 1000; // represents the address being faulty
-        console.log('Geocode was not successful for the following reason: ' + status);
       }
     });
   }
@@ -158,9 +154,9 @@ export class CreatePartyPage {
         this.navCtrl.popTo(this.navCtrl.getByIndex(this.navCtrl.length()-3));
       })
       .catch((err) => {
-        this.inputError = "Unknown error - please try creating the party again.";
+        this.inputError = "An error occurred - please try creating the party again.";
         this.showCreatePartyErrorAlert();
-        console.log(err);
+        this.allMyData.logError(this.tabName, "server", "createParty query error: Err msg = " + err, this.http);
       });
     }else{
       this.showCreatePartyErrorAlert();

@@ -3,20 +3,30 @@ import {Bar} from "./bar";
 
 export class Utility {
 
+    public static hasThisPartyStarted(party : Party) : boolean {
+        var partyHasStarted = false;
+        if(party == null){
+            return false;
+        }
+        var timeOfPartyInMilliseconds = Date.parse(party.startTime);
+        var rightNow = new Date();
+        var rightNowInMilliseconds = rightNow.getTime();
+        if( rightNowInMilliseconds >= timeOfPartyInMilliseconds){
+            partyHasStarted = true;
+        }
+        return partyHasStarted;
+    }
+
     public static isPartyToday(party : Party){
         var partyIsToday = false;
         if(party == null){
             return partyIsToday;
         }
-        console.log("Party start time = " + party.startTime);
         var timeOfPartyInMilliseconds = Date.parse(party.startTime);
-        
         var todayRightBeforeMidnight = new Date();
         todayRightBeforeMidnight.setHours(23);
         todayRightBeforeMidnight.setMinutes(59);
         var timeRightBeforeMidnightInMilliseconds = todayRightBeforeMidnight.getTime();
-        console.log("timeRightBeforeMidnightInMilliseconds = " + timeRightBeforeMidnightInMilliseconds);
-        console.log("timeOfPartyInMilliseconds = " + timeOfPartyInMilliseconds);
         if((timeRightBeforeMidnightInMilliseconds - timeOfPartyInMilliseconds) >= 0){
             partyIsToday = true;
         }
@@ -28,12 +38,9 @@ export class Utility {
         if(party == null){
             return partyIsThisWeek;
         }
-        console.log("Party start time = " + party.startTime);
         var currentTimeInMilliseconds = new Date().getTime();
         var aWeekFromNowInMilliseconds = currentTimeInMilliseconds + 604800000; // 604,800,000 milliseconds is eqaul to one week
         var timeOfPartyInMilliseconds = Date.parse(party.startTime);
-        console.log("aWeekFromNowInMilliseconds = " + aWeekFromNowInMilliseconds);
-        console.log("timeOfPartyInMilliseconds" + timeOfPartyInMilliseconds);
         if((aWeekFromNowInMilliseconds - timeOfPartyInMilliseconds) >= 0){
             partyIsThisWeek= true;
         }

@@ -19,6 +19,7 @@ declare var google;
 })
 export class EditPartyPage {
 
+  private tabName: string = "Host Tab";
   @ViewChild('map') mapElement: ElementRef;
   public map: any;
   geocoder : any;
@@ -67,7 +68,7 @@ export class EditPartyPage {
       this.updateMapMarker();
     })
     .catch((err) => {
-        console.log(err);
+      this.allMyData.logError(this.tabName, "google maps", "getCurrentPosition error: Err msg = " + err, this.http);
     });
   }
 
@@ -137,7 +138,6 @@ export class EditPartyPage {
         tempThis.partyMarker.setMap(null);
         tempThis.party.latitude = 1000; // represents the address being faulty
         tempThis.party.longitude = 1000; // represents the address being faulty
-        console.log('Geocode was not successful for the following reason: ' + status);
       }
     });
   }
@@ -176,9 +176,9 @@ export class EditPartyPage {
           this.navCtrl.popTo(this.navCtrl.getByIndex(this.navCtrl.length()-3));
         })
         .catch((err) => {
-            this.inputError = "Unknown error - please try editing the party again.";
+            this.inputError = "An error occurred - please try editing the party again.";
             this.showEditPartyErrorAlert();
-            console.log(err);
+            this.allMyData.logError(this.tabName, "server", "editParty query error: Err msg = " + err, this.http);
         });
     }else{
       this.showEditPartyErrorAlert();
@@ -298,9 +298,9 @@ export class EditPartyPage {
                 this.navCtrl.popTo(this.navCtrl.getByIndex(this.navCtrl.length()-3));
             })
             .catch((err) => {
-                this.inputError = "Unknown error - please try removing yourself as a host again.";
+                this.inputError = "An error occurred - please try removing yourself as a host again.";
                 this.showEditPartyErrorAlert();
-                console.log(err);
+                this.allMyData.logError(this.tabName, "server", "removeYourselfAsHostForParty query error: Err msg = " + err, this.http);
             });
         }
     });
@@ -326,9 +326,9 @@ export class EditPartyPage {
                 this.navCtrl.popTo(this.navCtrl.getByIndex(this.navCtrl.length()-3));
             })
             .catch((err) => {
-                this.inputError = "Unknown error - please try deleting the party again.";
+                this.inputError = "An error occurred - please try deleting the party again.";
                 this.showEditPartyErrorAlert();
-                console.log(err);
+                this.allMyData.logError(this.tabName, "server", "deleteParty query error: Err msg = " + err, this.http);
             });
         }
     });

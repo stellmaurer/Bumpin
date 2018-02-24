@@ -11,6 +11,7 @@ import {Utility} from "../../model/utility";
 })
 
 export class BarPopover {
+  private tabName: string = "Find Tab";
   public bar : Bar;
   private allMyData : AllMyData;
   private http : Http;
@@ -36,7 +37,6 @@ export class BarPopover {
   synchronizeLatestBarData(){
    let indexOfBar = Utility.findIndexOfBar(this.bar, this.allMyData.barsCloseToMe);
     if(indexOfBar == -1){
-      console.log("Bar has been removed. You cannot rate it anymore.");
       return;
     }
     this.bar = this.allMyData.barsCloseToMe[indexOfBar];
@@ -46,11 +46,11 @@ export class BarPopover {
     this.synchronizeLatestBarData();
     this.allMyData.rateBar(this.bar, rating, this.http)
         .then((res) => {
-        //console.log("Rating the bar query succeeded.");
+        
         })
         .catch((err) => {
-        console.log(err);
-    });
+          this.allMyData.logError(this.tabName, "server", "rateBar query error : Err msg = " + err, this.http);
+        });
   }
 
 
@@ -58,10 +58,10 @@ export class BarPopover {
     this.synchronizeLatestBarData();
     this.allMyData.changeAttendanceStatusToBar(this.bar, status, this.http)
           .then((res) => {
-            //console.log("Changing attendance status to the bar query succeeded.");
+            
           })
           .catch((err) => {
-            console.log(err);
+            this.allMyData.logError(this.tabName, "server", "changeAttendanceStatusToBar query error : Err msg = " + err, this.http);
         });
 
   }

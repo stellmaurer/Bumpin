@@ -16,6 +16,8 @@ import { NgZone } from '@angular/core';
 })
 export class HostPage {
 
+  private tabName: string = "Host Tab";
+
   constructor(private zone: NgZone, public allMyData : AllMyData, private http:Http, private navCtrl: NavController, public alertCtrl: AlertController) {
   }
 
@@ -31,24 +33,23 @@ export class HostPage {
       .then((res) => {
       })
       .catch((err) => {
-        console.log(err);
+        this.allMyData.logError(this.tabName, "server", "refreshPartiesImHosting query error: Err msg = " + err, this.http);
       });
 
       this.allMyData.refreshBarsImHosting(this.http)
       .then((res) => {
       })
       .catch((err) => {
-        console.log(err);
+        this.allMyData.logError(this.tabName, "server", "refreshBarsImHosting query error: Err msg = " + err, this.http);
       });
 
     })
     .catch((err) => {
-      console.log(err);
+      this.allMyData.logError(this.tabName, "server", "refreshPerson query error: Err msg = " + err, this.http);
     });
   }
 
   partySelected(party : Party) {
-    console.log(party.title + " selected");
     if(party.hosts.get(this.allMyData.me.facebookID).status == "Waiting"){
       this.acceptOrDeclineHostingAPartyAlert(party);
     }else{
@@ -57,7 +58,6 @@ export class HostPage {
   }
 
   barSelected(bar : Bar) {
-    console.log(bar.name + " selected");
     if(bar.hosts.get(this.allMyData.me.facebookID).status == "Waiting"){
       this.acceptOrDeclineHostingABarAlert(bar);
     }else{
@@ -87,7 +87,7 @@ export class HostPage {
             this.locallyRemovePartyFromPartiesImHosting(party);
           })
           .catch((err) => {
-              console.log(err);
+            this.allMyData.logError(this.tabName, "server", "declineInvitationToHostParty query error: Err msg = " + err, this.http);
           });
         }
     });
@@ -100,7 +100,7 @@ export class HostPage {
               this.navCtrl.push(EditPartyPage, {party: party}, {animate: false});
             })
             .catch((err) => {
-                console.log(err);
+              this.allMyData.logError(this.tabName, "server", "acceptInvitationToHostParty query error: Err msg = " + err, this.http);
             });
         }
     });
@@ -125,7 +125,7 @@ export class HostPage {
             this.locallyRemoveBarFromBarsImHosting(bar);
           })
           .catch((err) => {
-              console.log(err);
+            this.allMyData.logError(this.tabName, "server", "declineInvitationToHostBar query error: Err msg = " + err, this.http);
           });
         }
     });
@@ -138,7 +138,7 @@ export class HostPage {
               this.navCtrl.push(EditBarPage, {bar: bar}, {animate: false});
             })
             .catch((err) => {
-                console.log(err);
+              this.allMyData.logError(this.tabName, "server", "acceptInvitationToHostBar query error: Err msg = " + err, this.http);
             });
         }
     });

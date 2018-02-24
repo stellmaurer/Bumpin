@@ -19,6 +19,7 @@ declare var google;
 })
 export class CreateBarPage {
 
+  private tabName: string = "Host Tab";
   @ViewChild('map') mapElement: ElementRef;
   public map: any;
   geocoder : any;
@@ -36,17 +37,13 @@ export class CreateBarPage {
     this.datePickerMinYear = (new Date()).getFullYear();
   }
 
-  ionViewWillLeave(){
-    console.log(this.bar);
-  }
-
   ionViewDidLoad(){
     this.loadMap()
     .then((res) => {
       
     })
     .catch((err) => {
-        console.log(err);
+      this.allMyData.logError(this.tabName, "google maps", "getCurrentPosition error: Err msg = " + err, this.http);
     });
   }
 
@@ -77,7 +74,7 @@ export class CreateBarPage {
     })
     .catch((err) => {
       this.updateMapMarker();
-      console.log(err);
+      this.allMyData.logError(this.tabName, "server", "getAddressForBarKey query error: Err msg = " + err, this.http);
     });
   }
 
@@ -144,7 +141,6 @@ export class CreateBarPage {
         tempThis.barMarker.setMap(null);
         tempThis.bar.latitude = 1000; // represents the address being faulty
         tempThis.bar.longitude = 1000; // represents the address being faulty
-        console.log('Geocode was not successful for the following reason: ' + status);
       }
     });
   }
@@ -161,9 +157,9 @@ export class CreateBarPage {
         this.navCtrl.popTo(this.navCtrl.getByIndex(this.navCtrl.length()-3));
       })
       .catch((err) => {
-        this.inputError = "Unknown error - please try creating the bar again.";
+        this.inputError = "An error occurred - please try creating the bar again.";
         this.showCreateBarErrorAlert();
-        console.log(err);
+        this.allMyData.logError(this.tabName, "server", "createBar query error: Err msg = " + err, this.http);
       });
     }else{
       this.showCreateBarErrorAlert();

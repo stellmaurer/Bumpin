@@ -13,6 +13,9 @@ import { LocationTracker } from '../../providers/location-tracker';
 
 @Injectable()
 export class Login {
+
+  private tabName : string = "More Tab";
+
   constructor(private allMyData : AllMyData, private http:Http, private events : Events, private fb : Facebook, private locationTracker: LocationTracker) {}
 
   public login(){
@@ -20,7 +23,6 @@ export class Login {
       this.fb.getLoginStatus()
       .then((response: FacebookLoginResponse) => {
         if (response.status === 'connected') {
-          console.log("You are logged into Facebook already.");
           // the user is logged in and has authenticated your
           // app, and response.authResponse supplies
           // the user's ID, a valid access token, a signed
@@ -29,65 +31,62 @@ export class Login {
           let accessToken = response.authResponse.accessToken;
           this.createOrUpdatePersonWithFacebookInfo(accessToken)
           .then((res) => {
-            console.log("createOrUpdatePersonWithFacebookInfo function successfully completed.");
             resolve("Login process completed.");
           })
           .catch(err => {
-            console.log("Error in createOrUpdatePersonWithFacebookInfo function.");
+            this.allMyData.logError(this.tabName, "server", "createOrUpdatePersonWithFacebookInfo function error: Err msg = " + err, this.http);
             reject(err);
           });
         } else if (response.status === 'not_authorized') {
           // the user is logged in to Facebook, 
           // but has not authenticated your app
-          console.log("User hasn't authenticated app - whatever that means...");
+          this.allMyData.logError(this.tabName, "login", "The user is logged in to Facebook, but has not authenticated your app.", this.http);
           reject("User hasn't authenticated app - whatever that means...");
         } else {
           // the user isn't logged in to Facebook.
           this.fb.login(['public_profile', 'user_friends'])
           .then((response: FacebookLoginResponse) => {
-            console.log('Logged into Facebook!', response);
             let accessToken = response.authResponse.accessToken;
             this.createOrUpdatePersonWithFacebookInfo(accessToken)
             .then((res) => {
               resolve("Login process completed.");
             })
             .catch(err => {
+              this.allMyData.logError(this.tabName, "server", "createOrUpdatePersonWithFacebookInfo function error: Err msg = " + err, this.http);
               reject(err);
             });
           })
-          .catch(e => {
-            console.log('Error logging into Facebook', e);
-            console.log("Trying to log you out and retry.");
+          .catch(err => {
+            this.allMyData.logError(this.tabName, "login", "Error logging into Facebook : Err msg = " + err, this.http);
             this.logout()
             .then((response: FacebookLoginResponse) => {
               this.fb.login(['public_profile', 'user_friends'])
               .then((response: FacebookLoginResponse) => {
-                console.log('Logged into Facebook!', response);
                 let accessToken = response.authResponse.accessToken;
                 this.createOrUpdatePersonWithFacebookInfo(accessToken)
                 .then((res) => {
                   resolve("Login process completed.");
                 })
                 .catch(err => {
-                  console.log("Error in createOrUpdatePersonWithFacebookInfo function.");
+                  this.allMyData.logError(this.tabName, "server", "Error with createOrUpdatePersonWithFacebookInfo function : Err msg = " + err, this.http);
                   reject(err);
                 });
               })
-              .catch(e => {
-                console.log("We tried logging you out of Facebook and trying to log in again, but it didn't work. Here's the error: " + e);
-                reject(e);
+              .catch(err => {
+                this.allMyData.logError(this.tabName, "login", "We tried logging the user out of Facebook and trying to log them in again, but it didn't work. : Err msg = " + err, this.http);
+                reject(err);
               });
             })
-            .catch(e => {
-              console.log('Error logging out of Facebook', e);
-              reject(e);
+            .catch(err => {
+              this.allMyData.logError(this.tabName, "login", "Error logging out of Facebook : Err msg = " + err, this.http);
+              reject(err);
             });
           });
         }
       })
-      .catch(e => {
-        console.log('Error checking status of login.', e);
-        reject(e);
+      .catch(err => {
+        this.allMyData.logError(this.tabName, "login", "Error checking status of login : Err msg = " + err, this.http);
+        reject(err);
       });
     });
   }
@@ -96,7 +95,6 @@ export class Login {
     return new Promise((resolve, reject) => {
       this.fb.logout()
       .then((response: FacebookLoginResponse) => {
-        console.log("Logged out successfully.");
         this.login()
         .then((res) => {
           this.events.publish("aDifferentUserJustLoggedIn");
@@ -107,7 +105,6 @@ export class Login {
         });
       })
       .catch(e => {
-        console.log('Error logging out.', e);
         reject(e);
       });
     });

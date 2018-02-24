@@ -20,15 +20,16 @@ import { Events } from 'ionic-angular';
   templateUrl: 'rate.html',
 })
 export class RatePage {
+  private tabName: string = "Rate Tab";
   public party : Party;
   public bar : Bar;
   constructor(private allMyData : AllMyData, private events : Events, private http:Http, public navCtrl: NavController) {}
 
   ionViewWillEnter(){
-    console.log("updating the rate tab UI");
+    //console.log("updating the rate tab UI");
       this.updateTheUI();
       this.events.subscribe("timeToUpdateUI",() => {
-        console.log("********************* updating the rate tab UI now");
+        //console.log("********************* updating the rate tab UI now");
         this.updateTheUI();
       });
   }
@@ -50,7 +51,6 @@ export class RatePage {
       }
       this.synchronizeLatestPartyData();
       this.synchronizeLatestBarData();
-      console.log(this.party.invitees);
   }
 
 
@@ -58,7 +58,6 @@ export class RatePage {
    if(this.party != null){
     let indexOfParty = Utility.findIndexOfParty(this.party, this.allMyData.invitedTo);
     if(indexOfParty == -1){
-      console.log("Party has been removed. You cannot rate it anymore.");
       return;
     }
     this.party = this.allMyData.invitedTo[indexOfParty];
@@ -69,7 +68,6 @@ export class RatePage {
    if(this.bar != null){
     let indexOfBar = Utility.findIndexOfBar(this.bar, this.allMyData.barsCloseToMe);
     if(indexOfBar == -1){
-      console.log("Bar has been removed. You cannot rate it anymore.");
       return;
     }
     this.bar = this.allMyData.barsCloseToMe[indexOfBar];
@@ -80,10 +78,10 @@ export class RatePage {
     this.synchronizeLatestPartyData();
     this.allMyData.rateParty(this.party, rating, this.http)
     .then((res) => {
-        //console.log("Rating the party query succeeded.");
+        
     })
     .catch((err) => {
-        console.log(err);
+        this.allMyData.logError(this.tabName, "server", "rateParty query error : Err msg = " + err, this.http);
     });
   }
 
@@ -91,10 +89,10 @@ export class RatePage {
     this.synchronizeLatestBarData();
     this.allMyData.rateBar(this.bar, rating, this.http)
         .then((res) => {
-        //console.log("Rating the bar query succeeded.");
+          
         })
         .catch((err) => {
-        console.log(err);
-    });
+          this.allMyData.logError(this.tabName, "server", "rateBar query error : Err msg = " + err, this.http);
+        });
   }
 }

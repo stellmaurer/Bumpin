@@ -101,6 +101,7 @@ export class AllMyData{
                 party.invitees.get(this.me.facebookID).timeOfLastKnownLocation = timeOfLastKnownLocation;
                 party.refreshPartyStats();
             });
+            this.events.publish("timeToUpdateUI");
             return new Promise((resolve, reject) => {
                 var query = new Query(this, http);
                 query.rateParty(party.partyID, this.me.facebookID, rating, timeLastRated, timeOfLastKnownLocation)
@@ -137,6 +138,7 @@ export class AllMyData{
                 bar.attendees.get(this.me.facebookID).timeOfLastKnownLocation = timeOfLastKnownLocation;
                 bar.refreshBarStats();
             });
+            this.events.publish("timeToUpdateUI");
             return new Promise((resolve, reject) => {
                 var query = new Query(this, http);
                 query.rateBar(bar.barID, this.me.facebookID, this.me.isMale, this.me.name, rating, bar.attendees.get(this.me.facebookID).status, timeLastRated, timeOfLastKnownLocation)

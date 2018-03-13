@@ -276,7 +276,7 @@ export class Bar {
             }
         }else{
             this.averageRatingNumber = 0;
-            this.averageRating = "None";
+            this.averageRating = "Weak";
         }
     }
 }

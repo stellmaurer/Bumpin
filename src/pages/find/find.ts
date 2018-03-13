@@ -24,6 +24,11 @@ declare var google;
   templateUrl: 'find.html'
 })
 export class FindPage {
+
+  private bumpinMarker = "http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=|32DB64";
+  private heatingUpMarker = "http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=|FFFF00";
+  private decentMarker = "http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=|FFA500";
+  private weakMarker = "http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=|F53D3D";
  
   private tabName: string = "Find Tab";
   @ViewChild('map') mapElement: ElementRef;
@@ -154,6 +159,10 @@ export class FindPage {
     this.events.subscribe("timeToUpdateUI",() => {
         this.updateTheUI();
     });
+
+    this.events.subscribe("timeToRefreshMapMarkers",() => {
+      this.refreshMapMarkers();
+    });
   }
 
   private updateTheUI(){
@@ -163,6 +172,12 @@ export class FindPage {
     for(let i = 0; i < this.allMyData.barsCloseToMe.length; i++){
       this.allMyData.barsCloseToMe[i].refreshBarStats();
     }
+    this.refreshMapMarkers();
+  }
+
+  private refreshMapMarkers(){
+    this.refreshPartyMarkers();
+    this.refreshBarMarkers();
   }
 
   private enableUserLocation(){
@@ -242,7 +257,9 @@ export class FindPage {
         // the party might have new myCoordinates
         var coordinates = {lat: value.latitude, lng: value.longitude};
         marker.setPosition(coordinates);
+        marker.setIcon(this.getMarkerIcon(value));
         marker.party = value;
+        marker.setLabel(String(value.numberOfPeopleAtParty));
       }
       // Case 3 : this party isn't on the map
       else{
@@ -251,12 +268,12 @@ export class FindPage {
         if(this.partyMarkerShouldBeVisible(value) == false){
           mapToAttachToMarker = null;
         }
-        var image = 'assets/darkgreen_MarkerP.png';
         marker = new google.maps.Marker({
           map: mapToAttachToMarker,
           animation: google.maps.Animation.DROP,
           position: {lat: value.latitude, lng: value.longitude},
-          icon : image,
+          icon : this.getMarkerIcon(value),
+          label : String(value.numberOfPeopleAtParty),
           party : value
         });
         marker.addListener('click', function() {
@@ -307,16 +324,18 @@ export class FindPage {
         // the bar might have new myCoordinates
         var coordinates = {lat: value.latitude, lng: value.longitude};
         marker.setPosition(coordinates);
+        marker.setIcon(this.getMarkerIcon(value));
+        marker.setLabel(String(value.numberOfPeopleAtBar));
         marker.bar = value;
       }
       // Case 3 : this bar isn't on the map
       else{
-        var image = 'assets/blue_MarkerB.png';
         marker = new google.maps.Marker({
           map: this.map,
           animation: google.maps.Animation.DROP,
           position: {lat: value.latitude, lng: value.longitude},
-          icon : image,
+          icon : this.getMarkerIcon(value),
+          label: String(value.numberOfPeopleAtBar),
           bar : value
         });
         marker.addListener('click', function() {
@@ -329,14 +348,15 @@ export class FindPage {
 
   private addPartiesToMap(parties : Party[]){
     if(parties != null){
-      var image = 'assets/darkgreen_MarkerP.png';
       for(var i = 0; i < parties.length; i++){
         let party : Party = parties[i];
         var marker = new google.maps.Marker({
           map: this.map,
           animation: google.maps.Animation.DROP,
           position: {lat: party.latitude, lng: party.longitude},
-          icon : image,
+          icon : this.getMarkerIcon(party),
+          label: String(party.numberOfPeopleAtParty),
+          labelOrigin: new google.maps.Point(9, 9),
           party : party
         });
         var tempThis = this;
@@ -350,14 +370,14 @@ export class FindPage {
 
   private addBarsToMap(bars : Bar[]){
     if(bars != null){
-      var image = 'assets/blue_MarkerB.png';
       for(var i = 0; i < bars.length; i++){
         let bar : Bar = bars[i];
         var marker = new google.maps.Marker({
           map: this.map,
           animation: google.maps.Animation.DROP,
           position: {lat: bar.latitude, lng: bar.longitude},
-          icon : image,
+          icon : this.getMarkerIcon(bar),
+          label: String(bar.numberOfPeopleAtBar),
           bar : bar
         });
         var tempThis = this;
@@ -367,6 +387,24 @@ export class FindPage {
         this.barMarkersOnMap.set(bar.barID, marker);
       }
     }
+  }
+
+  private getMarkerIcon(partyOrBar: any): any{
+    let iconURL = this.bumpinMarker;
+    if(partyOrBar.averageRating == "Heat'n-up"){
+      iconURL = this.heatingUpMarker;
+    }
+    if(partyOrBar.averageRating == "Decent"){
+      iconURL = this.decentMarker;
+    }
+    if(partyOrBar.averageRating == "Weak"){
+      iconURL = this.weakMarker;
+    }
+    var markerIcon = {
+      url: iconURL,
+      labelOrigin: new google.maps.Point(10,11)
+    };
+    return markerIcon;
   }
 
   private addInfoWindow(marker, content){

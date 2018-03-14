@@ -89,7 +89,8 @@ export class FindPage {
       this.allMyData.refreshBarsCloseToMe(this.myCoordinates,this.http)
       .then((res) => {
         this.events.publish("updateMyAtBarAndAtPartyStatuses");
-        this.addBarsToMap(this.allMyData.barsCloseToMe);
+        //this.addBarsToMap(this.allMyData.barsCloseToMe);
+        this.refreshBarMarkers();
       })
       .catch((err) => {
         this.allMyData.logError(this.tabName, "server", "refreshBarsCloseToMe query error : Err msg = " + err, this.http);
@@ -98,7 +99,8 @@ export class FindPage {
       this.allMyData.refreshParties(this.http)
       .then((res) => {
         this.events.publish("updateMyAtBarAndAtPartyStatuses");
-        this.addPartiesToMap(this.allMyData.invitedTo);
+        //this.addPartiesToMap(this.allMyData.invitedTo);
+        this.refreshPartyMarkers();
       })
       .catch((err) => {
         this.allMyData.logError(this.tabName, "server", "refreshParties query error : Err msg = " + err, this.http);
@@ -124,6 +126,7 @@ export class FindPage {
 
     this.allMyData.startPeriodicDataRetrieval(this.http);
     this.events.subscribe("timeToRefreshPartyAndBarData",() => {
+      console.log("event: timeToRefreshPartyAndBarData");
       this.allMyData.refreshPerson(this.http)
       .then((res) => {
         Promise.all([this.allMyData.refreshBarsCloseToMe(this.myCoordinates, this.http), this.allMyData.refreshParties(this.http)]).then(thePromise => {
@@ -204,7 +207,7 @@ export class FindPage {
         }
         
         this.map = new google.maps.Map(this.mapElement.nativeElement, mapOptions);
-        var image = 'assets/greencircle.png';
+        let image = 'assets/greencircle.png';
         this.userLocationMarker = new google.maps.Marker({
           map: this.map,
           position: {lat: position.coords.latitude, lng: position.coords.longitude},
@@ -231,6 +234,7 @@ export class FindPage {
     Case 3 : this party isn't on the map
   */
   private refreshPartyMarkers(){
+    console.log("in refreshPartyMarkers");
     var thisInstance = this;
     // Transform party array into a hashmap for quick access in Case 1
     var parties = this.allMyData.invitedTo;
@@ -242,7 +246,7 @@ export class FindPage {
     // Case 1 : cleanup parties that are on the map but are no longer in allMyData.invitedTo
     this.partyMarkersOnMap.forEach((value: any, key: string) => {
       if(partiesMap.has(key) == false){
-        var theMarkerToRemove = this.partyMarkersOnMap.get(key);
+        let theMarkerToRemove = this.partyMarkersOnMap.get(key);
         theMarkerToRemove.setMap(null);
         this.partyMarkersOnMap.delete(key);
       }
@@ -250,7 +254,7 @@ export class FindPage {
 
     // Case 2 and 3
     partiesMap.forEach((value: Party, key: string) => {
-      var marker : any;
+      let marker : any;
       // Case 2 : this party is on the map
       if(this.partyMarkersOnMap.has(key) == true){
         marker = this.partyMarkersOnMap.get(key);
@@ -264,10 +268,11 @@ export class FindPage {
       // Case 3 : this party isn't on the map
       else{
         // Check the filters to see if we should put this marker on the map
-        var mapToAttachToMarker = this.map;
+        let mapToAttachToMarker = this.map;
         if(this.partyMarkerShouldBeVisible(value) == false){
           mapToAttachToMarker = null;
         }
+        console.log("adding new party marker");
         marker = new google.maps.Marker({
           map: mapToAttachToMarker,
           animation: google.maps.Animation.DROP,
@@ -297,6 +302,7 @@ export class FindPage {
     Case 3 : this bar isn't on the map
   */
   private refreshBarMarkers(){
+    console.log("in refreshBarMarkers");
     var thisInstance = this;
     // Transform bar array into a hashmap for quick access in Case 1
     var bars = this.allMyData.barsCloseToMe;
@@ -308,7 +314,7 @@ export class FindPage {
     // Case 1 : cleanup bars that are on the map but are no longer in allMyData.invitedTo
     this.barMarkersOnMap.forEach((value: any, key: string) => {
       if(barsMap.has(key) == false){
-        var theMarkerToRemove = this.barMarkersOnMap.get(key);
+        let theMarkerToRemove = this.barMarkersOnMap.get(key);
         theMarkerToRemove.setMap(null);
         this.barMarkersOnMap.delete(key);
       }
@@ -316,13 +322,13 @@ export class FindPage {
 
     // Case 2 and 3
     barsMap.forEach((value: Bar, key: string) => {
-      var marker : any;
+      let marker : any;
       // Case 2 : this bar is on the map
       if(this.barMarkersOnMap.has(key) == true){
         marker = this.barMarkersOnMap.get(key);
         //console.log(marker);
         // the bar might have new myCoordinates
-        var coordinates = {lat: value.latitude, lng: value.longitude};
+        let coordinates = {lat: value.latitude, lng: value.longitude};
         marker.setPosition(coordinates);
         marker.setIcon(this.getMarkerIcon(value));
         marker.setLabel(String(value.numberOfPeopleAtBar));
@@ -330,6 +336,7 @@ export class FindPage {
       }
       // Case 3 : this bar isn't on the map
       else{
+        console.log("adding new bar marker");
         marker = new google.maps.Marker({
           map: this.map,
           animation: google.maps.Animation.DROP,
@@ -346,17 +353,19 @@ export class FindPage {
     });
   }
 
-  private addPartiesToMap(parties : Party[]){
+  /*private addPartiesToMap(parties : Party[]){
+    console.log("in addPartiesToMap");
     if(parties != null){
-      for(var i = 0; i < parties.length; i++){
+      for(let i = 0; i < parties.length; i++){
         let party : Party = parties[i];
-        var marker = new google.maps.Marker({
+        console.log("adding new party marker");
+        let marker = new google.maps.Marker({
           map: this.map,
           animation: google.maps.Animation.DROP,
           position: {lat: party.latitude, lng: party.longitude},
           icon : this.getMarkerIcon(party),
           label: String(party.numberOfPeopleAtParty),
-          labelOrigin: new google.maps.Point(9, 9),
+          labelOrigin: new google.maps.Point(10, 11),
           party : party
         });
         var tempThis = this;
@@ -369,10 +378,12 @@ export class FindPage {
   }
 
   private addBarsToMap(bars : Bar[]){
+    console.log("in addBarsToMap");
     if(bars != null){
-      for(var i = 0; i < bars.length; i++){
+      for(let i = 0; i < bars.length; i++){
         let bar : Bar = bars[i];
-        var marker = new google.maps.Marker({
+        console.log("adding new bar marker");
+        let marker = new google.maps.Marker({
           map: this.map,
           animation: google.maps.Animation.DROP,
           position: {lat: bar.latitude, lng: bar.longitude},
@@ -387,7 +398,7 @@ export class FindPage {
         this.barMarkersOnMap.set(bar.barID, marker);
       }
     }
-  }
+  }*/
 
   private getMarkerIcon(partyOrBar: any): any{
     let iconURL = this.bumpinMarker;
@@ -400,7 +411,7 @@ export class FindPage {
     if(partyOrBar.averageRating == "Weak"){
       iconURL = this.weakMarker;
     }
-    var markerIcon = {
+    let markerIcon = {
       url: iconURL,
       labelOrigin: new google.maps.Point(10,11)
     };
@@ -497,7 +508,7 @@ export class FindPage {
   }
 
   partyMarkerShouldBeVisible(party : Party){
-    var markerShouldBeVisible = false;
+    let markerShouldBeVisible = false;
     if(this.includeAllParties == true){
       markerShouldBeVisible = true;
     }else if(this.includePartiesThisWeek == true){
@@ -520,7 +531,7 @@ export class FindPage {
 
   showPartyMarkersForTodayAndHideEverythingElse(){
     this.partyMarkersOnMap.forEach((value: any, key: string) => {
-        var theMarker = this.partyMarkersOnMap.get(key);
+        let theMarker = this.partyMarkersOnMap.get(key);
         if(Utility.isPartyToday(theMarker.party) == true){
           theMarker.setMap(this.map);
         }else{
@@ -531,7 +542,7 @@ export class FindPage {
 
   showPartyMarkersForThisWeekAndHideEverythingElse(){
     this.partyMarkersOnMap.forEach((value: any, key: string) => {
-        var theMarker = this.partyMarkersOnMap.get(key);
+        let theMarker = this.partyMarkersOnMap.get(key);
         if(Utility.isPartyThisWeek(theMarker.party) == true){
           theMarker.setMap(this.map);
         }else{
@@ -542,28 +553,30 @@ export class FindPage {
 
   hideAllPartyMarkers(){
     this.partyMarkersOnMap.forEach((value: any, key: string) => {
-        var theMarkerToHide = this.partyMarkersOnMap.get(key);
+        let theMarkerToHide = this.partyMarkersOnMap.get(key);
         theMarkerToHide.setMap(null);
     });
   }
 
   showAllPartyMarkers(){
     this.partyMarkersOnMap.forEach((value: any, key: string) => {
-        var theMarkerToShow = this.partyMarkersOnMap.get(key);
+        let theMarkerToShow = this.partyMarkersOnMap.get(key);
         theMarkerToShow.setMap(this.map);
     });
   }
 
   hideBarMarkers(){
+    console.log("in hideBarMarkers");
     this.barMarkersOnMap.forEach((value: any, key: string) => {
-        var theMarkerToHide = this.barMarkersOnMap.get(key);
+        let theMarkerToHide = this.barMarkersOnMap.get(key);
         theMarkerToHide.setMap(null);
     });
   }
 
   showBarMarkers(){
+    console.log("in showBarMarkers");
     this.barMarkersOnMap.forEach((value: any, key: string) => {
-        var theMarkerToShow = this.barMarkersOnMap.get(key);
+        let theMarkerToShow = this.barMarkersOnMap.get(key);
         theMarkerToShow.setMap(this.map);
     });
   }

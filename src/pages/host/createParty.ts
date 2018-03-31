@@ -1,14 +1,21 @@
+/*******************************************************
+ * Copyright (C) 2018 Stephen Ellmaurer <stellmaurer@gmail.com>
+ * 
+ * This file is part of the Bumpin mobile app project.
+ * 
+ * The Bumpin project and any of the files within the Bumpin
+ * project can not be copied and/or distributed without
+ * the express permission of Stephen Ellmaurer.
+ *******************************************************/
+
 import { Component, ViewChild, ElementRef } from '@angular/core';
-import {Http, Headers, RequestOptions} from '@angular/http';
+import {Http} from '@angular/http';
 import { NavParams, NavController, AlertController} from 'ionic-angular';
-import { Person } from '../../model/person';
 import { AllMyData} from '../../model/allMyData';
-import { Party, Invitee } from '../../model/party';
-import { Bar } from '../../model/bar';
-import { Geolocation, Geoposition, Geocoder} from 'ionic-native';
+import { Party } from '../../model/party';
+import { Geolocation } from 'ionic-native';
 import { EditInviteeListPage } from './editInviteeList';
 import { EditHostListPage } from './editHostList';
-import { HostPage } from './host';
 import { Utility } from "../../model/utility";
 
 declare var google;

@@ -1,15 +1,25 @@
+/*******************************************************
+ * Copyright (C) 2018 Stephen Ellmaurer <stellmaurer@gmail.com>
+ * 
+ * This file is part of the Bumpin mobile app project.
+ * 
+ * The Bumpin project and any of the files within the Bumpin
+ * project can not be copied and/or distributed without
+ * the express permission of Stephen Ellmaurer.
+ *******************************************************/
+
 /********************* NOTE! - still may need to implement this sometime later on if it's an issue
 * Edge case: new party data is brought in while the user rates a party.
 *     In this case, the new party data will overwrite the local data
 *     and may confuse the user.
 */
 
-import { Component, ViewChild, ElementRef } from '@angular/core';
+import { Component } from '@angular/core';
 import {Http} from '@angular/http';
 
 import { NavController } from 'ionic-angular';
 import {Party} from "../../model/party";
-import {Bar, Attendee} from "../../model/bar";
+import {Bar} from "../../model/bar";
 import { AllMyData } from "../../model/allMyData";
 import {Utility} from "../../model/utility";
 import { Events } from 'ionic-angular';
@@ -26,10 +36,8 @@ export class RatePage {
   constructor(private allMyData : AllMyData, private events : Events, private http:Http, public navCtrl: NavController) {}
 
   ionViewWillEnter(){
-    //console.log("updating the rate tab UI");
       this.updateTheUI();
       this.events.subscribe("timeToUpdateUI",() => {
-        //console.log("********************* updating the rate tab UI now");
         this.updateTheUI();
       });
   }
@@ -47,7 +55,7 @@ export class RatePage {
       } else {
           this.party = null;
           this.bar = null;
-          console.log("There's a bug somewhere in the findThePartyOrBarIAmAt function.");
+          this.allMyData.logError(this.tabName, "client", "There's a bug somewhere in the findThePartyOrBarIAmAt function.", this.http);
       }
       this.synchronizeLatestPartyData();
       this.synchronizeLatestBarData();

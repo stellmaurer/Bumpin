@@ -1,10 +1,19 @@
+/*******************************************************
+ * Copyright (C) 2018 Stephen Ellmaurer <stellmaurer@gmail.com>
+ * 
+ * This file is part of the Bumpin mobile app project.
+ * 
+ * The Bumpin project and any of the files within the Bumpin
+ * project can not be copied and/or distributed without
+ * the express permission of Stephen Ellmaurer.
+ *******************************************************/
+
 import { Bar, Attendee } from './bar';
 import { Party, Invitee, Host } from './party';
 import { Person } from './person';
 import { Friend } from './friend';
 import { Query } from "./query";
 import { Http } from '@angular/http';
-import { Component } from '@angular/core';
 import { Events } from 'ionic-angular';
 import { Utility } from "./utility";
 import { Injectable, NgZone } from '@angular/core';
@@ -40,7 +49,7 @@ export class AllMyData{
 
     public startPeriodicDataRetrieval(http : Http){
         var tempThis = this;
-        var id = setInterval(function(){
+        setInterval(function(){
             tempThis.events.publish("timeToRefreshPartyAndBarData");
         }, 60000);
     }
@@ -53,7 +62,6 @@ export class AllMyData{
                 resolve("AllMyData class: refreshMyDataFromFacebook query succeeded.");
             })
             .catch((err) => {
-                console.log("AllMyData class: error in refreshMyDataFromFacebook.");
                 reject(err);
             });
         });
@@ -64,14 +72,12 @@ export class AllMyData{
             var query = new Query(this, http);
             query.createOrUpdatePerson(this.me.facebookID, this.me.isMale, this.me.name)
             .then((res) => {
-                //console.log(res);
                 return query.getPerson(this.me.facebookID);
             })
             .then((res) => {
                 resolve("CreateUpdateMeInDatabase query succeeded.");
             })
             .catch((err) => {
-                console.log(err);
                 reject(err);
             });
         });
@@ -82,7 +88,6 @@ export class AllMyData{
             var query = new Query(this, http);
             query.getPerson(this.me.facebookID)
             .then((res) => {
-                //console.log(this);
                 resolve("getPerson query succeeded.");
             })
             .catch((err) => {
@@ -351,11 +356,9 @@ export class AllMyData{
 
     public refreshBarsCloseToMe(coordinates : any, http : Http){
         return new Promise((resolve, reject) => {
-            //console.log(coordinates);
             var query = new Query(this, http);
             query.getBarsCloseToMe(coordinates)
             .then((res) => {
-                //console.log(this);
                 resolve("barsCloseToMe query succeeded.");
             })
             .catch((err) => {
@@ -370,6 +373,24 @@ export class AllMyData{
             query.getPartiesImInvitedTo()
             .then((res) => {
                 resolve("getPartiesImInvitedTo query succeeded.");
+            })
+            .catch((err) => {
+                reject(err);
+            });
+        });
+    }
+
+    public sendInvitationsAsGuestOfParty(party : Party, inviteesToAdd : Map<string,Invitee>, http : Http){
+        return new Promise((resolve, reject) => {
+            var query = new Query(this, http);
+            query.sendInvitationsAsGuestOfParty(party, inviteesToAdd)
+            .then((res) => {
+                this.zone.run(() => {
+                    inviteesToAdd.forEach((value: any, key: string) => {
+                        party.invitees.set(key, value);
+                    });
+                });
+                resolve("sendInvitationsAsGuestOfParty query succeeded.");
             })
             .catch((err) => {
                 reject(err);

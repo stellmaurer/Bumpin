@@ -1,8 +1,18 @@
+/*******************************************************
+ * Copyright (C) 2018 Stephen Ellmaurer <stellmaurer@gmail.com>
+ * 
+ * This file is part of the Bumpin mobile app project.
+ * 
+ * The Bumpin project and any of the files within the Bumpin
+ * project can not be copied and/or distributed without
+ * the express permission of Stephen Ellmaurer.
+ *******************************************************/
+
 import { Component } from '@angular/core';
-import {ViewController,NavParams, NavController} from 'ionic-angular';
-import {Bar, Attendee, Host} from "../../model/bar";
+import {ViewController,NavParams} from 'ionic-angular';
+import {Bar} from "../../model/bar";
 import { AllMyData } from "../../model/allMyData";
-import {Http, Headers, RequestOptions} from '@angular/http';
+import {Http} from '@angular/http';
 import {Utility} from "../../model/utility";
 
 @Component({

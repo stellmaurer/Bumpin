@@ -1,3 +1,13 @@
+/*******************************************************
+ * Copyright (C) 2018 Stephen Ellmaurer <stellmaurer@gmail.com>
+ * 
+ * This file is part of the Bumpin mobile app project.
+ * 
+ * The Bumpin project and any of the files within the Bumpin
+ * project can not be copied and/or distributed without
+ * the express permission of Stephen Ellmaurer.
+ *******************************************************/
+
 import { Bar } from './bar';
 import { Party, Invitee, Host } from './party';
 import { Person } from './person';
@@ -5,7 +15,6 @@ import { Friend } from './friend';
 import { AllMyData } from './allMyData';
 import { Http, Headers, RequestOptions } from '@angular/http';
 import { deserialize } from "serializer.ts/Serializer";
-import { Geolocation } from 'ionic-native';
 
 export class Query{
     constructor(private allMyData : AllMyData, private http : Http){
@@ -24,12 +33,9 @@ export class Query{
 
     // curl "https://graph.facebook.com/me?fields=id,name,gender,friends&access_token=EAACEdEose0cBAB6rZA5M4FggQWjpvo7FUv0iRA4xpFZBZAdL5ElYrbNC92YAaaf1gy9zyVYfxyHWE51YcQ6Jh7hFhP9cgoJhQQapczYr1qZAs7ZCa4Re3ifb9q1zRBdVybE5KvydgUFo5Rs6DvEKZCWuFUdpMbjtkzQXMWh8dSGgvAWDah0rNTAZBIzo8JJxyAZD"
     public refreshMyDataFromFacebook(accessToken : string){
-        //console.log("Query.ts: in refreshMyDataFromFacebook");
         return new Promise((resolve, reject) => {
             var url = "https://graph.facebook.com/me?fields=id,name,gender,friends{id,name,gender}&access_token=" + accessToken;
-            //console.log("Sending the Facebook request now");
             this.http.get(url).map(res => res.json()).subscribe(data => {
-                //console.log("Facebook data retrieved.");
                 // TODO: Might need to eventually check for an error here.
                 this.createMyFriendList(data);
                 this.allMyData.me.facebookID = data.id;
@@ -85,7 +91,6 @@ export class Query{
     }
     
     public createOrUpdatePerson(facebookID : string, isMale : boolean, name : string){
-        // let body = "facebookID=10155613117039816&isMale=true&name=Steve%20Ellmaurer";
         return new Promise((resolve, reject) => {
             var url = "http://bumpin-env.us-west-2.elasticbeanstalk.com:80/createOrUpdatePerson";
             let body = "facebookID=" + facebookID + "&isMale=" + isMale + "&name=" + encodeURIComponent(name);
@@ -117,7 +122,6 @@ export class Query{
                     reject(data.error);
                 }
             });
-            resolve();
         });
     }
 
@@ -136,7 +140,6 @@ export class Query{
                     reject(data.error);
                 }
             });
-            resolve();
         });
     }
 
@@ -339,7 +342,6 @@ export class Query{
                     partiesImInvitedTo = partiesImInvitedTo.substr(0, partiesImInvitedTo.length-1); // take off the last comma
                 }
             }
-            //console.log("Parties I'm invited to: " + partiesImInvitedTo);
             var url = "http://bumpin-env.us-west-2.elasticbeanstalk.com:80/myParties?partyIDs=" + partiesImInvitedTo;
             this.http.get(url).map(res => res.json()).subscribe(data => {
                 if(data.succeeded){
@@ -351,7 +353,6 @@ export class Query{
                         this.allMyData.invitedTo[i].fixMaps();
                         this.allMyData.invitedTo[i].preparePartyObjectForTheUI();
                     }
-                    console.log("new party data fixed and ready");
                     resolve(data);
                 }else{
                     reject(data.error);
@@ -476,7 +477,6 @@ export class Query{
                     reject(data.error);
                 }
             });
-            resolve();
         });
     }
 
@@ -551,7 +551,6 @@ export class Query{
                     reject(data.error);
                 }
             });
-            resolve();
         });
     }
 
@@ -636,6 +635,54 @@ export class Query{
         return additionsListName + additionsListFacebookID + additionsListIsMale + removalsListFacebookID;
     }
 
+    // curl http://localhost:5000/sendInvitationsAsGuestOfParty -d "
+    //      partyID=17717147682844711033&
+    //      guestFacebookID=111354699627054&
+    //      additionsListFacebookID=184484668766597,114947809267026&
+    //      additionsListIsMale=true,true&
+    //      additionsListName=Mike%20Panditman,Tom%20Rosenthalsen"
+    public sendInvitationsAsGuestOfParty(party : Party, inviteesToAdd : Map<string,Invitee>){
+        return new Promise((resolve, reject) => {
+            var url = "http://bumpin-env.us-west-2.elasticbeanstalk.com:80/sendInvitationsAsGuestOfParty";
+            let body = "partyID=" + party.partyID + "&guestFacebookID=" + this.allMyData.me.facebookID;
+            body += this.createInviteeListParametersForSendInvitationsAsGuestOfPartyQuery(inviteesToAdd);
+            var headers = new Headers();
+            headers.append('content-type', "application/x-www-form-urlencoded");
+            let options= new RequestOptions({headers: headers});
+            this.http.post(url, body, options).map(res => res.json()).subscribe(data => {
+                if(data.succeeded){
+                    resolve(data);
+                }else{
+                    reject(data.error);
+                }
+            });
+        });
+    }
+
+    //      additionsListFacebookID=184484668766597,114947809267026&
+    //      additionsListIsMale=true,true&
+    //      additionsListName=Mike%20Panditman,Tom%20Rosenthalsen"
+    private createInviteeListParametersForSendInvitationsAsGuestOfPartyQuery(inviteesToAdd : Map<string,Invitee>){
+        let additionsListName : string = "";
+        let additionsListFacebookID : string = "";
+        let additionsListIsMale : string = "";
+        if(inviteesToAdd.size >= 1){
+            additionsListName += "&additionsListName=";
+            additionsListFacebookID += "&additionsListFacebookID=";
+            additionsListIsMale += "&additionsListIsMale=";
+        }
+        inviteesToAdd.forEach((value: any, key: string) => {
+            additionsListName += encodeURIComponent(inviteesToAdd.get(key).name) + ",";
+            additionsListFacebookID += key + ",";
+            additionsListIsMale += inviteesToAdd.get(key).isMale + ",";
+        });
+        additionsListName = additionsListName.slice(0, additionsListName.length - 1);
+        additionsListFacebookID = additionsListFacebookID.slice(0, additionsListFacebookID.length - 1);
+        additionsListIsMale = additionsListIsMale.slice(0, additionsListIsMale.length - 1);
+
+        return additionsListName + additionsListFacebookID + additionsListIsMale;
+    }
+
     public getAddressForBarKey(bar: Bar){
         return new Promise((resolve, reject) => {
             var url = "http://bumpin-env.us-west-2.elasticbeanstalk.com:80/getBarKey";
@@ -708,11 +755,9 @@ export class Query{
                     this.allMyData.barsCloseToMe.push(bar);
                     resolve(data);
                 }else{
-                    console.log("Something went wrong: " + data);
                     reject(data.error);
                 }
             });
-            resolve();
         });
     }
 
@@ -772,7 +817,6 @@ export class Query{
                     reject(data.error);
                 }
             });
-            resolve();
         });
     }
 
@@ -809,7 +853,6 @@ export class Query{
                     reject(data.error);
                 }
             });
-            resolve();
         });
     }
 
@@ -828,7 +871,6 @@ export class Query{
                     reject(data.error);
                 }
             });
-            resolve();
         });
     }
 

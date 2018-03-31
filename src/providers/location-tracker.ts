@@ -1,10 +1,20 @@
+/*******************************************************
+ * Copyright (C) 2018 Stephen Ellmaurer <stellmaurer@gmail.com>
+ * 
+ * This file is part of the Bumpin mobile app project.
+ * 
+ * The Bumpin project and any of the files within the Bumpin
+ * project can not be copied and/or distributed without
+ * the express permission of Stephen Ellmaurer.
+ *******************************************************/
+
 import { Injectable, NgZone } from '@angular/core';
 import { BackgroundGeolocation } from '@ionic-native/background-geolocation';
 import { Geolocation, Geoposition } from '@ionic-native/geolocation';
 import 'rxjs/add/operator/filter';
 import { AllMyData } from '../model/allMyData';
 import { Party } from '../model/party';
-import { Bar, Attendee } from '../model/bar';
+import { Bar } from '../model/bar';
 import { Utility } from '../model/utility';
 import { Http } from '@angular/http';
 import { Events } from 'ionic-angular';
@@ -161,8 +171,6 @@ export class LocationTracker {
   }
 
   findPartiesOrBarsInMyVicinity(myLatitude : number, myLongitude : number) : any{
-    console.log("********************************************");
-    console.log("");
     let closestPartyOrBar = null;
     let min = Number.MAX_VALUE;
     if((myLatitude == null) || (myLongitude == null)){
@@ -172,10 +180,8 @@ export class LocationTracker {
     this.barsThatWereInMyVicinity = this.barsThatAreInMyVicinity;
     this.partiesThatAreInMyVicinity = new Map<string,Party>();
     this.barsThatAreInMyVicinity = new Map<string,Bar>();
-    console.log("Bars close to me = " + this.allMyData.barsCloseToMe.length);
     for(let bar of this.allMyData.barsCloseToMe){
       let distanceToBar = Utility.getDistanceInMetersBetweenCoordinates(myLatitude, myLongitude, bar.latitude, bar.longitude);
-      console.log("Distance to bar is " + distanceToBar + " meters.");
       if(distanceToBar <= this.vicinityDistance){
         this.barsThatAreInMyVicinity.set(bar.barID, bar);
         if(distanceToBar <= min){
@@ -184,11 +190,9 @@ export class LocationTracker {
         }
       }
     }
-    console.log("Parties close to me = " + this.allMyData.invitedTo.length);
     for(let party of this.allMyData.invitedTo){
       if(Utility.hasThisPartyStarted(party)){
         let distanceToParty = Utility.getDistanceInMetersBetweenCoordinates(myLatitude, myLongitude, party.latitude, party.longitude);
-        console.log("Distance to party is " + distanceToParty + " meters.");
         if(distanceToParty <= this.vicinityDistance){
           this.partiesThatAreInMyVicinity.set(party.partyID, party);
           if(distanceToParty <= min){
@@ -198,10 +202,6 @@ export class LocationTracker {
         }
       }
     }
-    console.log("Parties in my vicinity = " + this.partiesThatAreInMyVicinity.size);
-    console.log("Bars in my vicinity = " + this.barsThatAreInMyVicinity.size);
-    console.log("");
-    console.log("********************************************");
     return closestPartyOrBar;
   }
 
@@ -296,7 +296,7 @@ export class LocationTracker {
       if(atTheSamePartyOrBar == false){
         // I was at a bar/party, and now I am at another bar/party, so I need to communicate that
         //    I'm not at the bar/party I was at, and that I'm at this new bar/party.
-        console.log("I was at a bar/party, and now I am at another bar/party, so I need to communicate that I'm not at the bar/party I was at, and that I'm at this new bar/party.");
+        //console.log("I was at a bar/party, and now I am at another bar/party, so I need to communicate that I'm not at the bar/party I was at, and that I'm at this new bar/party.");
         if(partyOrBarIWasAt instanceof Party){
           party = partyOrBarIWasAt;
           this.allMyData.changeAtPartyStatus(party, false, this.http)
@@ -457,16 +457,6 @@ export class LocationTracker {
     if((closestPartyOrBar == null) || (min > 40)){
       return null;
     }
-    
-    if(closestPartyOrBar instanceof Party){
-      var closestParty : Party = closestPartyOrBar;
-      //console.log("You are currently at the party, " + closestParty.title + ".");
-    }else if (closestPartyOrBar instanceof Bar){
-      var closestBar : Bar = closestPartyOrBar;
-      //console.log("You are currently at the bar, " + closestBar.name + ".");
-    }else{
-      //console.log("You are not currently at a party or bar.");
-    }
     return closestPartyOrBar;
   }
  
@@ -497,16 +487,6 @@ export class LocationTracker {
     }
     if(closestPartyOrBar == null){
       return null;
-    }
-    //console.log("Distance to closest party or bar is " + max + " meters away.");
-    if(closestPartyOrBar instanceof Party){
-      var closestParty : Party = closestPartyOrBar;
-      //console.log(closestParty.title + " is the closest to you.");
-    }else if (closestPartyOrBar instanceof Bar){
-      var closestBar : Bar = closestPartyOrBar;
-      //console.log(closestBar.name + " is the closest to you.");
-    }else{
-      //console.log("There's an error in the findClosestPartyOrBar function.");
     }
     return closestPartyOrBar;
   }

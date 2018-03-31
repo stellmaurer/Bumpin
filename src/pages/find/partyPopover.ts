@@ -1,10 +1,20 @@
+/*******************************************************
+ * Copyright (C) 2018 Stephen Ellmaurer <stellmaurer@gmail.com>
+ * 
+ * This file is part of the Bumpin mobile app project.
+ * 
+ * The Bumpin project and any of the files within the Bumpin
+ * project can not be copied and/or distributed without
+ * the express permission of Stephen Ellmaurer.
+ *******************************************************/
+
 import { Component } from '@angular/core';
 import {ViewController,NavParams, NavController} from 'ionic-angular';
 import {Party} from "../../model/party";
 import { AllMyData } from "../../model/allMyData";
-import {Http, Headers, RequestOptions} from '@angular/http';
+import {Http} from '@angular/http';
 import {Utility} from "../../model/utility";
-
+import { InviteFriendsPage } from './inviteFriends';
 
 @Component({
   selector: 'page-partyPopover',
@@ -17,6 +27,7 @@ export class PartyPopover {
   private allMyData : AllMyData;
   private http : Http;
   private params : NavParams;
+  private navCtrl : NavController;
 
   static get parameters() {
     return [[ViewController],[NavParams]];
@@ -27,6 +38,7 @@ export class PartyPopover {
     this.allMyData = params.get("allMyData");
     this.http = params.get("http");
     this.party = params.get("party");
+    this.navCtrl = params.get("navCtrl");
   }
 
   ionViewWillEnter(){
@@ -65,5 +77,10 @@ export class PartyPopover {
     .catch((err) => {
       this.allMyData.logError(this.tabName, "server", "changeAttendanceStatusToParty query error : Err msg = " + err, this.http);
     });
+  }
+
+  inviteFriendsButtonClicked(){
+    this.viewCtrl.dismiss();
+    this.navCtrl.push(InviteFriendsPage, {party:this.party}, {animate: false});
   }
 }

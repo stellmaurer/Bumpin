@@ -212,6 +212,14 @@
         </ion-col>
     </ion-row>
 
+    <ion-row *ngIf="party.hosts.has(this.allMyData.me.facebookID) == false">
+      <ion-col col-12>
+          <button ion-button block [color]="primary" style="color: black;" (click)='inviteFriendsButtonClicked();' [disabled]="party.invitees.get(this.allMyData.me.facebookID).numberOfInvitationsLeft <= 0">
+            Invite Friends
+          </button>
+      </ion-col>
+    </ion-row>
+
   </ion-grid>
 
 </ion-scroll>

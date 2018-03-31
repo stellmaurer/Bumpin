@@ -4,10 +4,9 @@ import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
 
 import { TabsPage } from '../pages/tabs/tabs';
-import { NativeStorage } from 'ionic-native';
 import { ViewChild } from '@angular/core';
 import { Events } from 'ionic-angular';
-import { BackgroundGeolocation, BackgroundGeolocationConfig, BackgroundGeolocationResponse } from '@ionic-native/background-geolocation';
+import { BackgroundGeolocation } from '@ionic-native/background-geolocation';
 
 @Component({
   templateUrl: 'app.html',
@@ -21,14 +20,6 @@ export class MyApp {
   constructor(platform: Platform, statusBar: StatusBar, splashScreen: SplashScreen, private backgroundGeolocation: BackgroundGeolocation, private events : Events) {
     platform.ready().then(() => {
       this.rootPage = TabsPage;
-      //this.nav.push(LoginPage);
-      //splashScreen.hide();
-      
-      
-      let env = this;
-      
-      //env.nav.push(TabsPage);
-      //this.rootPage = TabsPage;
       splashScreen.hide();
       statusBar.styleDefault();
     });

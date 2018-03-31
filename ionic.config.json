@@ -1,6 +1,8 @@
 {
   "name": "Bumpin",
   "app_id": "111fb7d7",
-  "integrations": {},
+  "integrations": {
+    "cordova": {}
+  },
   "type": "ionic-angular"
 }

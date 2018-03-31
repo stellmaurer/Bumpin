@@ -1,14 +1,18 @@
+/*******************************************************
+ * Copyright (C) 2018 Stephen Ellmaurer <stellmaurer@gmail.com>
+ * 
+ * This file is part of the Bumpin mobile app project.
+ * 
+ * The Bumpin project and any of the files within the Bumpin
+ * project can not be copied and/or distributed without
+ * the express permission of Stephen Ellmaurer.
+ *******************************************************/
+
 import { Component } from '@angular/core';
 import { App, AlertController } from 'ionic-angular';
-import { FacebookAuth } from '@ionic/cloud-angular';
-import { Facebook, FacebookLoginResponse } from '@ionic-native/facebook';
-import { FindPage } from '../find/find';
 import { AllMyData } from '../../model/allMyData';
 import { Login } from '../login/login';
-import { TabsPage } from '../tabs/tabs';
 import {Http} from '@angular/http';
-
-import { NavController } from 'ionic-angular';
 
 @Component({
   selector: 'page-more',
@@ -20,7 +24,7 @@ export class MorePage {
   private bugDescription: string;
   private featureRequest: string;
 
-  constructor(private app: App, private fb : Facebook, private login : Login, public facebookAuth: FacebookAuth, public allMyData : AllMyData, private http:Http, public alertCtrl: AlertController) {
+  constructor(private app: App, private login : Login, public allMyData : AllMyData, private http:Http, public alertCtrl: AlertController) {
     this.bugDescription = "";
     this.featureRequest = "";
   }

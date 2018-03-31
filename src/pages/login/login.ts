@@ -1,13 +1,17 @@
-import { Component } from '@angular/core';
-import { FacebookAuth, User } from '@ionic/cloud-angular';
+/*******************************************************
+ * Copyright (C) 2018 Stephen Ellmaurer <stellmaurer@gmail.com>
+ * 
+ * This file is part of the Bumpin mobile app project.
+ * 
+ * The Bumpin project and any of the files within the Bumpin
+ * project can not be copied and/or distributed without
+ * the express permission of Stephen Ellmaurer.
+ *******************************************************/
+
 import { Facebook, FacebookLoginResponse } from '@ionic-native/facebook';
-import { NavController, Events } from 'ionic-angular';
-import { TabsPage } from '../tabs/tabs';
-import { Person } from '../../model/person';
-import {Http, Headers, RequestOptions} from '@angular/http';
-import {deserialize} from "serializer.ts/Serializer";
+import { Events } from 'ionic-angular';
+import {Http} from '@angular/http';
 import {AllMyData} from "../../model/allMyData"
-import { NativeStorage } from 'ionic-native';
 import { Injectable } from '@angular/core';
 import { LocationTracker } from '../../providers/location-tracker';
 
@@ -112,7 +116,6 @@ export class Login {
 
   createOrUpdatePersonWithFacebookInfo(accessToken : string){
     return new Promise((resolve, reject) => {
-      console.log("Access Token = " + accessToken);
       this.allMyData.refreshMyDataFromFacebook(accessToken, this.http)
       .then((res) => {
         this.allMyData.createOrUpdatePerson(this.http)

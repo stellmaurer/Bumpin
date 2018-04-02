@@ -101,6 +101,16 @@ export class FindPage {
       .catch((err) => {
         this.allMyData.logError(this.tabName, "server", "refreshBarsCloseToMe query error : Err msg = " + err, this.http);
       });
+
+      this.allMyData.refreshBarsImHosting(this.http)
+      .then((res) => {
+        this.events.publish("updateMyAtBarAndAtPartyStatuses");
+        this.refreshBarMarkers();
+      })
+      .catch((err) => {
+        this.allMyData.logError(this.tabName, "server", "refreshBarsImHosting query error : Err msg = " + err, this.http);
+      });
+
       // Get parties that I'm invited to from the database
       this.allMyData.refreshParties(this.http)
       .then((res) => {
@@ -133,7 +143,7 @@ export class FindPage {
     this.events.subscribe("timeToRefreshPartyAndBarData",() => {
       this.allMyData.refreshPerson(this.http)
       .then((res) => {
-        Promise.all([this.allMyData.refreshBarsCloseToMe(this.myCoordinates, this.http), this.allMyData.refreshParties(this.http)]).then(thePromise => {
+        Promise.all([this.allMyData.refreshBarsCloseToMe(this.myCoordinates, this.http), this.allMyData.refreshBarsImHosting(this.http), this.allMyData.refreshParties(this.http)]).then(thePromise => {
           return thePromise;
         })
         .then((res) => {
@@ -151,7 +161,7 @@ export class FindPage {
     });
 
     this.events.subscribe("aDifferentUserJustLoggedIn",() => {
-      Promise.all([this.allMyData.refreshBarsCloseToMe(this.myCoordinates, this.http), this.allMyData.refreshParties(this.http)]).then(thePromise => {
+      Promise.all([this.allMyData.refreshBarsCloseToMe(this.myCoordinates, this.http), this.allMyData.refreshBarsImHosting(this.http), this.allMyData.refreshParties(this.http)]).then(thePromise => {
         return thePromise;
       })
       .then((res) => {
@@ -190,7 +200,7 @@ export class FindPage {
   private enableUserLocation(){
     this.locationTracker.watch
       .subscribe((location) => {
-        this.myCoordinates = {lat: this.locationTracker.lat, lng: this.locationTracker.lng}
+        this.myCoordinates = {lat: this.locationTracker.lat, lng: this.locationTracker.lng};
         this.userLocationMarker.setPosition(this.myCoordinates);
     });
   }
@@ -219,7 +229,23 @@ export class FindPage {
         });
         resolve("the google map has loaded");
       }, (err) => {
-        reject(err);
+        // User probably didn't allow the app permission to access their location
+        this.myCoordinates = {lat: 40.082064, lng: -97.390820};
+        let latLng = {lat: 40.082064, lng: -97.390820};
+
+        let mapOptions = {
+          center: latLng,
+          zoom: 3,
+          mapTypeId: google.maps.MapTypeId.ROADMAP,
+          zoomControl: false,
+          mapTypeControl: false,
+          streetViewControl: false,
+        }
+        
+        this.map = new google.maps.Map(this.mapElement.nativeElement, mapOptions);
+
+        resolve("the google map has loaded after an error: " + err + 
+        ". This probably was caused by the user not allowing the app to use their location.");
       });
     });
   }
@@ -307,6 +333,10 @@ export class FindPage {
     // Transform bar array into a hashmap for quick access in Case 1
     var bars = this.allMyData.barsCloseToMe;
     var barsMap : Map<string,Bar> = new Map<string,Bar>();
+    for(let i = 0; i < bars.length; i++){
+      barsMap.set(bars[i].barID, bars[i]);
+    }
+    bars = this.allMyData.barHostFor;
     for(let i = 0; i < bars.length; i++){
       barsMap.set(bars[i].barID, bars[i]);
     }

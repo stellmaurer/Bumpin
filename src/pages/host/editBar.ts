@@ -88,7 +88,28 @@ export class EditBarPage {
         this.geocoder = new google.maps.Geocoder();
         resolve("the google map has loaded");
       }, (err) => {
-        reject(err);
+        // User probably didn't allow the app permission to access their location
+        let latLng = new google.maps.LatLng(40.082064, -97.390820);
+
+        let mapOptions = {
+          center: latLng,
+          zoom: 3,
+          mapTypeId: google.maps.MapTypeId.ROADMAP,
+          zoomControl: false,
+          mapTypeControl: false,
+          streetViewControl: true,
+        }
+        
+        this.map = new google.maps.Map(this.mapElement.nativeElement, mapOptions);
+
+        this.barMarker = new google.maps.Marker({ // just for initialization
+          map: null,
+          position: latLng,
+        });
+
+        this.geocoder = new google.maps.Geocoder();
+        resolve("the google map has loaded after an error: " + err + 
+        ". This probably was caused by the user not allowing the app to use their location.");
       });
     });
   }

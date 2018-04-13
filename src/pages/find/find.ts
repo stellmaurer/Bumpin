@@ -554,20 +554,9 @@ export class FindPage {
 
   hideBarMarkers(){
     this.markerCluster.clearMarkers();
-/*
-    this.barMarkersOnMap.forEach((value: any, key: string) => {
-        let theMarkerToHide = this.barMarkersOnMap.get(key);
-        theMarkerToHide.setMap(null);
-    });*/
   }
 
   showBarMarkers(){
     this.markerCluster.addMarkers(this.barClusterMarkers);
-
-    /*
-    this.barMarkersOnMap.forEach((value: any, key: string) => {
-        let theMarkerToShow = this.barMarkersOnMap.get(key);
-        theMarkerToShow.setMap(this.map);
-    });*/
   }
 }

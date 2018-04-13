@@ -11,9 +11,9 @@
 import { Component, ViewChild, ElementRef } from '@angular/core';
 import { NavController, Events } from 'ionic-angular';
 import { Geolocation } from 'ionic-native';
-import {Http} from '@angular/http';
-import {Party} from "../../model/party";
-import {Bar} from "../../model/bar";
+import { Http } from '@angular/http';
+import { Party } from "../../model/party";
+import { Bar } from "../../model/bar";
 import { AllMyData } from "../../model/allMyData";
 import { PopoverController } from 'ionic-angular';
 import { PartyPopover } from './partyPopover';
@@ -22,7 +22,7 @@ import { LocationTracker } from '../../providers/location-tracker';
 import { Utility } from '../../model/utility';
 import { AlertController } from 'ionic-angular';
 import { Login } from '../login/login';
-
+import * as MarkerClusterer from 'node-js-marker-clusterer';
  
 declare var google;
 
@@ -41,6 +41,8 @@ export class FindPage {
   @ViewChild('map') mapElement: ElementRef;
   public map: any;
 
+  private markerCluster : any;
+  private barClusterMarkers : any;
   partyMarkersOnMap : Map<string,any>;
   barMarkersOnMap : Map<string,any>;
 
@@ -71,6 +73,7 @@ export class FindPage {
     this.includePartiesTodayTemp = true;
     this.includePartiesThisWeekTemp = true;
     this.includeAllPartiesTemp = true;
+    this.barClusterMarkers = new Array<any>();
   }
 
   ionViewDidLoad(){
@@ -227,6 +230,7 @@ export class FindPage {
           position: {lat: position.coords.latitude, lng: position.coords.longitude},
           icon: image
         });
+        this.markerCluster = new MarkerClusterer(this.map, [], {imagePath: 'assets/m', maxZoom: 12});
         resolve("the google map has loaded");
       }, (err) => {
         // User probably didn't allow the app permission to access their location
@@ -244,6 +248,7 @@ export class FindPage {
         
         this.map = new google.maps.Map(this.mapElement.nativeElement, mapOptions);
 
+        this.markerCluster = new MarkerClusterer(this.map, [], {imagePath: 'assets/m', maxZoom: 12});
         resolve("the google map has loaded after an error: " + err + 
         ". This probably was caused by the user not allowing the app to use their location.");
       });
@@ -379,6 +384,16 @@ export class FindPage {
       }
       this.barMarkersOnMap.set(key, marker); // update the bar markers list with the new bar info
     });
+
+
+    this.barClusterMarkers = new Array<any>();
+    this.barMarkersOnMap.forEach((value: any, key: string) => {
+      let theMarkerToHide = this.barMarkersOnMap.get(key);
+      theMarkerToHide.setMap(null);
+      this.barClusterMarkers.push(theMarkerToHide);
+    });
+    this.markerCluster.clearMarkers();
+    this.markerCluster.addMarkers(this.barClusterMarkers);
   }
 
   private getMarkerIcon(partyOrBar: any): any{
@@ -538,16 +553,21 @@ export class FindPage {
   }
 
   hideBarMarkers(){
+    this.markerCluster.clearMarkers();
+/*
     this.barMarkersOnMap.forEach((value: any, key: string) => {
         let theMarkerToHide = this.barMarkersOnMap.get(key);
         theMarkerToHide.setMap(null);
-    });
+    });*/
   }
 
   showBarMarkers(){
+    this.markerCluster.addMarkers(this.barClusterMarkers);
+
+    /*
     this.barMarkersOnMap.forEach((value: any, key: string) => {
         let theMarkerToShow = this.barMarkersOnMap.get(key);
         theMarkerToShow.setMap(this.map);
-    });
+    });*/
   }
 }

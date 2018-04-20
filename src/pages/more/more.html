@@ -11,7 +11,7 @@
     <ion-row justify-content-center class="firstRow">
         <ion-col col-12 class="oneElement">
           <div class="centerMe">
-            <h1 [style.color]="'#32db64'">Version: 1.0</h1>
+            <h1 [style.color]="'#32db64'">Version: 1.0.1</h1>
           </div>
         </ion-col>
     </ion-row>
@@ -38,7 +38,7 @@
     <ion-row class="needsSpaceOnTop">
         <ion-col col-12 class="oneElement">
           <div class="centerMe">
-            <label>Want more from the app?</label>
+            <label>Want to request a feature or just tell us something?</label>
           </div>
           <div class="centerMe backgroundIncluded needsPadding">
             <ion-textarea type="text" [(ngModel)]="featureRequest"></ion-textarea>
@@ -49,7 +49,7 @@
     <ion-row>
       <ion-col col-12>
           <button ion-button block [color]="primary" style="color: black;" (click)='submitFeatureRequest();'>
-            Request Feature
+            Submit Feedback
           </button>
       </ion-col>
     </ion-row>

@@ -11,9 +11,9 @@
 import { Component, ViewChild, ElementRef } from '@angular/core';
 import { NavController, Events } from 'ionic-angular';
 import { Geolocation } from 'ionic-native';
-import {Http} from '@angular/http';
-import {Party} from "../../model/party";
-import {Bar} from "../../model/bar";
+import { Http } from '@angular/http';
+import { Party } from "../../model/party";
+import { Bar } from "../../model/bar";
 import { AllMyData } from "../../model/allMyData";
 import { PopoverController } from 'ionic-angular';
 import { PartyPopover } from './partyPopover';
@@ -22,7 +22,7 @@ import { LocationTracker } from '../../providers/location-tracker';
 import { Utility } from '../../model/utility';
 import { AlertController } from 'ionic-angular';
 import { Login } from '../login/login';
-
+import * as MarkerClusterer from 'node-js-marker-clusterer';
  
 declare var google;
 
@@ -41,6 +41,8 @@ export class FindPage {
   @ViewChild('map') mapElement: ElementRef;
   public map: any;
 
+  private markerCluster : any;
+  private barClusterMarkers : any;
   partyMarkersOnMap : Map<string,any>;
   barMarkersOnMap : Map<string,any>;
 
@@ -71,6 +73,7 @@ export class FindPage {
     this.includePartiesTodayTemp = true;
     this.includePartiesThisWeekTemp = true;
     this.includeAllPartiesTemp = true;
+    this.barClusterMarkers = new Array<any>();
   }
 
   ionViewDidLoad(){
@@ -101,6 +104,16 @@ export class FindPage {
       .catch((err) => {
         this.allMyData.logError(this.tabName, "server", "refreshBarsCloseToMe query error : Err msg = " + err, this.http);
       });
+
+      this.allMyData.refreshBarsImHosting(this.http)
+      .then((res) => {
+        this.events.publish("updateMyAtBarAndAtPartyStatuses");
+        this.refreshBarMarkers();
+      })
+      .catch((err) => {
+        this.allMyData.logError(this.tabName, "server", "refreshBarsImHosting query error : Err msg = " + err, this.http);
+      });
+
       // Get parties that I'm invited to from the database
       this.allMyData.refreshParties(this.http)
       .then((res) => {
@@ -133,7 +146,7 @@ export class FindPage {
     this.events.subscribe("timeToRefreshPartyAndBarData",() => {
       this.allMyData.refreshPerson(this.http)
       .then((res) => {
-        Promise.all([this.allMyData.refreshBarsCloseToMe(this.myCoordinates, this.http), this.allMyData.refreshParties(this.http)]).then(thePromise => {
+        Promise.all([this.allMyData.refreshBarsCloseToMe(this.myCoordinates, this.http), this.allMyData.refreshBarsImHosting(this.http), this.allMyData.refreshParties(this.http)]).then(thePromise => {
           return thePromise;
         })
         .then((res) => {
@@ -151,7 +164,7 @@ export class FindPage {
     });
 
     this.events.subscribe("aDifferentUserJustLoggedIn",() => {
-      Promise.all([this.allMyData.refreshBarsCloseToMe(this.myCoordinates, this.http), this.allMyData.refreshParties(this.http)]).then(thePromise => {
+      Promise.all([this.allMyData.refreshBarsCloseToMe(this.myCoordinates, this.http), this.allMyData.refreshBarsImHosting(this.http), this.allMyData.refreshParties(this.http)]).then(thePromise => {
         return thePromise;
       })
       .then((res) => {
@@ -190,7 +203,7 @@ export class FindPage {
   private enableUserLocation(){
     this.locationTracker.watch
       .subscribe((location) => {
-        this.myCoordinates = {lat: this.locationTracker.lat, lng: this.locationTracker.lng}
+        this.myCoordinates = {lat: this.locationTracker.lat, lng: this.locationTracker.lng};
         this.userLocationMarker.setPosition(this.myCoordinates);
     });
   }
@@ -217,9 +230,27 @@ export class FindPage {
           position: {lat: position.coords.latitude, lng: position.coords.longitude},
           icon: image
         });
+        this.markerCluster = new MarkerClusterer(this.map, [], {imagePath: 'assets/m', maxZoom: 12});
         resolve("the google map has loaded");
       }, (err) => {
-        reject(err);
+        // User probably didn't allow the app permission to access their location
+        this.myCoordinates = {lat: 40.082064, lng: -97.390820};
+        let latLng = {lat: 40.082064, lng: -97.390820};
+
+        let mapOptions = {
+          center: latLng,
+          zoom: 3,
+          mapTypeId: google.maps.MapTypeId.ROADMAP,
+          zoomControl: false,
+          mapTypeControl: false,
+          streetViewControl: false,
+        }
+        
+        this.map = new google.maps.Map(this.mapElement.nativeElement, mapOptions);
+
+        this.markerCluster = new MarkerClusterer(this.map, [], {imagePath: 'assets/m', maxZoom: 12});
+        resolve("the google map has loaded after an error: " + err + 
+        ". This probably was caused by the user not allowing the app to use their location.");
       });
     });
   }
@@ -310,6 +341,10 @@ export class FindPage {
     for(let i = 0; i < bars.length; i++){
       barsMap.set(bars[i].barID, bars[i]);
     }
+    bars = this.allMyData.barHostFor;
+    for(let i = 0; i < bars.length; i++){
+      barsMap.set(bars[i].barID, bars[i]);
+    }
 
     // Case 1 : cleanup bars that are on the map but are no longer in allMyData.invitedTo
     this.barMarkersOnMap.forEach((value: any, key: string) => {
@@ -349,6 +384,16 @@ export class FindPage {
       }
       this.barMarkersOnMap.set(key, marker); // update the bar markers list with the new bar info
     });
+
+
+    this.barClusterMarkers = new Array<any>();
+    this.barMarkersOnMap.forEach((value: any, key: string) => {
+      let theMarkerToHide = this.barMarkersOnMap.get(key);
+      theMarkerToHide.setMap(null);
+      this.barClusterMarkers.push(theMarkerToHide);
+    });
+    this.markerCluster.clearMarkers();
+    this.markerCluster.addMarkers(this.barClusterMarkers);
   }
 
   private getMarkerIcon(partyOrBar: any): any{
@@ -508,16 +553,10 @@ export class FindPage {
   }
 
   hideBarMarkers(){
-    this.barMarkersOnMap.forEach((value: any, key: string) => {
-        let theMarkerToHide = this.barMarkersOnMap.get(key);
-        theMarkerToHide.setMap(null);
-    });
+    this.markerCluster.clearMarkers();
   }
 
   showBarMarkers(){
-    this.barMarkersOnMap.forEach((value: any, key: string) => {
-        let theMarkerToShow = this.barMarkersOnMap.get(key);
-        theMarkerToShow.setMap(this.map);
-    });
+    this.markerCluster.addMarkers(this.barClusterMarkers);
   }
 }

@@ -72,7 +72,7 @@ export class AllMyData{
             var query = new Query(this, http);
             query.createOrUpdatePerson(this.me.facebookID, this.me.isMale, this.me.name)
             .then((res) => {
-                return query.getPerson(this.me.facebookID);
+                return this.refreshPerson(http);
             })
             .then((res) => {
                 resolve("CreateUpdateMeInDatabase query succeeded.");
@@ -88,12 +88,20 @@ export class AllMyData{
             var query = new Query(this, http);
             query.getPerson(this.me.facebookID)
             .then((res) => {
+                this.changeMyGoingOutStatusToUnknownIfStatusIsExpired();
                 resolve("getPerson query succeeded.");
             })
             .catch((err) => {
                 reject(err);
             });
         });
+    }
+
+    private changeMyGoingOutStatusToUnknownIfStatusIsExpired(){
+        var goingOutStatusIsExpired = Utility.isGoingOutStatusExpired(this.me.status["timeGoingOutStatusWasSet"]);
+        if(goingOutStatusIsExpired){
+            this.me.status["goingOut"] = "Unknown";
+        }
     }
 
     public rateParty(party : Party, rating : string, http : Http){
@@ -133,7 +141,7 @@ export class AllMyData{
             newAttendee.timeLastRated = "2001-01-01T00:00:00Z";
             bar.attendees.set(this.me.facebookID, newAttendee);
         }
-
+        
         if(rating != bar.attendees.get(this.me.facebookID).rating){
             let timeLastRated = Utility.convertDateTimeToISOFormat(new Date());
             let timeOfLastKnownLocation = timeLastRated;
@@ -373,6 +381,51 @@ export class AllMyData{
             query.getPartiesImInvitedTo()
             .then((res) => {
                 resolve("getPartiesImInvitedTo query succeeded.");
+            })
+            .catch((err) => {
+                reject(err);
+            });
+        });
+    }
+
+    public refreshFriends(http : Http){
+        return new Promise((resolve, reject) => {
+            var query = new Query(this, http);
+            query.getFriends()
+            .then((res) => {
+                this.zone.run(() => {
+                    this.changeGoingOutStatusOfFriendsToUnknownIfStatusIsExpired();
+                });
+                resolve("getFriends query succeeded.");
+            })
+            .catch((err) => {
+                reject(err);
+            });
+        });
+    }
+
+    private changeGoingOutStatusOfFriendsToUnknownIfStatusIsExpired(){
+        for(let i = 0; i < this.friends.length; i++){
+            let friend = this.friends[i];
+            var goingOutStatusIsExpired = Utility.isGoingOutStatusExpired(friend.status["timeGoingOutStatusWasSet"]);
+            if(goingOutStatusIsExpired){
+                friend.status["goingOut"] = "Unknown";
+            }
+        }
+    }
+
+    public changeMyGoingOutStatus(status : string, manuallySet : string, http : Http){
+        let timeGoingOutStatusWasSet = Utility.convertDateTimeToISOFormat(new Date());
+        this.zone.run(() => {
+            this.me.status["goingOut"] = status;
+            this.me.status["timeGoingOutStatusWasSet"] = timeGoingOutStatusWasSet;
+            this.me.status["manuallySet"] = manuallySet;
+        });
+        return new Promise((resolve, reject) => {
+            var query = new Query(this, http);
+            query.updatePersonStatus(this.me.facebookID, status, timeGoingOutStatusWasSet, manuallySet)
+            .then((res) => {
+                resolve("updatePersonStatus query succeeded.");
             })
             .catch((err) => {
                 reject(err);

@@ -9,10 +9,12 @@
  *******************************************************/
 
 import { Component } from '@angular/core';
-import { App, AlertController } from 'ionic-angular';
+import { App, NavController, AlertController } from 'ionic-angular';
 import { AllMyData } from '../../model/allMyData';
 import { Login } from '../login/login';
-import {Http} from '@angular/http';
+import { Http } from '@angular/http';
+import { FriendsPage } from './friends';
+import { MyStatusPage } from './myStatus';
 
 @Component({
   selector: 'page-more',
@@ -24,9 +26,17 @@ export class MorePage {
   private bugDescription: string;
   private featureRequest: string;
 
-  constructor(private app: App, private login : Login, public allMyData : AllMyData, private http:Http, public alertCtrl: AlertController) {
+  constructor(private app: App, private login : Login, public allMyData : AllMyData, private http:Http, private navCtrl: NavController, public alertCtrl: AlertController) {
     this.bugDescription = "";
     this.featureRequest = "";
+  }
+
+  private goToFriendStatusPage(){
+    this.navCtrl.push(FriendsPage, {}, {animate: false});
+  }
+
+  private goToMyStatusPage(){
+    this.navCtrl.push(MyStatusPage, {}, {animate: false});
   }
 
   private submitBug(){

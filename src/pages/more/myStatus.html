@@ -1,0 +1,54 @@
+<ion-header>
+    <ion-navbar>
+        <ion-title>Are you going out?</ion-title>
+        <ion-buttons end>
+        </ion-buttons>
+    </ion-navbar>
+    </ion-header>
+
+<ion-content>
+    <ion-grid class="home">
+
+        <ion-row class="verticalSpacingForTop">
+            <ion-col col-12 class="oneElement">
+                <div class="centerMe">
+                    <label>Your Status: {{ allMyData.me.status.goingOut }}</label>
+                </div>
+            </ion-col>
+        </ion-row>
+
+        <ion-row class="verticalSpacingForMiddle">
+            <ion-col col-12 class="oneElement">
+                <button ion-button id="yes" color="primary" style="color: black;" (click)='changeStatus("Yes");'>
+                    Yes
+                </button>
+            </ion-col>
+        </ion-row>
+
+        <ion-row class="verticalSpacingForMiddle">
+            <ion-col col-12 class="oneElement">
+                <button ion-button id="convinceMe" color="yellow" style="color: black;" (click)='changeStatus("Convince&nbsp;Me");'>
+                    Convince Me
+                </button>
+            </ion-col>
+        </ion-row>
+
+        <ion-row class="verticalSpacingForMiddle">
+            <ion-col col-12 class="oneElement">
+                <button ion-button id="maybe" color="orange" style="color: black;" (click)='changeStatus("Maybe");'>
+                    Maybe
+                </button>
+            </ion-col>
+        </ion-row>
+
+        <ion-row class="verticalSpacingForBottom">
+            <ion-col col-12 class="oneElement">
+                <button ion-button id="no" color="danger" style="color: white;" (click)='changeStatus("No");'>
+                    No
+                </button>
+            </ion-col>
+        </ion-row>
+
+    </ion-grid>
+</ion-content>
+      

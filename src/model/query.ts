@@ -15,6 +15,7 @@ import { Friend } from './friend';
 import { AllMyData } from './allMyData';
 import { Http, Headers, RequestOptions } from '@angular/http';
 import { deserialize } from "serializer.ts/Serializer";
+import { Utility } from "./utility";
 
 export class Query{
     constructor(private allMyData : AllMyData, private http : Http){
@@ -166,6 +167,24 @@ export class Query{
         return new Promise((resolve, reject) => {
             var url = "http://bumpin-env.us-west-2.elasticbeanstalk.com:80/changeAttendanceStatusToBar";
             let body = "barID=" + barID + "&facebookID=" + facebookID + "&atBar=" + atBar + "&isMale=" + isMale + "&name=" + name + "&rating=" + rating + "&status=" + status + "&timeLastRated=" + timeLastRated + "&timeOfLastKnownLocation=" + timeOfLastKnownLocation;
+            var headers = new Headers();
+            headers.append('content-type', "application/x-www-form-urlencoded");
+            let options= new RequestOptions({headers: headers});
+            this.http.post(url, body, options).map(res => res.json()).subscribe(data => {
+                if(data.succeeded){
+                    resolve(data);
+                }else{
+                    reject(data.error);
+                }
+            });
+        });
+    }
+
+    // curl http://localhost:5000/updatePersonStatus -d "facebookID=&goingOut=Unknown&timeGoingOutStatusWasSet=2000-01-01T00:00:00Z&manuallySet=No"
+    public updatePersonStatus(facebookID : string, status : string, timeGoingOutStatusWasSet : string, manuallySet : string){
+        return new Promise((resolve, reject) => {
+            var url = "http://bumpin-env.us-west-2.elasticbeanstalk.com:80/updatePersonStatus";
+            let body = "facebookID=" + facebookID + "&goingOut=" + encodeURIComponent(status) + "&timeGoingOutStatusWasSet=" + timeGoingOutStatusWasSet + "&manuallySet=" + manuallySet;
             var headers = new Headers();
             headers.append('content-type', "application/x-www-form-urlencoded");
             let options= new RequestOptions({headers: headers});
@@ -353,6 +372,41 @@ export class Query{
                         this.allMyData.invitedTo[i].fixMaps();
                         this.allMyData.invitedTo[i].preparePartyObjectForTheUI();
                     }
+                    resolve(data);
+                }else{
+                    reject(data.error);
+                }
+            });
+        });
+    }
+
+    public getFriends(){
+        return new Promise((resolve, reject) => {
+            var facebookIDs : string = "";
+            if(this.allMyData.friends != null){
+                for(let i = 0; i < this.allMyData.friends.length; i++){
+                    facebookIDs += this.allMyData.friends[i].facebookID + ",";
+                }
+                if(facebookIDs.length >= 1){
+                    facebookIDs = facebookIDs.substr(0, facebookIDs.length-1); // take off the last comma
+                }
+            }
+            var url = "http://bumpin-env.us-west-2.elasticbeanstalk.com:80/getFriends?facebookIDs=" + facebookIDs;
+            this.http.get(url).map(res => res.json()).subscribe(data => {
+                if(data.succeeded){
+                    this.allMyData.friends = deserialize<Friend[]>(Friend, data.people);
+                    if(this.allMyData.friends == null){
+                        this.allMyData.friends = new Array<Friend>();
+                    }
+                    this.allMyData.friends.sort(function(a, b){
+                        if(b.name < a.name){
+                            return 1;
+                        }
+                        if(b.name > a.name){
+                            return -1;
+                        }
+                        return 0;
+                    });
                     resolve(data);
                 }else{
                     reject(data.error);

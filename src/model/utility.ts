@@ -57,6 +57,23 @@ export class Utility {
         return partyIsThisWeek;
     }
 
+    public static isGoingOutStatusExpired(timeGoingOutStatusWasSet : string){
+        if(timeGoingOutStatusWasSet == null){
+            return true;
+        }
+        var today = new Date();
+        var dateThatStatusWasSet = new Date(timeGoingOutStatusWasSet);
+        var goingOutStatusIsExpired = false;
+        if(today.getFullYear() == dateThatStatusWasSet.getFullYear() &&
+           today.getMonth() == dateThatStatusWasSet.getMonth() &&
+           today.getDate() == dateThatStatusWasSet.getDate()){
+            goingOutStatusIsExpired = false;
+        }else{
+            goingOutStatusIsExpired = true;
+        }
+        return goingOutStatusIsExpired;
+    }
+
     public static isRatingExpired(timeLastRated : string){
         if(timeLastRated == null){
             return true;

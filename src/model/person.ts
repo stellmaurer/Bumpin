@@ -18,6 +18,7 @@ export class Person {
     public partyHostFor : Map<string,boolean>;
     public peopleBlockingTheirActivityFromMe : Map<string,boolean>;
     public peopleToIgnore : Map<string,boolean>;
+    public status : Map<string,string>;
 
     constructor() {}
 }

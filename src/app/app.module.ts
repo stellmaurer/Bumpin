@@ -2,6 +2,8 @@ import { NgModule, ErrorHandler } from '@angular/core';
 import { IonicApp, IonicModule, IonicErrorHandler } from 'ionic-angular';
 import { MyApp } from './app.component';
 import { MorePage } from '../pages/more/more';
+import { FriendsPage } from '../pages/more/friends';
+import { MyStatusPage } from '../pages/more/myStatus';
 import { RatePage } from '../pages/rate/rate';
 import { HostPage } from '../pages/host/host';
 import { FindPage } from '../pages/find/find';
@@ -45,6 +47,8 @@ const cloudSettings: CloudSettings = {
   declarations: [
     MyApp,
     MorePage,
+    FriendsPage,
+    MyStatusPage,
     RatePage,
     HostPage,
     FindPage,
@@ -71,6 +75,8 @@ const cloudSettings: CloudSettings = {
   entryComponents: [
     MyApp,
     MorePage,
+    FriendsPage,
+    MyStatusPage,
     RatePage,
     HostPage,
     FindPage,

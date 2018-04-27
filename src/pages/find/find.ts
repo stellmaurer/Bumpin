@@ -153,6 +153,7 @@ export class FindPage {
           this.events.publish("updateMyAtBarAndAtPartyStatuses");
           this.refreshPartyMarkers();
           this.refreshBarMarkers();
+          this.updateMyGoingOutStatusIfNeeded();
         })
         .catch((err) => {
           this.allMyData.logError(this.tabName, "server", "refreshBarsCloseToMe or refreshParties query error : Err msg = " + err, this.http);
@@ -385,7 +386,7 @@ export class FindPage {
       this.barMarkersOnMap.set(key, marker); // update the bar markers list with the new bar info
     });
 
-
+    
     this.barClusterMarkers = new Array<any>();
     this.barMarkersOnMap.forEach((value: any, key: string) => {
       let theMarkerToHide = this.barMarkersOnMap.get(key);
@@ -559,4 +560,118 @@ export class FindPage {
   showBarMarkers(){
     this.markerCluster.addMarkers(this.barClusterMarkers);
   }
+
+  private updateMyGoingOutStatusIfNeeded(){
+    let overallStatusNumber = 0;
+    if(this.allMyData.me.status["manuallySet"] == "No"){
+      for(let i = 0; i < this.allMyData.barsCloseToMe.length; i++){
+        if(this.allMyData.barsCloseToMe[i].attendees.has(this.allMyData.me.facebookID)){
+          let myAttendeeInfo = this.allMyData.barsCloseToMe[i].attendees.get(this.allMyData.me.facebookID);
+          let statusNumber = this.getStatusNumber(myAttendeeInfo.status);
+          if(statusNumber > overallStatusNumber){
+            overallStatusNumber = statusNumber;
+          }
+        }
+      }
+
+      for(let i = 0; i < this.allMyData.barHostFor.length; i++){
+        if(this.allMyData.barHostFor[i].attendees.has(this.allMyData.me.facebookID)){
+          let myAttendeeInfo = this.allMyData.barHostFor[i].attendees.get(this.allMyData.me.facebookID);
+          let statusNumber = this.getStatusNumber(myAttendeeInfo.status);
+          if(statusNumber > overallStatusNumber){
+            overallStatusNumber = statusNumber;
+          }
+        }
+      }
+
+      for(let i = 0; i < this.allMyData.invitedTo.length; i++){
+        if(this.allMyData.invitedTo[i].invitees.has(this.allMyData.me.facebookID)){
+          let myInviteeInfo = this.allMyData.invitedTo[i].invitees.get(this.allMyData.me.facebookID);
+          let statusNumber = this.getStatusNumber(myInviteeInfo.status);
+          if(statusNumber > overallStatusNumber){
+            overallStatusNumber = statusNumber;
+          }
+        }
+      }
+
+      let oldStatusNumber = this.getStatusNumber(this.allMyData.me.status["goingOut"]);
+      let newStatusNumber = overallStatusNumber;
+      if(newStatusNumber > oldStatusNumber){
+        let newStatus = this.getStatusFromStatusNumber(newStatusNumber);
+        let manuallySet = "No";
+        this.allMyData.changeMyGoingOutStatus(newStatus, manuallySet, this.http)
+        .then((res) => {
+          
+        })
+        .catch((err) => {
+          this.allMyData.logError(this.tabName, "server", "changeMyGoingOutStatus query error : Err msg = " + err, this.http);
+        });
+      }
+
+    }
+  }
+
+  // 0 = Unknown
+  // 1 = No
+  // 2 = Convince Me
+  // 3 = Maybe
+  // 4 = Yes
+  private getStatusNumber(status : string) : number {
+    let statusNumber = 0;
+    switch(status){
+      case "Unknown": {
+        statusNumber = 0;
+        break;
+      }
+      case "No": {
+        statusNumber = 1;
+        break;
+      }
+      case "Convince Me": {
+        statusNumber = 2;
+        break;
+      }
+      case "Maybe": {
+        statusNumber = 3;
+        break;
+      }
+      case "Yes": {
+        statusNumber = 4;
+        break;
+      }
+      case "Going": {
+        statusNumber = 4;
+        break;
+      }
+    }
+    return statusNumber;
+  }
+
+  private getStatusFromStatusNumber(statusNumber : number) : string {
+    let status = "Unknown";
+    switch(statusNumber){
+      case 0: {
+        status = "Unknown";
+        break;
+      }
+      case 1: {
+        status = "No";
+        break;
+      }
+      case 2: {
+        status = "Convince Me";
+        break;
+      }
+      case 3: {
+        status = "Maybe";
+        break;
+      }
+      case 4: {
+        status = "Yes";
+        break;
+      }
+    }
+    return status;
+  }
+
 }

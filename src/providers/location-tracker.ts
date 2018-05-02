@@ -145,13 +145,12 @@ export class LocationTracker {
       }else{ // was at the bar and now I'm not there
         this.allMyData.changeAtBarStatus(value, false, this.http)
         .then((res) => {
-        
+          needToUpdateUI = true;
         })
         .catch((err) => {
           this.allMyData.logError(this.analyticsID, "server", "changeAtBarStatus query error : Err msg = " + err, this.http);
         });
       }
-      needToUpdateUI = true;
     });
     this.barsThatAreInMyVicinity.forEach((value: Bar, key: string) => {
       if(this.barsThatWereInMyVicinity.has(key)){ // am at the bar, and was at the bar
@@ -159,12 +158,11 @@ export class LocationTracker {
       }else{ // at the bar and wasn't at the bar before
         this.allMyData.changeAtBarStatus(value, true, this.http)
         .then((res) => {
-        
+          needToUpdateUI = true;
         })
         .catch((err) => {
           this.allMyData.logError(this.analyticsID, "server", "changeAtBarStatus query error : Err msg = " + err, this.http);
         });
-        needToUpdateUI = true;
       }
     });
     return needToUpdateUI;

@@ -1,13 +1,22 @@
 <ion-header>
   <ion-navbar>
+
+    <ion-buttons left>
+      <button ion-button style="color: #32db64; background-color: #222" (click)='presentPartyFilterAlert();'>
+        Party Filter
+      </button>
+    </ion-buttons>
+
     <ion-title>
       Find
     </ion-title>
+
     <ion-buttons end>
-      <button ion-button style="color: #32db64; background-color: #222" (click)='presentAlert();'>
-        Filter
+      <button ion-button style="color: #32db64; background-color: #222" (click)='presentBarFilterAlert();'>
+        Bar Filter
       </button>
     </ion-buttons>
+
   </ion-navbar>
 </ion-header>
  

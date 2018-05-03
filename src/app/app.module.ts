@@ -8,6 +8,7 @@ import { RatePage } from '../pages/rate/rate';
 import { HostPage } from '../pages/host/host';
 import { FindPage } from '../pages/find/find';
 import { InviteFriendsPage } from '../pages/find/inviteFriends';
+import { InvitedFriendsPage } from '../pages/find/invitedFriends';
 import { PartyPopover } from '../pages/find/partyPopover'
 import { BarPopover } from '../pages/find/barPopover'
 import { TabsPage } from '../pages/tabs/tabs';
@@ -53,6 +54,7 @@ const cloudSettings: CloudSettings = {
     HostPage,
     FindPage,
     InviteFriendsPage,
+    InvitedFriendsPage,
     CreatePartyPage,
     EditPartyPage,
     EditBarPage,
@@ -81,6 +83,7 @@ const cloudSettings: CloudSettings = {
     HostPage,
     FindPage,
     InviteFriendsPage,
+    InvitedFriendsPage,
     CreatePartyPage,
     EditPartyPage,
     EditBarPage,

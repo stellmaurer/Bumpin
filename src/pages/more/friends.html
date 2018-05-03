@@ -7,6 +7,7 @@
     </ion-header>
 
 <ion-content>
+    
     <ion-grid *ngIf="this.allMyData.friends.length == 0">
         <ion-row>
             <ion-col col-12 class="oneElement">
@@ -16,12 +17,6 @@
             </ion-col>
         </ion-row>
     </ion-grid>
-    <!--
-    <ion-list *ngIf="this.allMyData.friends.length != 0">
-        <ion-item *ngFor="let friend of this.allMyData.friends">
-            <ion-label [color]="friend.status === undefined ? 'white' : {'Yes': 'primary', 'Maybe': 'yellow', 'Convince Me': 'orange', 'No': 'danger', 'None': 'white'}[friend.status.goingOut]">{{ friend.name }}</ion-label>
-        </ion-item>
-    </ion-list>-->
 
     <ion-list no-lines *ngIf="this.allMyData.friends.length != 0">
         <ion-list-header color="background-info-color" *ngIf="this.yes.length != 0">Yes</ion-list-header>

@@ -15,6 +15,7 @@ import { AllMyData } from "../../model/allMyData";
 import {Http} from '@angular/http';
 import {Utility} from "../../model/utility";
 import { InviteFriendsPage } from './inviteFriends';
+import { InvitedFriendsPage } from './invitedFriends';
 
 @Component({
   selector: 'page-partyPopover',
@@ -82,5 +83,10 @@ export class PartyPopover {
   inviteFriendsButtonClicked(){
     this.viewCtrl.dismiss();
     this.navCtrl.push(InviteFriendsPage, {party:this.party}, {animate: false});
+  }
+
+  friendsButtonClicked(){
+    this.viewCtrl.dismiss();
+    this.navCtrl.push(InvitedFriendsPage, {party:this.party}, {animate: false});
   }
 }

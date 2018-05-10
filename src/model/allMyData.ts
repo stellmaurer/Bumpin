@@ -17,6 +17,7 @@ import { Http } from '@angular/http';
 import { Events } from 'ionic-angular';
 import { Utility } from "./utility";
 import { Injectable, NgZone } from '@angular/core';
+import { Storage } from '@ionic/storage';
 
 // This class only gets created once and it happens when the app launches.
 //      Person is equal to your Person object in the database. It is used
@@ -37,7 +38,7 @@ export class AllMyData{
     
     public events : Events;
 
-    constructor(public zone: NgZone) {
+    constructor(public zone: NgZone, private storage: Storage) {
         this.me = new Person();
         this.partyHostFor = new Array<Party>();
         this.barHostFor = new Array<Bar>();
@@ -50,6 +51,7 @@ export class AllMyData{
     public startPeriodicDataRetrieval(http : Http){
         var tempThis = this;
         setInterval(function(){
+            console.log("allMyData.ts: in startPeriodicDataRetrieval");
             tempThis.events.publish("timeToRefreshPartyAndBarData");
         }, 60000);
     }
@@ -70,7 +72,14 @@ export class AllMyData{
     public createOrUpdatePerson(http : Http){
         return new Promise((resolve, reject) => {
             var query = new Query(this, http);
-            query.createOrUpdatePerson(this.me.facebookID, this.me.isMale, this.me.name)
+            console.log("in createOrUpdatePerson");
+            this.storage.get('platform').then((val) => {
+                console.log('Platform is ', val);
+            });
+            this.storage.get('deviceToken').then((val) => {
+                console.log('Device token is ', val);
+            });
+            query.createOrUpdatePerson()
             .then((res) => {
                 return this.refreshPerson(http);
             })

@@ -47,6 +47,7 @@ export class LocationTracker {
       enableHighAccuracy: true
     };
     let backgroundConfig = {
+      // stopOnTerminate: false, // this is used so that the app termination doesn't cause this code to terminate
       desiredAccuracy: 0,
       stationaryRadius: 5,
       distanceFilter: 5, 

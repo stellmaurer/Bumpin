@@ -31,6 +31,7 @@ export class BarPopover {
   }
 
   constructor(public viewCtrl: ViewController, params : NavParams) {
+    console.log("barPopover.ts: in constructor");
     this.allMyData = params.get("allMyData");
     this.http = params.get("http");
     this.bar = params.get("bar");

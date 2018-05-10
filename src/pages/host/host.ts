@@ -28,13 +28,15 @@ export class HostPage {
   private tabName: string = "Host Tab";
 
   constructor(private zone: NgZone, public allMyData : AllMyData, private http:Http, private navCtrl: NavController, public alertCtrl: AlertController) {
+    console.log("host.ts: in constructor");
   }
 
   ionViewDidLoad(){
-    
+    console.log("host.ts: in ionViewDidLoad");
   }
 
   ionViewDidEnter(){
+    console.log("host.ts: in ionViewDidEnter");
     this.allMyData.refreshPerson(this.http)
     .then((res) => {
 

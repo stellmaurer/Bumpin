@@ -23,6 +23,7 @@ import { Utility } from '../../model/utility';
 import { AlertController } from 'ionic-angular';
 import { Login } from '../login/login';
 import * as MarkerClusterer from 'node-js-marker-clusterer';
+import { Storage } from '@ionic/storage';
  
 declare var google;
 
@@ -71,7 +72,8 @@ export class FindPage {
   private partyFilterAnyThisWeekTemp : boolean;
   private partyFilterDontShowPartiesTemp : boolean;
  
-  constructor(private allMyData : AllMyData, private login : Login, public alertCtrl: AlertController, public locationTracker: LocationTracker, private events : Events, private http:Http, public navCtrl: NavController, public popoverCtrl: PopoverController) {
+  constructor(private storage: Storage, private allMyData : AllMyData, private login : Login, public alertCtrl: AlertController, public locationTracker: LocationTracker, private events : Events, private http:Http, public navCtrl: NavController, public popoverCtrl: PopoverController) {
+    console.log("find.ts: in constructor");
     this.allMyData.events = events;
     this.partyMarkersOnMap = new Map<string,any>();
     this.barMarkersOnMap = new Map<string,any>();
@@ -98,9 +100,17 @@ export class FindPage {
     this.barFilterFriendsPresentTemp = false;
 
     this.barClusterMarkers = new Array<any>();
+
+    this.storage.get('platform').then((val) => {
+      console.log('Platform is ', val);
+    });
+    this.storage.get('deviceToken').then((val) => {
+        console.log('Device token is ', val);
+    });
   }
 
   ionViewDidLoad(){
+    console.log("find.ts: in ionViewDidLoad");
     this.login.login()
     .then((res) => {
       this.setupThePage();
@@ -111,6 +121,7 @@ export class FindPage {
   }
 
   ionViewWillEnter(){
+    console.log("find.ts: in ionViewWillEnter");
     this.allMyData.events.publish("timeToRefreshPartyAndBarData");
   }
 
@@ -168,6 +179,7 @@ export class FindPage {
 
     this.allMyData.startPeriodicDataRetrieval(this.http);
     this.events.subscribe("timeToRefreshPartyAndBarData",() => {
+      console.log("find.ts: in timeToRefreshPartyAndBarData");
       this.allMyData.refreshPerson(this.http)
       .then((res) => {
         Promise.all([this.allMyData.refreshBarsCloseToMe(this.myCoordinates, this.http), this.allMyData.refreshBarsImHosting(this.http), this.allMyData.refreshParties(this.http)]).then(thePromise => {
@@ -234,6 +246,7 @@ export class FindPage {
   }
  
   private loadMap(){
+    console.log("find.ts: in loadMap()");
     return new Promise((resolve, reject) => {
       Geolocation.getCurrentPosition().then((position) => {
         this.myCoordinates = {lat: position.coords.latitude, lng: position.coords.longitude};
@@ -356,7 +369,7 @@ export class FindPage {
     Case 3 : this bar isn't on the map
   */
   private refreshBarMarkers(){
-    console.log("in refreshBarMarkers");
+    console.log("find.ts: in refreshBarMarkers");
     var thisInstance = this;
     // Transform bar array into a hashmap for quick access in Case 1
     var bars = this.allMyData.barsCloseToMe;

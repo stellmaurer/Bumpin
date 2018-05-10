@@ -11,6 +11,7 @@
     <allow-intent href="sms:*" />
     <allow-intent href="mailto:*" />
     <allow-intent href="geo:*" />
+    <allow-navigation href="*" />
     <edit-config file="*-Info.plist" mode="merge" target="NSLocationWhenInUseUsageDescription">
         <string>Your location will only be used to (1) show you what bars are around you, (2) help you navigate to parties and bars, (3) anonymously help crowd source party and bar attendance and men to women ratios, and (4) allow you to rate the party or bar you are at.</string>
     </edit-config>
@@ -101,20 +102,23 @@
         <variable name="ALWAYS_USAGE_DESCRIPTION" value="This app requires background location tracking" />
     </plugin>
     <plugin name="cordova-plugin-nativestorage" spec="~2.2.2" />
-    <plugin name="cordova-plugin-splashscreen" spec="~4.0.1" />
     <plugin name="cordova-plugin-statusbar" spec="~2.2.1" />
     <plugin name="cordova-plugin-whitelist" spec="~1.3.1" />
     <plugin name="cordova-sqlite-storage" spec="~2.0.2" />
     <plugin name="ionic-plugin-keyboard" spec="~2.2.1" />
-    <plugin name="cordova-plugin-ionic" spec="^2.0.4">
+    <plugin name="cordova-plugin-ionic-keyboard" spec="^2.0.5" />
+    <plugin name="phonegap-plugin-push" spec="^2.1.3">
+        <variable name="FCM_VERSION" value="11.6.2" />
+    </plugin>
+    <plugin name="cordova-plugin-splashscreen" spec="^5.0.2" />
+    <plugin name="cordova-plugin-ionic" spec="^3.1.3">
         <variable name="APP_ID" value="111fb7d7" />
-        <variable name="CHANNEL_NAME" value="Master" />
+        <variable name="CHANNEL_NAME" value="Production" />
         <variable name="UPDATE_METHOD" value="background" />
+        <variable name="WARN_DEBUG" value="“true”" />
         <variable name="UPDATE_API" value="https://api.ionicjs.com" />
         <variable name="MAX_STORE" value="2" />
     </plugin>
-    <plugin name="cordova-plugin-ionic-keyboard" spec="^2.0.5" />
-    <plugin name="cordova-plugin-console" spec="^1.1.0" />
     <engine name="browser" spec="^5.0.3" />
     <engine name="ios" spec="4.5.4" />
 </widget>

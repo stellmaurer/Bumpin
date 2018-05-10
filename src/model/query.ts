@@ -91,10 +91,11 @@ export class Query{
         });
     }
     
-    public createOrUpdatePerson(facebookID : string, isMale : boolean, name : string){
+    public createOrUpdatePerson(){
         return new Promise((resolve, reject) => {
             var url = "http://bumpin-env.us-west-2.elasticbeanstalk.com:80/createOrUpdatePerson";
-            let body = "facebookID=" + facebookID + "&isMale=" + isMale + "&name=" + encodeURIComponent(name);
+            let body = "facebookID=" + this.allMyData.me.facebookID + "&isMale=" + this.allMyData.me.isMale + 
+                       "&name=" + encodeURIComponent(this.allMyData.me.name);
             var headers = new Headers();
             headers.append('content-type', "application/x-www-form-urlencoded");
             let options= new RequestOptions({headers: headers});

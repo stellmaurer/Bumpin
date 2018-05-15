@@ -29,7 +29,6 @@ export class MorePage {
   constructor(private app: App, private login : Login, public allMyData : AllMyData, private http:Http, private navCtrl: NavController, public alertCtrl: AlertController) {
     this.bugDescription = "";
     this.featureRequest = "";
-    console.log("more.ts: in constructor");
   }
 
   private goToFriendStatusPage(){

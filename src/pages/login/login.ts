@@ -22,7 +22,6 @@ export class Login {
   constructor(private allMyData : AllMyData, private http:Http, private events : Events, private fb : Facebook) {}
 
   public login(){
-    console.log("login.ts: in login function");
     return new Promise((resolve, reject) => {
       this.fb.getLoginStatus()
       .then((response: FacebookLoginResponse) => {

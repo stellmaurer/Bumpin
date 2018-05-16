@@ -19,6 +19,8 @@ export class Person {
     public peopleBlockingTheirActivityFromMe : Map<string,boolean>;
     public peopleToIgnore : Map<string,boolean>;
     public status : Map<string,string>;
+    public platform : string;
+    public deviceToken : string;
 
     constructor() {}
 }

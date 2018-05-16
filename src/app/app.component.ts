@@ -20,21 +20,20 @@ export class MyApp {
   private rootPage:any;
 
   constructor(public platform: Platform, private statusBar: StatusBar, private splashScreen: SplashScreen, public push: Push, public alertCtrl: AlertController, private backgroundGeolocation: BackgroundGeolocation, private events : Events, private storage: Storage) {
-    console.log("app.component.ts: in constructor");
     this.platform.ready().then(() => {
+      this.storePlatform();
+      this.initPushNotification();
       this.rootPage = TabsPage;
       this.splashScreen.hide();
       this.statusBar.hide();
       /*this.statusBar.styleDefault();
       this.statusBar.overlaysWebView(false);
       this.statusBar.backgroundColorByHexString('#32db64');*/
-      this.storePlatform();
-      this.initPushNotification();
     });
   }
 
   private storePlatform(){
-    this.storage.set('platform', 'unknown');
+    this.storage.set('platform', 'Unknown');
     let isIOS = this.platform.is('ios');
     let isAndroid = this.platform.is('android');
     if(isIOS == true){
@@ -75,7 +74,6 @@ export class MyApp {
     const pushObject: PushObject = this.push.init(options);
 
     pushObject.on('registration').subscribe((data: any) => {
-      console.log("deviceToken = " + data.registrationId);
       this.storage.set('deviceToken', data.registrationId);
     });
 

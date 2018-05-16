@@ -38,6 +38,7 @@
     "cordova-plugin-device": "^1.1.7",
     "cordova-plugin-facebook4": "^1.10.1",
     "cordova-plugin-geolocation": "^2.4.3",
+    "cordova-plugin-ionic": "^4.1.7",
     "cordova-plugin-ionic-keyboard": "^2.0.5",
     "cordova-plugin-mauron85-background-geolocation": "^2.3.5",
     "cordova-plugin-nativestorage": "^2.3.1",
@@ -107,7 +108,15 @@
       "phonegap-plugin-push": {
         "FCM_VERSION": "11.6.2"
       },
-      "cordova-plugin-splashscreen": {}
+      "cordova-plugin-splashscreen": {},
+      "cordova-plugin-ionic": {
+        "APP_ID": "111fb7d7",
+        "CHANNEL_NAME": "Production",
+        "UPDATE_METHOD": "background",
+        "WARN_DEBUG": "true",
+        "UPDATE_API": "https://api.ionicjs.com",
+        "MAX_STORE": "2"
+      }
     }
   }
 }

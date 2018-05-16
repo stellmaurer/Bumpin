@@ -1,0 +1,27 @@
+<ion-header>
+    <ion-navbar>
+        <ion-title>{{allMyData.numberOfUnseenNotifications}} new notifications</ion-title>
+    </ion-navbar>
+</ion-header>
+
+<ion-content>
+    <ion-grid *ngIf="allMyData.notifications.length == 0">
+        <ion-row>
+            <ion-col col-12 class="oneElement">
+                <div class="centerMe">
+                    <h1 [style.color]="'#32db64'">You don't have any notifications.</h1>
+                </div>
+            </ion-col>
+        </ion-row>
+    </ion-grid>
+
+    <ion-list *ngIf="allMyData.notifications.length != 0">
+
+        <ion-item *ngFor="let notification of allMyData.notifications">
+            <ion-label [color]="notification.hasBeenSeen == false ? 'primary' : 'light-gray'">{{notification.message}}</ion-label>
+        </ion-item>
+
+    </ion-list>
+
+</ion-content>
+      

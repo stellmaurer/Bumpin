@@ -105,6 +105,10 @@ export class FindPage {
     this.login.login()
     .then((res) => {
       this.setupThePage();
+      this.allMyData.getNotifications(this.http)
+      .catch((err) => {
+        this.allMyData.logError(this.tabName, "server", "notifications query error : Err msg = " + err, this.http);
+      });
     })
     .catch((err) => {
         // error logging is already done in the Login file

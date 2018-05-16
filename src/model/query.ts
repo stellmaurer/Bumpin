@@ -16,20 +16,11 @@ import { AllMyData } from './allMyData';
 import { Http, Headers, RequestOptions } from '@angular/http';
 import { deserialize } from "serializer.ts/Serializer";
 import { Utility } from "./utility";
+import { PushNotification } from "./pushNotification";
 
 export class Query{
     constructor(private allMyData : AllMyData, private http : Http){
       
-    }
-
-    public static promisePractice(resolveIt : boolean) {
-        return new Promise((resolve, reject) => {
-            if(resolveIt){
-                resolve("It resolved!");
-            }else{
-                reject(new Error("Something awful happened"));
-            }
-        });
     }
 
     // curl "https://graph.facebook.com/me?fields=id,name,gender,friends&access_token=EAACEdEose0cBAB6rZA5M4FggQWjpvo7FUv0iRA4xpFZBZAdL5ElYrbNC92YAaaf1gy9zyVYfxyHWE51YcQ6Jh7hFhP9cgoJhQQapczYr1qZAs7ZCa4Re3ifb9q1zRBdVybE5KvydgUFo5Rs6DvEKZCWuFUdpMbjtkzQXMWh8dSGgvAWDah0rNTAZBIzo8JJxyAZD"
@@ -90,12 +81,46 @@ export class Query{
             });
         });
     }
-    
-    public createOrUpdatePerson(){
+
+    // curl http://localhost:5000/getNotificationsForPerson -d "facebookID=10154326505409816"
+    public getNotifications(){
         return new Promise((resolve, reject) => {
-            var url = "http://bumpin-env.us-west-2.elasticbeanstalk.com:80/createOrUpdatePerson";
-            let body = "facebookID=" + this.allMyData.me.facebookID + "&isMale=" + this.allMyData.me.isMale + 
-                       "&name=" + encodeURIComponent(this.allMyData.me.name);
+            var url = "http://bumpin-env.us-west-2.elasticbeanstalk.com:80/getNotificationsForPerson";
+            let body = "facebookID=" + this.allMyData.me.facebookID;
+            var headers = new Headers();
+            headers.append('content-type', "application/x-www-form-urlencoded");
+            let options= new RequestOptions({headers: headers});
+            this.http.post(url, body, options).map(res => res.json()).subscribe(data => {
+                if(data.succeeded){
+                    this.allMyData.notifications = deserialize<PushNotification[]>(PushNotification, data.notifications);
+                    this.allMyData.notifications.sort(function(a, b){
+                        if(b.expiresAt > a.expiresAt){
+                            return 1;
+                        }
+                        if(b.expiresAt < a.expiresAt){
+                            return -1;
+                        }
+                        return 0;
+                    });
+                    this.allMyData.numberOfUnseenNotifications = 0;
+                    for(let i = 0; i < this.allMyData.notifications.length; i++){
+                        if(this.allMyData.notifications[i].hasBeenSeen == false){
+                            this.allMyData.numberOfUnseenNotifications++;
+                        }
+                    }
+                    resolve(data);
+                }else{
+                    reject(data.error);
+                }
+            });
+        });
+    }
+
+    // curl http://localhost:5000/markNotificationAsSeen -d "notificationID=7816555614368222646"
+    public markNotificationAsSeen(notification : PushNotification){
+        return new Promise((resolve, reject) => {
+            var url = "http://bumpin-env.us-west-2.elasticbeanstalk.com:80/markNotificationAsSeen";
+            let body = "notificationID=" + notification.notificationID;
             var headers = new Headers();
             headers.append('content-type', "application/x-www-form-urlencoded");
             let options= new RequestOptions({headers: headers});
@@ -106,6 +131,32 @@ export class Query{
                     reject(data.error);
                 }
             });
+        });
+    }
+    
+    public createOrUpdatePerson(){
+        return new Promise((resolve, reject) => {
+            Promise.all([this.allMyData.storage.get('platform'), this.allMyData.storage.get('deviceToken')]).then(data => {
+                let platform = data[0];
+                let deviceToken = data[1];
+                var url = "http://bumpin-env.us-west-2.elasticbeanstalk.com:80/createOrUpdatePerson";
+                let body = "facebookID=" + this.allMyData.me.facebookID + "&isMale=" + this.allMyData.me.isMale + 
+                            "&name=" + encodeURIComponent(this.allMyData.me.name) + "&platform=" + platform +
+                            "&deviceToken=" + encodeURIComponent(deviceToken);
+                var headers = new Headers();
+                headers.append('content-type', "application/x-www-form-urlencoded");
+                let options= new RequestOptions({headers: headers});
+                this.http.post(url, body, options).map(res => res.json()).subscribe(data => {
+                    if(data.succeeded){
+                        resolve(data);
+                    }else{
+                        reject(data.error);
+                    }
+                });
+              })
+              .catch((err) => {
+                reject(err);
+              });
         });
     }
 

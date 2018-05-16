@@ -10,6 +10,14 @@
   <ion-grid class="home">
 
     <ion-row>
+      <ion-col col-12>
+          <button ion-button block [color]="primary" style="color: black;" (click)='goToNotificationsPage();'>
+            {{allMyData.numberOfUnseenNotifications}} Notifications
+          </button>
+      </ion-col>
+    </ion-row>
+
+    <ion-row>
       <ion-col col-6 class="twoElements">
           <button ion-button [color]="primary" style="color: black;" (click)='goToFriendStatusPage();'>
             Who's Going Out?

@@ -18,6 +18,7 @@ import { Events } from 'ionic-angular';
 import { Utility } from "./utility";
 import { Injectable, NgZone } from '@angular/core';
 import { Storage } from '@ionic/storage';
+import { PushNotification } from "./pushNotification";
 
 // This class only gets created once and it happens when the app launches.
 //      Person is equal to your Person object in the database. It is used
@@ -35,10 +36,12 @@ export class AllMyData{
     public barsCloseToMe : Bar[];
     public thePartyOrBarIAmAt : any;
     public friends : Friend[];
+    public notifications : PushNotification[];
+    public numberOfUnseenNotifications : number;
     
     public events : Events;
 
-    constructor(public zone: NgZone, private storage: Storage) {
+    constructor(public zone: NgZone, public storage: Storage) {
         this.me = new Person();
         this.partyHostFor = new Array<Party>();
         this.barHostFor = new Array<Bar>();
@@ -46,6 +49,8 @@ export class AllMyData{
         this.barsCloseToMe = new Array<Bar>();
         this.thePartyOrBarIAmAt = null;
         this.friends = new Array<Friend>();
+        this.notifications = new Array<PushNotification>();
+        this.numberOfUnseenNotifications = 0;
     }
 
     public startPeriodicDataRetrieval(http : Http){
@@ -72,19 +77,12 @@ export class AllMyData{
     public createOrUpdatePerson(http : Http){
         return new Promise((resolve, reject) => {
             var query = new Query(this, http);
-            console.log("in createOrUpdatePerson");
-            this.storage.get('platform').then((val) => {
-                console.log('Platform is ', val);
-            });
-            this.storage.get('deviceToken').then((val) => {
-                console.log('Device token is ', val);
-            });
             query.createOrUpdatePerson()
             .then((res) => {
                 return this.refreshPerson(http);
             })
             .then((res) => {
-                resolve("CreateUpdateMeInDatabase query succeeded.");
+                resolve("createOrUpdatePerson query succeeded.");
             })
             .catch((err) => {
                 reject(err);
@@ -99,6 +97,32 @@ export class AllMyData{
             .then((res) => {
                 this.changeMyGoingOutStatusToUnknownIfStatusIsExpired();
                 resolve("getPerson query succeeded.");
+            })
+            .catch((err) => {
+                reject(err);
+            });
+        });
+    }
+
+    public getNotifications(http : Http){
+        return new Promise((resolve, reject) => {
+            var query = new Query(this, http);
+            query.getNotifications()
+            .then((res) => {
+                resolve("getNotifications query succeeded.");
+            })
+            .catch((err) => {
+                reject(err);
+            });
+        });
+    }
+
+    public markNotificationAsSeen(notification : PushNotification, http : Http){
+        return new Promise((resolve, reject) => {
+            var query = new Query(this, http);
+            query.markNotificationAsSeen(notification)
+            .then((res) => {
+                resolve("markNotificationAsSeen query succeeded.");
             })
             .catch((err) => {
                 reject(err);

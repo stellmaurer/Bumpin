@@ -2,6 +2,7 @@ import { NgModule, ErrorHandler } from '@angular/core';
 import { IonicApp, IonicModule, IonicErrorHandler } from 'ionic-angular';
 import { MyApp } from './app.component';
 import { MorePage } from '../pages/more/more';
+import { NotificationsPage } from '../pages/more/notifications';
 import { FriendsPage } from '../pages/more/friends';
 import { MyStatusPage } from '../pages/more/myStatus';
 import { RatePage } from '../pages/rate/rate';
@@ -49,6 +50,7 @@ const cloudSettings: CloudSettings = {
   declarations: [
     MyApp,
     MorePage,
+    NotificationsPage,
     FriendsPage,
     MyStatusPage,
     RatePage,
@@ -78,6 +80,7 @@ const cloudSettings: CloudSettings = {
   entryComponents: [
     MyApp,
     MorePage,
+    NotificationsPage,
     FriendsPage,
     MyStatusPage,
     RatePage,

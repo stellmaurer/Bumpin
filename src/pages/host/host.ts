@@ -17,7 +17,6 @@ import { CreatePage } from './create';
 import { EditPartyPage } from './editParty';
 import { EditBarPage } from './editBar';
 import { Http } from '@angular/http';
-import { NgZone } from '@angular/core';
 
 @Component({
   selector: 'page-host',
@@ -27,16 +26,15 @@ export class HostPage {
 
   private tabName: string = "Host Tab";
 
-  constructor(private zone: NgZone, public allMyData : AllMyData, private http:Http, private navCtrl: NavController, public alertCtrl: AlertController) {
-    console.log("host.ts: in constructor");
+  constructor(public allMyData : AllMyData, private http:Http, private navCtrl: NavController, public alertCtrl: AlertController) {
+    
   }
 
   ionViewDidLoad(){
-    console.log("host.ts: in ionViewDidLoad");
+    
   }
 
   ionViewDidEnter(){
-    console.log("host.ts: in ionViewDidEnter");
     this.allMyData.refreshPerson(this.http)
     .then((res) => {
 

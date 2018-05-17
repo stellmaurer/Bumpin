@@ -8,7 +8,7 @@
  * the express permission of Stephen Ellmaurer.
  *******************************************************/
 
-import { Component, ViewChild, ElementRef } from '@angular/core';
+import { Component, ViewChild, ElementRef, NgZone } from '@angular/core';
 import { Http } from '@angular/http';
 import { NavParams, NavController, AlertController} from 'ionic-angular';
 import { AllMyData} from '../../model/allMyData';
@@ -42,7 +42,7 @@ export class EditPartyPage {
   private inputError : string;
   private addressInputTimer : any;
 
-  constructor(public allMyData : AllMyData, private http:Http, private navCtrl: NavController, params : NavParams, public alertCtrl: AlertController) {
+  constructor(public allMyData : AllMyData, private http:Http, public zone: NgZone, private navCtrl: NavController, params : NavParams, public alertCtrl: AlertController) {
     this.originalParty = params.get("party");
     this.party = this.originalParty.createShallowCopy();
     this.inviteesToAdd = new Map<string,Invitee>();
@@ -233,8 +233,16 @@ export class EditPartyPage {
   private determineWhichHostsWereAddedAndWhichWereRemoved(){
     this.originalParty.hosts.forEach((value: any, key: string) => {
         if(this.party.hosts.has(key) == false){
-            // person is in the old list but not the new, so they should be in the list to remove
-            this.hostsToRemove.set(key, value);
+          // person is in the old list but not the new, so they should be in the list to remove
+          this.hostsToRemove.set(key, value);
+        }else{
+          // person is in the old list and the new (happens if the friend declined to host the party, but then
+          //    you reinvited them to host the party)
+          let oldHostObject = <Host>value;
+          let newHostObject = this.party.hosts.get(key);
+          if(oldHostObject.status == "Declined" && newHostObject.status == "Waiting"){
+            this.hostsToAdd.set(key, newHostObject);
+          }
         }
     });
     this.party.hosts.forEach((value: any, key: string) => {
@@ -321,8 +329,7 @@ export class EditPartyPage {
         handler: data => {
             this.allMyData.removeYourselfAsHostForParty(this.party, this.http)
             .then((res) => {
-                this.removeTheDeletedPartyLocally();
-                this.party.hosts.delete(this.allMyData.me.facebookID);
+                this.removePartyFromPartyHostFor();
                 this.navCtrl.popTo(this.navCtrl.getByIndex(this.navCtrl.length()-3));
             })
             .catch((err) => {
@@ -369,7 +376,7 @@ export class EditPartyPage {
   }
 
   private removePartyFromInvitedTo(){
-    let indexToRemove = this.allMyData.invitedTo.indexOf[this.party.partyID];
+    let indexToRemove = this.allMyData.invitedTo.indexOf(this.party);
     let invitedTo = new Array<Party>();
     for(let i = 0; i < invitedTo.length; i++){
         if(i != indexToRemove){
@@ -380,7 +387,7 @@ export class EditPartyPage {
   }
 
   private removePartyFromPartyHostFor(){
-    let indexToRemove = this.allMyData.partyHostFor.indexOf[this.party.partyID];
+    let indexToRemove = this.allMyData.partyHostFor.indexOf(this.party);
     let partyHostFor = new Array<Party>();
     for(let i = 0; i < partyHostFor.length; i++){
         if(i != indexToRemove){

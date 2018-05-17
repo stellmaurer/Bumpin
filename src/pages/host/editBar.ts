@@ -193,6 +193,14 @@ export class EditBarPage {
         if(this.bar.hosts.has(key) == false){
             // person is in the old list but not the new, so they should be in the list to remove
             this.hostsToRemove.set(key, value);
+        }else{
+          // person is in the old list and the new (happens if the friend declined to host the party, but then
+          //    you reinvited them to host the party)
+          let oldHostObject = <Host>value;
+          let newHostObject = this.bar.hosts.get(key);
+          if(oldHostObject.status == "Declined" && newHostObject.status == "Waiting"){
+            this.hostsToAdd.set(key, newHostObject);
+          }
         }
     });
     this.bar.hosts.forEach((value: any, key: string) => {

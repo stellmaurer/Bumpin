@@ -23,7 +23,7 @@ export class Query{
       
     }
 
-    // curl "https://graph.facebook.com/me?fields=id,name,gender,friends&access_token=EAACEdEose0cBAB6rZA5M4FggQWjpvo7FUv0iRA4xpFZBZAdL5ElYrbNC92YAaaf1gy9zyVYfxyHWE51YcQ6Jh7hFhP9cgoJhQQapczYr1qZAs7ZCa4Re3ifb9q1zRBdVybE5KvydgUFo5Rs6DvEKZCWuFUdpMbjtkzQXMWh8dSGgvAWDah0rNTAZBIzo8JJxyAZD"
+    // curl "https://graph.facebook.com/me?fields=id,name,gender,friends&access_token=EAAGqhN2UkfwBACXGfqebyJ9LxCVXOBuPSyR9eVExRD0PZA3TBIOHJtXUjLXRaL2TPsGrFr5BXPkJw8ttKP3aejbdfPVoxCSmyMzjmlTD4BNn6Y7Gxz0cfig3aJZC6HOnLGQcId0MwFOWEjmQYnt5r01hVjpUiNSrpDEzZAODYVyzS0NEHKNZC5BKU0xh6yVa8ioQcT0rTmEYqxJ61WsX"
     public refreshMyDataFromFacebook(accessToken : string){
         return new Promise((resolve, reject) => {
             var url = "https://graph.facebook.com/me?fields=id,name,gender,friends{id,name,gender}&access_token=" + accessToken;
@@ -57,6 +57,47 @@ export class Query{
             this.allMyData.friends.push(friend);
             //console.log("Friend added: FacebookID=" + friend.facebookID + ", Name= " + friend.name + ", Male=" + friend.isMale);
         }
+
+        if(data.friends.paging.next != undefined){
+            this.pageThroughMoreFriends(data.friends.paging.next)
+            .then((res) => {
+                this.sortFacebookFriendsByName();
+            })
+            .catch((err) => {
+                this.allMyData.logError("More Tab", "login", "error while paging through user's FB friends : Err msg = " + err, this.http);
+            });
+        }else{
+            this.sortFacebookFriendsByName();
+        }
+
+        
+    }
+
+    private pageThroughMoreFriends(url : string){
+        return new Promise((resolve, reject) => {
+            this.http.get(url).map(res => res.json()).subscribe(data => {
+                // TODO: Might need to eventually check for an error here.
+                for(let i = 0; i < data.data.length; i++){
+                    var friend : Friend = new Friend();
+                    friend.facebookID = data.data[i].id;
+                    friend.name = data.data[i].name;
+                    if(data.data[i].gender == "male"){
+                        friend.isMale = true;
+                    }else{
+                        friend.isMale = false;
+                    }
+                    this.allMyData.friends.push(friend);
+                }
+        
+                if(data.paging.next != undefined){
+                    return this.pageThroughMoreFriends(data.paging.next);
+                }
+                resolve("Successfully paged through the user's Facebook friends.");
+            });
+        });
+    }
+
+    private sortFacebookFriendsByName(){
         this.allMyData.friends.sort(function(a, b){
             if(b.name < a.name){
                 return 1;
@@ -654,6 +695,7 @@ export class Query{
                 if(data.succeeded){
                     resolve(data);
                 }else{
+                    console.log(data.error);
                     reject(data.error);
                 }
             });

@@ -28,7 +28,6 @@ export class FriendsPage {
     private unknown : Friend[];
 
     constructor(private http:Http, public allMyData : AllMyData) {
-        console.log("friends.ts: in constructor");
         this.yes = new Array<Friend>();
         this.maybe = new Array<Friend>();
         this.convinceMe = new Array<Friend>();
@@ -37,7 +36,6 @@ export class FriendsPage {
     }
 
     ionViewWillEnter(){
-        console.log("friends.ts: in ionViewWillEnter");
         this.yes = new Array<Friend>();
         this.maybe = new Array<Friend>();
         this.convinceMe = new Array<Friend>();

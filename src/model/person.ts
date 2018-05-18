@@ -23,4 +23,49 @@ export class Person {
     public deviceToken : string;
 
     constructor() {}
+
+    fixMaps(){
+        this.fixPartyHostForMap();
+        this.fixBarHostForMap();
+        this.fixInvitedToMap();
+    }
+
+    private fixPartyHostForMap(){
+        if(this.partyHostFor == null){
+            this.partyHostFor = new Map<string,boolean>();
+        }else{
+            let fixedPartyHostForMap = new Map<string,boolean>();
+            let partyHostFor = this.partyHostFor;
+            Object.keys(partyHostFor).forEach(function (key) {
+                fixedPartyHostForMap.set(key, partyHostFor[key]);
+            });
+            this.partyHostFor = fixedPartyHostForMap;
+        }
+    }
+
+    private fixBarHostForMap(){
+        if(this.barHostFor == null){
+            this.barHostFor = new Map<string,boolean>();
+        }else{
+            let fixedBarHostForMap = new Map<string,boolean>();
+            let barHostFor = this.barHostFor;
+            Object.keys(barHostFor).forEach(function (key) {
+                fixedBarHostForMap.set(key, barHostFor[key]);
+            });
+            this.barHostFor = fixedBarHostForMap;
+        }
+    }
+
+    private fixInvitedToMap(){
+        if(this.invitedTo == null){
+            this.invitedTo = new Map<string,boolean>();
+        }else{
+            let fixedInvitedToMap = new Map<string,boolean>();
+            let invitedTo = this.invitedTo;
+            Object.keys(invitedTo).forEach(function (key) {
+                fixedInvitedToMap.set(key, invitedTo[key]);
+            });
+            this.invitedTo = fixedInvitedToMap;
+        }
+    }
 }

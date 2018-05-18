@@ -56,7 +56,6 @@ export class AllMyData{
     public startPeriodicDataRetrieval(http : Http){
         var tempThis = this;
         setInterval(function(){
-            console.log("allMyData.ts: in startPeriodicDataRetrieval");
             tempThis.events.publish("timeToRefreshPartyAndBarData");
         }, 60000);
     }
@@ -128,6 +127,33 @@ export class AllMyData{
                 reject(err);
             });
         });
+    }
+
+    public deleteNotification(notification : PushNotification, http : Http){
+        this.zone.run(() => {
+            this.deleteNotificationLocally(notification);
+        });
+        return new Promise((resolve, reject) => {
+            var query = new Query(this, http);
+            query.deleteNotification(notification)
+            .then((res) => {
+                resolve("deleteNotification query succeeded.");
+            })
+            .catch((err) => {
+                reject(err);
+            });
+        });
+    }
+
+    private deleteNotificationLocally(notification : PushNotification){
+        let indexToRemove = this.notifications.indexOf(notification);
+        let notifications = new Array<PushNotification>();
+        for(let i = 0; i < this.notifications.length; i++){
+            if(i != indexToRemove){
+                notifications.push(this.notifications[i]);
+            }
+        }
+        this.notifications = notifications;
     }
 
     private changeMyGoingOutStatusToUnknownIfStatusIsExpired(){

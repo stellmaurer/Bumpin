@@ -9,9 +9,10 @@
  *******************************************************/
 
 import { Component } from '@angular/core';
-import { NavController} from 'ionic-angular';
+import { NavController, App, AlertController} from 'ionic-angular';
 import { AllMyData} from '../../model/allMyData';
 import { Http } from '@angular/http';
+import { PushNotification } from '../../model/pushNotification';
 
 @Component({
   selector: 'page-notifications',
@@ -20,11 +21,15 @@ import { Http } from '@angular/http';
 export class NotificationsPage {
     private tabName: string = "More Tab";
 
-    constructor(public allMyData : AllMyData, private navCtrl: NavController, private http:Http) {
-
+    constructor(private app : App, public alertCtrl: AlertController, public allMyData : AllMyData, private navCtrl: NavController, private http:Http) {
+        
     }
 
     ionViewDidEnter(){
+        this.markNotificationsAsSeen();
+    }
+
+    private markNotificationsAsSeen(){
         for(let i = 0; i < this.allMyData.notifications.length; i++){
             let notification = this.allMyData.notifications[i];
             if(notification.hasBeenSeen == false){
@@ -35,4 +40,73 @@ export class NotificationsPage {
             }
         }
     }
+
+    private viewNotification(notification : PushNotification){
+        if(notification.message.includes("party")){
+            if(notification.message.includes("host")){
+                if(this.areYouStillAHostOfTheParty(notification.partyOrBarID) == true){
+                    this.app.getRootNav().getActiveChildNav().select(2);
+                }else{
+                    this.presentAlertWithMessage("You are either no longer a host for this party anymore, or this party no longer exists.");
+                    this.deleteTheNotification(notification);
+                }
+            }
+            if(notification.message.includes("invited")){
+                this.allMyData.storage.set('partyIDForPushNotification', notification.partyOrBarID);
+                if(this.areYouStillInvitedToTheParty(notification.partyOrBarID) == true){
+                    this.app.getRootNav().getActiveChildNav().select(0);
+                }else{
+                    this.presentAlertWithMessage("You are either no longer invited to this party, or this party no longer exists.");
+                    this.deleteTheNotification(notification);
+                }
+            }
+        }else if(notification.message.includes("bar")){
+            if(notification.message.includes("host")){
+                if(this.areYouStillAHostOfTheBar(notification.partyOrBarID) == true){
+                    this.app.getRootNav().getActiveChildNav().select(2);
+                }else{
+                    this.presentAlertWithMessage("You are either no longer a host for this bar anymore, or this bar no longer exists.");
+                    this.deleteTheNotification(notification);
+                }
+            }
+        }
+    }
+
+    private deleteTheNotification(notification : PushNotification){
+        this.allMyData.deleteNotification(notification, this.http)
+        .catch((err) => {
+            this.allMyData.logError(this.tabName, "server", "deleteNotification query error : Err msg = " + err, this.http);
+        });
+    }
+
+    private areYouStillAHostOfTheParty(partyID : string) : boolean {
+        let stillHostOfParty = this.allMyData.me.partyHostFor.has(partyID);
+        if(this.allMyData.me.partyHostFor.has(partyID) == true){
+            return true;
+        }else{
+            return false;
+        }
+    }
+
+    private areYouStillAHostOfTheBar(barID : string) : boolean {
+        if(this.allMyData.me.barHostFor.has(barID) == true){
+            return true;
+        }else{
+            return false;
+        }
+    }
+
+    private areYouStillInvitedToTheParty(partyID : string) : boolean {
+        if(this.allMyData.me.invitedTo.has(partyID) == true){
+            return true;
+        }else{
+            return false;
+        }
+    }
+
+    presentAlertWithMessage(message : string) {
+        let alert = this.alertCtrl.create();
+        alert.setTitle(message);
+        alert.present();
+      }
 }

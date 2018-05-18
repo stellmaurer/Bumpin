@@ -72,7 +72,7 @@ export class FindPage {
   private partyFilterAnyThisWeekTemp : boolean;
   private partyFilterDontShowPartiesTemp : boolean;
  
-  constructor(private storage: Storage, private allMyData : AllMyData, private login : Login, public alertCtrl: AlertController, public locationTracker: LocationTracker, private events : Events, private http:Http, public navCtrl: NavController, public popoverCtrl: PopoverController) {
+  constructor(private allMyData : AllMyData, private login : Login, public alertCtrl: AlertController, public locationTracker: LocationTracker, private events : Events, private http:Http, public navCtrl: NavController, public popoverCtrl: PopoverController) {
     this.allMyData.events = events;
     this.partyMarkersOnMap = new Map<string,any>();
     this.barMarkersOnMap = new Map<string,any>();
@@ -99,16 +99,15 @@ export class FindPage {
     this.barFilterFriendsPresentTemp = false;
 
     this.barClusterMarkers = new Array<any>();
+    
+   console.log("find.ts: in constructor");
   }
 
   ionViewDidLoad(){
+    console.log("find.ts: in ionViewDidLoad");
     this.login.login()
     .then((res) => {
       this.setupThePage();
-      this.allMyData.getNotifications(this.http)
-      .catch((err) => {
-        this.allMyData.logError(this.tabName, "server", "notifications query error : Err msg = " + err, this.http);
-      });
     })
     .catch((err) => {
         // error logging is already done in the Login file
@@ -116,7 +115,25 @@ export class FindPage {
   }
 
   ionViewWillEnter(){
-    this.allMyData.events.publish("timeToRefreshPartyAndBarData");
+    console.log("find.ts: in ionViewWillEnter");
+    this.refreshPartyAndBarData()
+    .then((res) => {
+      console.log("in refreshPartyAndBarData.then");
+      this.allMyData.storage.get('partyIDForPushNotification')
+      .then((partyID : any) => {
+        console.log("in storage.then");
+        if(partyID != null){
+          console.log("partyID is good, should be working");
+          let theParty = this.partyMarkersOnMap.get(partyID).party;
+          this.allMyData.storage.remove('partyIDForPushNotification');
+          this.map.panTo(this.partyMarkersOnMap.get(partyID).getPosition());
+          this.presentPartyPopover(theParty);
+        }
+      });
+    })
+    .catch((err) => {
+      console.log("error: " + err);
+    });
   }
 
   private setupThePage(){
@@ -148,6 +165,17 @@ export class FindPage {
       .then((res) => {
         this.events.publish("updateMyAtBarAndAtPartyStatuses");
         this.refreshPartyMarkers();
+        this.allMyData.storage.get('partyIDForPushNotification')
+        .then((partyID : any) => {
+          console.log("in storage.then");
+          if(partyID != null){
+            console.log("partyID is good, should be working");
+            let theParty = this.partyMarkersOnMap.get(partyID).party;
+            this.allMyData.storage.remove('partyIDForPushNotification');
+            this.map.panTo(this.partyMarkersOnMap.get(partyID).getPosition());
+            this.presentPartyPopover(theParty);
+          }
+        });
       })
       .catch((err) => {
         this.allMyData.logError(this.tabName, "server", "refreshParties query error : Err msg = " + err, this.http);
@@ -173,24 +201,7 @@ export class FindPage {
 
     this.allMyData.startPeriodicDataRetrieval(this.http);
     this.events.subscribe("timeToRefreshPartyAndBarData",() => {
-      this.allMyData.refreshPerson(this.http)
-      .then((res) => {
-        Promise.all([this.allMyData.refreshBarsCloseToMe(this.myCoordinates, this.http), this.allMyData.refreshBarsImHosting(this.http), this.allMyData.refreshParties(this.http)]).then(thePromise => {
-          return thePromise;
-        })
-        .then((res) => {
-          this.events.publish("updateMyAtBarAndAtPartyStatuses");
-          this.refreshPartyMarkers();
-          this.refreshBarMarkers();
-          this.updateMyGoingOutStatusIfNeeded();
-        })
-        .catch((err) => {
-          this.allMyData.logError(this.tabName, "server", "refreshBarsCloseToMe or refreshParties query error : Err msg = " + err, this.http);
-        });
-      })
-      .catch((err) => {
-        this.allMyData.logError(this.tabName, "server", "refreshPerson query error : Err msg = " + err, this.http);
-      });
+      this.refreshPartyAndBarData();
     });
 
     this.events.subscribe("aDifferentUserJustLoggedIn",() => {
@@ -212,6 +223,32 @@ export class FindPage {
 
     this.events.subscribe("timeToRefreshMapMarkers",() => {
       this.refreshMapMarkers();
+    });
+  }
+
+  private refreshPartyAndBarData(){
+    return new Promise((resolve, reject) => {
+      this.allMyData.refreshPerson(this.http)
+      .then((res) => {
+        Promise.all([this.allMyData.refreshBarsCloseToMe(this.myCoordinates, this.http), this.allMyData.refreshBarsImHosting(this.http), this.allMyData.refreshParties(this.http)]).then(thePromise => {
+          return thePromise;
+        })
+        .then((res) => {
+          this.events.publish("updateMyAtBarAndAtPartyStatuses");
+          this.refreshPartyMarkers();
+          this.refreshBarMarkers();
+          this.updateMyGoingOutStatusIfNeeded();
+          resolve("refreshedPartyAndBarData");
+        })
+        .catch((err) => {
+          this.allMyData.logError(this.tabName, "server", "refreshBarsCloseToMe or refreshParties query error : Err msg = " + err, this.http);
+          reject("refreshingPartyAndBarData failed. Err: " + err);
+        });
+      })
+      .catch((err) => {
+        reject("refreshingPartyAndBarData failed due to refreshPerson. Err: " + err);
+        this.allMyData.logError(this.tabName, "server", "refreshPerson query error : Err msg = " + err, this.http);
+      });
     });
   }
 
@@ -444,6 +481,10 @@ export class FindPage {
   }
 
   private presentPartyPopover(party : Party) {
+    console.log("in find.ts: party = " + party);
+    console.log("in find.ts: this.allMyData = " + this.allMyData);
+    console.log("in find.ts: this.http = " + this.http);
+    console.log("in find.ts: this.navCtrl = " + this.navCtrl);
     let popover = this.popoverCtrl.create(PartyPopover, {party:party, allMyData:this.allMyData, http:this.http, navCtrl:this.navCtrl}, {cssClass:'partyPopover.scss'});
     popover.present();
   }

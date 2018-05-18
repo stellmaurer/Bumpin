@@ -87,6 +87,8 @@ export class PartyPopover {
 
   friendsButtonClicked(){
     this.viewCtrl.dismiss();
+    console.log("in partyPopover.ts: this.party = " + this.party);
+    console.log("in partyPopover.ts: this.navCtrl = " + this.navCtrl);
     this.navCtrl.push(InvitedFriendsPage, {party:this.party}, {animate: false});
   }
 }

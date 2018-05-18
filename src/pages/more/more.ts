@@ -37,6 +37,14 @@ export class MorePage {
     .catch((err) => {
       this.allMyData.logError(this.tabName, "server", "notifications query error : Err msg = " + err, this.http);
     });
+
+    this.allMyData.refreshPerson(this.http)
+    .then((res) => {
+      
+    })
+    .catch((err) => {
+      this.allMyData.logError(this.tabName, "server", "refreshPerson query error : Err msg = " + err, this.http);
+    });
   }
 
   private goToNotificationsPage(){

@@ -115,6 +115,7 @@ export class Query{
             this.http.get(url).map(res => res.json()).subscribe(data => {
                 if(data.succeeded){
                     this.allMyData.me = deserialize<Person>(Person, data.people[0]);
+                    this.allMyData.me.fixMaps();
                     resolve(data);
                 }else{
                     reject(data.error);
@@ -161,6 +162,24 @@ export class Query{
     public markNotificationAsSeen(notification : PushNotification){
         return new Promise((resolve, reject) => {
             var url = "http://bumpin-env.us-west-2.elasticbeanstalk.com:80/markNotificationAsSeen";
+            let body = "notificationID=" + notification.notificationID;
+            var headers = new Headers();
+            headers.append('content-type', "application/x-www-form-urlencoded");
+            let options= new RequestOptions({headers: headers});
+            this.http.post(url, body, options).map(res => res.json()).subscribe(data => {
+                if(data.succeeded){
+                    resolve(data);
+                }else{
+                    reject(data.error);
+                }
+            });
+        });
+    }
+
+    // curl http://bumpin-env.us-west-2.elasticbeanstalk.com:80/deleteNotification -d "notificationID=5233516922553495941"
+    public deleteNotification(notification : PushNotification){
+        return new Promise((resolve, reject) => {
+            var url = "http://bumpin-env.us-west-2.elasticbeanstalk.com:80/deleteNotification";
             let body = "notificationID=" + notification.notificationID;
             var headers = new Headers();
             headers.append('content-type', "application/x-www-form-urlencoded");
@@ -446,14 +465,16 @@ export class Query{
     public getPartiesImInvitedTo(){
         return new Promise((resolve, reject) => {
             var partiesImInvitedTo : string = "";
-            if(this.allMyData.me.invitedTo != null){
-                for(var key in this.allMyData.me.invitedTo){
+            if(this.allMyData.me.invitedTo.size != 0){
+                this.allMyData.me.invitedTo.forEach((value: any, key: string) => {
                     partiesImInvitedTo += key + ",";
-                }
+                });
+
                 if(partiesImInvitedTo.length >= 1){
                     partiesImInvitedTo = partiesImInvitedTo.substr(0, partiesImInvitedTo.length-1); // take off the last comma
                 }
             }
+            
             var url = "http://bumpin-env.us-west-2.elasticbeanstalk.com:80/myParties?partyIDs=" + partiesImInvitedTo;
             this.http.get(url).map(res => res.json()).subscribe(data => {
                 if(data.succeeded){
@@ -511,10 +532,11 @@ export class Query{
     public getPartiesImHosting(){
         return new Promise((resolve, reject) => {
             var partiesImHosting : string = "";
-            if(this.allMyData.me.partyHostFor != null){
-                for(var key in this.allMyData.me.partyHostFor){
+            if(this.allMyData.me.partyHostFor.size != 0){
+                this.allMyData.me.partyHostFor.forEach((value: any, key: string) => {
                     partiesImHosting += key + ",";
-                }
+                });
+
                 if(partiesImHosting.length >= 1){
                     partiesImHosting = partiesImHosting.substr(0, partiesImHosting.length-1); // take off the last comma
                 }
@@ -541,10 +563,10 @@ export class Query{
     public getBarsImHosting(){
         return new Promise((resolve, reject) => {
             var barsImHosting : string = "";
-            if(this.allMyData.me.barHostFor != null){
-                for(var key in this.allMyData.me.barHostFor){
+            if(this.allMyData.me.barHostFor.size != 0){
+                this.allMyData.me.barHostFor.forEach((value: any, key: string) => {
                     barsImHosting += key + ",";
-                }
+                });
                 if(barsImHosting.length >= 1){
                     barsImHosting = barsImHosting.substr(0, barsImHosting.length-1); // take off the last comma
                 }
@@ -785,6 +807,7 @@ export class Query{
 
     // curl http://localhost:5000/sendInvitationsAsGuestOfParty -d "
     //      partyID=17717147682844711033&
+    //      guestName=Steve%20Ellmaurer&
     //      guestFacebookID=111354699627054&
     //      additionsListFacebookID=184484668766597,114947809267026&
     //      additionsListIsMale=true,true&
@@ -792,7 +815,8 @@ export class Query{
     public sendInvitationsAsGuestOfParty(party : Party, inviteesToAdd : Map<string,Invitee>){
         return new Promise((resolve, reject) => {
             var url = "http://bumpin-env.us-west-2.elasticbeanstalk.com:80/sendInvitationsAsGuestOfParty";
-            let body = "partyID=" + party.partyID + "&guestFacebookID=" + this.allMyData.me.facebookID;
+            let body = "partyID=" + party.partyID + "&guestName=" + encodeURIComponent(this.allMyData.me.name) + 
+                       "&guestFacebookID=" + this.allMyData.me.facebookID;
             body += this.createInviteeListParametersForSendInvitationsAsGuestOfPartyQuery(inviteesToAdd);
             var headers = new Headers();
             headers.append('content-type', "application/x-www-form-urlencoded");

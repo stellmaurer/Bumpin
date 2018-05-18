@@ -378,7 +378,7 @@ export class EditPartyPage {
   private removePartyFromInvitedTo(){
     let indexToRemove = this.allMyData.invitedTo.indexOf(this.party);
     let invitedTo = new Array<Party>();
-    for(let i = 0; i < invitedTo.length; i++){
+    for(let i = 0; i < this.allMyData.invitedTo.length; i++){
         if(i != indexToRemove){
             invitedTo.push(this.allMyData.invitedTo[i]);
         }
@@ -389,7 +389,7 @@ export class EditPartyPage {
   private removePartyFromPartyHostFor(){
     let indexToRemove = this.allMyData.partyHostFor.indexOf(this.party);
     let partyHostFor = new Array<Party>();
-    for(let i = 0; i < partyHostFor.length; i++){
+    for(let i = 0; i < this.allMyData.partyHostFor.length; i++){
         if(i != indexToRemove){
             partyHostFor.push(this.allMyData.partyHostFor[i]);
         }

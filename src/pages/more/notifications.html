@@ -17,9 +17,10 @@
 
     <ion-list *ngIf="allMyData.notifications.length != 0">
 
-        <ion-item *ngFor="let notification of allMyData.notifications">
-            <ion-label [color]="notification.hasBeenSeen == false ? 'primary' : 'light-gray'">{{notification.message}}</ion-label>
-        </ion-item>
+        <button ion-item text-wrap *ngFor="let notification of allMyData.notifications" (click)="viewNotification(notification)">
+            <h3 [style.color]="notification.hasBeenSeen == false ? '#32db64' : '#D3D3D3'">{{(1000 * notification.expiresAt) - ((1000*60*60*24) * 14) | date : "EEE, MMM d"}}</h3>
+            <p [style.color]="notification.hasBeenSeen == false ? '#32db64' : '#D3D3D3'">{{notification.message}}</p>
+        </button>
 
     </ion-list>
 

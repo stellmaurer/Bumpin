@@ -1,14 +1,16 @@
 import { Component } from '@angular/core';
 import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
-import { AlertController, Nav, Platform } from 'ionic-angular';
+import { AlertController, Nav, Platform, Events, Tabs, App } from 'ionic-angular';
 
 import { TabsPage } from '../pages/tabs/tabs';
 import { ViewChild } from '@angular/core';
-import { Events } from 'ionic-angular';
 import { BackgroundGeolocation } from '@ionic-native/background-geolocation';
 import { Push, PushObject, PushOptions } from '@ionic-native/push';
 import { Storage } from '@ionic/storage';
+import { HostPage } from '../pages/host/host';
+import { FindPage } from '../pages/find/find';
+import { NavController } from 'ionic-angular';
 
 @Component({
   templateUrl: 'app.html',
@@ -16,10 +18,10 @@ import { Storage } from '@ionic/storage';
 })
 
 export class MyApp {
-  @ViewChild('myNav') nav
+  @ViewChild('myNav') nav : NavController
   private rootPage:any;
 
-  constructor(public platform: Platform, private statusBar: StatusBar, private splashScreen: SplashScreen, public push: Push, public alertCtrl: AlertController, private backgroundGeolocation: BackgroundGeolocation, private events : Events, private storage: Storage) {
+  constructor(public app: App, public platform: Platform, private statusBar: StatusBar, private splashScreen: SplashScreen, public push: Push, public alertCtrl: AlertController, private backgroundGeolocation: BackgroundGeolocation, private events : Events, private storage: Storage) {
     this.platform.ready().then(() => {
       this.storePlatform();
       this.initPushNotification();
@@ -84,14 +86,10 @@ export class MyApp {
       if(data.title !== undefined){
         data.message = data.title;
       }
-      console.log("data.title = " + data.title);
-      console.log("data.message = " + data.message);
-      console.log('data.additionalData.partyOrBarID = ' + data.additionalData.partyOrBarID);
       //if user using app and push notification comes
       if (data.additionalData.foreground) {
         // if application open, show popup
         let confirmAlert = this.alertCtrl.create({
-          title: 'New Notification',
           message: data.message,
           buttons: [{
             text: 'Ignore',
@@ -99,17 +97,37 @@ export class MyApp {
           }, {
             text: 'View',
             handler: () => {
-              //TODO: Your logic here
-              //this.nav.push(DetailsPage, { message: data.message });
+              let message = <string>data.message;
+              if(message.includes("party")){
+                if(message.includes("host")){
+                  this.app.getRootNav().getActiveChildNav().select(2);
+                }
+                if(message.includes("invited")){
+                  this.storage.set('partyIDForPushNotification', data.additionalData.partyOrBarID);
+                  this.app.getRootNav().getActiveChildNav().select(0);
+                }
+              }else if(message.includes("bar")){
+                if(message.includes("host")){
+                  this.app.getRootNav().getActiveChildNav().select(2);
+                }
+              }
             }
           }]
         });
         confirmAlert.present();
       } else {
         //if user NOT using app and push notification comes
-        //TODO: Your logic on click of push notification directly
-        //this.nav.push(DetailsPage, { message: data.message });
-        console.log('Push notification clicked');
+        let message = <string>data.message;
+        if(message.includes("party")){
+          if(message.includes("host")){
+            this.app.getRootNav().getActiveChildNav().select(2);
+          }
+          if(message.includes("invited")){
+            this.storage.set('partyIDForPushNotification', data.additionalData.partyOrBarID);
+          }
+        }else if(message.includes("bar")){
+          this.app.getRootNav().getActiveChildNav().select(2);
+        }
       }
     });
 

@@ -22,6 +22,7 @@
     "@angular/platform-browser-dynamic": "4.0.0",
     "@angular/platform-server": "4.0.0",
     "@ionic-native/background-geolocation": "^4.7.0",
+    "@ionic-native/badge": "^4.7.0",
     "@ionic-native/core": "^4.7.0",
     "@ionic-native/facebook": "^4.7.0",
     "@ionic-native/geofence": "^4.7.0",
@@ -34,11 +35,11 @@
     "cordova-android": "7.0.0",
     "cordova-browser": "^5.0.3",
     "cordova-ios": "4.5.4",
+    "cordova-plugin-badge": "^0.8.7",
     "cordova-plugin-compat": "^1.2.0",
     "cordova-plugin-device": "^1.1.7",
     "cordova-plugin-facebook4": "^1.10.1",
     "cordova-plugin-geolocation": "^2.4.3",
-    "cordova-plugin-ionic": "^4.1.7",
     "cordova-plugin-ionic-keyboard": "^2.0.5",
     "cordova-plugin-mauron85-background-geolocation": "^2.3.5",
     "cordova-plugin-nativestorage": "^2.3.1",
@@ -109,14 +110,7 @@
         "FCM_VERSION": "11.6.2"
       },
       "cordova-plugin-splashscreen": {},
-      "cordova-plugin-ionic": {
-        "APP_ID": "111fb7d7",
-        "CHANNEL_NAME": "Production",
-        "UPDATE_METHOD": "background",
-        "WARN_DEBUG": "true",
-        "UPDATE_API": "https://api.ionicjs.com",
-        "MAX_STORE": "2"
-      }
+      "cordova-plugin-badge": {}
     }
   }
 }

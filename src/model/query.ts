@@ -158,6 +158,24 @@ export class Query{
         });
     }
 
+    // curl http://localhost:5000/clearOutstandingNotificationCountForPerson -d "facebookID=7816555614368222646"
+    public clearOutstandingNotificationCount(){
+        return new Promise((resolve, reject) => {
+            var url = "http://bumpin-env.us-west-2.elasticbeanstalk.com:80/clearOutstandingNotificationCountForPerson";
+            let body = "facebookID=" + this.allMyData.me.facebookID;
+            var headers = new Headers();
+            headers.append('content-type', "application/x-www-form-urlencoded");
+            let options= new RequestOptions({headers: headers});
+            this.http.post(url, body, options).map(res => res.json()).subscribe(data => {
+                if(data.succeeded){
+                    resolve(data);
+                }else{
+                    reject(data.error);
+                }
+            });
+        });
+    }
+
     // curl http://localhost:5000/markNotificationAsSeen -d "notificationID=7816555614368222646"
     public markNotificationAsSeen(notification : PushNotification){
         return new Promise((resolve, reject) => {

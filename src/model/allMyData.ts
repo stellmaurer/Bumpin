@@ -95,6 +95,7 @@ export class AllMyData{
             query.getPerson(this.me.facebookID)
             .then((res) => {
                 this.changeMyGoingOutStatusToUnknownIfStatusIsExpired();
+                this.clearOutstandingNotificationCountForPerson(http);
                 resolve("getPerson query succeeded.");
             })
             .catch((err) => {
@@ -109,6 +110,19 @@ export class AllMyData{
             query.getNotifications()
             .then((res) => {
                 resolve("getNotifications query succeeded.");
+            })
+            .catch((err) => {
+                reject(err);
+            });
+        });
+    }
+
+    public clearOutstandingNotificationCountForPerson(http : Http){
+        return new Promise((resolve, reject) => {
+            var query = new Query(this, http);
+            query.clearOutstandingNotificationCount()
+            .then((res) => {
+                resolve("clearOutstandingNotificationCountForPerson query succeeded.");
             })
             .catch((err) => {
                 reject(err);

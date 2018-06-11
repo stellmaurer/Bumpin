@@ -25,6 +25,7 @@ import { LocationTracker } from '../providers/location-tracker';
 import { BackgroundGeolocation } from '@ionic-native/background-geolocation';
 import { Geolocation } from '@ionic-native/geolocation';
 import { Push } from '@ionic-native/push';
+import { Badge } from '@ionic-native/badge';
 import { Facebook } from '@ionic-native/facebook';
 import { Login } from '../pages/login/login';
 import { StatusBar } from '@ionic-native/status-bar';
@@ -103,6 +104,7 @@ const cloudSettings: CloudSettings = {
     LocationTracker,
     BackgroundGeolocation,
     Push,
+    Badge,
     Facebook,
     Geolocation,
     [AllMyData],

@@ -7,6 +7,7 @@ import { TabsPage } from '../pages/tabs/tabs';
 import { ViewChild } from '@angular/core';
 import { BackgroundGeolocation } from '@ionic-native/background-geolocation';
 import { Push, PushObject, PushOptions } from '@ionic-native/push';
+import { Badge } from '@ionic-native/badge';
 import { Storage } from '@ionic/storage';
 import { HostPage } from '../pages/host/host';
 import { FindPage } from '../pages/find/find';
@@ -21,13 +22,23 @@ export class MyApp {
   @ViewChild('myNav') nav : NavController
   private rootPage:any;
 
-  constructor(public app: App, public platform: Platform, private statusBar: StatusBar, private splashScreen: SplashScreen, public push: Push, public alertCtrl: AlertController, private backgroundGeolocation: BackgroundGeolocation, private events : Events, private storage: Storage) {
+  constructor(public app: App, public platform: Platform, private statusBar: StatusBar, private splashScreen: SplashScreen, private badge: Badge, public push: Push, public alertCtrl: AlertController, private backgroundGeolocation: BackgroundGeolocation, private events : Events, private storage: Storage) {
     this.platform.ready().then(() => {
       this.storePlatform();
       this.initPushNotification();
       this.rootPage = TabsPage;
       this.splashScreen.hide();
       this.statusBar.hide();
+
+      //this.badge.set(10);
+      //this.badge.increase(1);
+      //this.badge.clear();
+
+      this.platform.resume.subscribe((result)=>{//Foreground
+        console.log("App in foreground.");
+        this.badge.clear();
+      });
+
       /*this.statusBar.styleDefault();
       this.statusBar.overlaysWebView(false);
       this.statusBar.backgroundColorByHexString('#32db64');*/

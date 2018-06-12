@@ -36,11 +36,14 @@ export class MyApp {
       //this.badge.increase(1);
       //this.badge.clear();
 
-      this.badge.requestPermission();
 
       this.platform.resume.subscribe((result)=>{//Foreground
         console.log("App in foreground.");
         this.allMyData.logError("Find Tab", "client", "App in foreground", this.http);
+        console.log(this.badge.get());
+        console.log(this.badge.hasPermission());
+        console.log(this.badge.isSupported());
+        console.log(this.badge.set(0));
         this.badge.clear();
       });
 

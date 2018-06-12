@@ -40,6 +40,10 @@ export class MyApp {
       this.platform.resume.subscribe((result)=>{//Foreground
         console.log("App in foreground.");
         this.allMyData.logError("Find Tab", "client", "App in foreground", this.http);
+        this.allMyData.logError("Find Tab", "client", "this.badge.get(): " + this.badge.get(), this.http);
+        this.allMyData.logError("Find Tab", "client", "this.badge.hasPermission(): " + this.badge.hasPermission(), this.http);
+        this.allMyData.logError("Find Tab", "client", "this.badge.isSupported(): " + this.badge.isSupported(), this.http);
+        this.allMyData.logError("Find Tab", "client", "this.badge.set(0): " + this.badge.set(0), this.http);
         console.log(this.badge.get());
         console.log(this.badge.hasPermission());
         console.log(this.badge.isSupported());

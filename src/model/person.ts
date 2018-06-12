@@ -22,7 +22,19 @@ export class Person {
     public platform : string;
     public deviceToken : string;
 
-    constructor() {}
+    constructor() {
+        this.facebookID = "Not yet set.";
+        this.isMale = true;
+        this.name = "Not yet set.";
+        this.platform = "Not yet set.";
+        this.deviceToken = "Not yet set.";
+        this.barHostFor = new Map<string,boolean>();
+        this.invitedTo = new Map<string,boolean>();
+        this.partyHostFor = new Map<string,boolean>();
+        this.peopleBlockingTheirActivityFromMe = new Map<string,boolean>();
+        this.peopleToIgnore = new Map<string,boolean>();
+        this.status = new Map<string,string>();
+    }
 
     fixMaps(){
         this.fixPartyHostForMap();

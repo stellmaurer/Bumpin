@@ -99,12 +99,9 @@ export class FindPage {
     this.barFilterFriendsPresentTemp = false;
 
     this.barClusterMarkers = new Array<any>();
-    
-   console.log("find.ts: in constructor");
   }
 
   ionViewDidLoad(){
-    console.log("find.ts: in ionViewDidLoad");
     this.login.login()
     .then((res) => {
       this.setupThePage();
@@ -115,15 +112,11 @@ export class FindPage {
   }
 
   ionViewWillEnter(){
-    console.log("find.ts: in ionViewWillEnter");
     this.refreshPartyAndBarData()
     .then((res) => {
-      console.log("in refreshPartyAndBarData.then");
       this.allMyData.storage.get('partyIDForPushNotification')
       .then((partyID : any) => {
-        console.log("in storage.then");
         if(partyID != null){
-          console.log("partyID is good, should be working");
           let theParty = this.partyMarkersOnMap.get(partyID).party;
           this.allMyData.storage.remove('partyIDForPushNotification');
           this.map.panTo(this.partyMarkersOnMap.get(partyID).getPosition());
@@ -167,9 +160,7 @@ export class FindPage {
         this.refreshPartyMarkers();
         this.allMyData.storage.get('partyIDForPushNotification')
         .then((partyID : any) => {
-          console.log("in storage.then");
           if(partyID != null){
-            console.log("partyID is good, should be working");
             let theParty = this.partyMarkersOnMap.get(partyID).party;
             this.allMyData.storage.remove('partyIDForPushNotification');
             this.map.panTo(this.partyMarkersOnMap.get(partyID).getPosition());

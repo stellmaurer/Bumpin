@@ -111,16 +111,20 @@ export class Query{
     
     public getPerson(facebookID : string){
         return new Promise((resolve, reject) => {
-            var url = "http://bumpin-env.us-west-2.elasticbeanstalk.com:80/getPerson?facebookID=" + facebookID;
-            this.http.get(url).map(res => res.json()).subscribe(data => {
-                if(data.succeeded){
-                    this.allMyData.me = deserialize<Person>(Person, data.people[0]);
-                    this.allMyData.me.fixMaps();
-                    resolve(data);
-                }else{
-                    reject(data.error);
-                }
-            });
+            if(facebookID == "Not yet set."){
+                reject("FacebookID wasn't set before getPerson was called");
+            }else{
+                var url = "http://bumpin-env.us-west-2.elasticbeanstalk.com:80/getPerson?facebookID=" + facebookID;
+                this.http.get(url).map(res => res.json()).subscribe(data => {
+                    if(data.succeeded){
+                        this.allMyData.me = deserialize<Person>(Person, data.people[0]);
+                        this.allMyData.me.fixMaps();
+                        resolve(data);
+                    }else{
+                        reject(data.error);
+                    }
+                });
+            }
         });
     }
 

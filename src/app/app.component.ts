@@ -34,6 +34,8 @@ export class MyApp {
       //this.badge.increase(1);
       //this.badge.clear();
 
+      this.badge.requestPermission();
+
       this.platform.resume.subscribe((result)=>{//Foreground
         console.log("App in foreground.");
         this.badge.clear();

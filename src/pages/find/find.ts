@@ -112,21 +112,23 @@ export class FindPage {
   }
 
   ionViewWillEnter(){
-    this.refreshPartyAndBarData()
-    .then((res) => {
-      this.allMyData.storage.get('partyIDForPushNotification')
-      .then((partyID : any) => {
-        if(partyID != null){
-          let theParty = this.partyMarkersOnMap.get(partyID).party;
-          this.allMyData.storage.remove('partyIDForPushNotification');
-          this.map.panTo(this.partyMarkersOnMap.get(partyID).getPosition());
-          this.presentPartyPopover(theParty);
-        }
+    if(this.allMyData.me.facebookID != "Not yet set."){
+      this.refreshPartyAndBarData()
+      .then((res) => {
+        this.allMyData.storage.get('partyIDForPushNotification')
+        .then((partyID : any) => {
+          if(partyID != null){
+            let theParty = this.partyMarkersOnMap.get(partyID).party;
+            this.allMyData.storage.remove('partyIDForPushNotification');
+            this.map.panTo(this.partyMarkersOnMap.get(partyID).getPosition());
+            this.presentPartyPopover(theParty);
+          }
+        });
+      })
+      .catch((err) => {
+        console.log("error: " + err);
       });
-    })
-    .catch((err) => {
-      console.log("error: " + err);
-    });
+    }
   }
 
   private setupThePage(){

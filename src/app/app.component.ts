@@ -33,7 +33,6 @@ export class MyApp {
       this.statusBar.hide();
 
       this.platform.resume.subscribe((result)=>{//Foreground
-        console.log("App in foreground.");
         this.badge.clear();
       });
 

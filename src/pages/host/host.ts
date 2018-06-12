@@ -17,7 +17,6 @@ import { CreatePage } from './create';
 import { EditPartyPage } from './editParty';
 import { EditBarPage } from './editBar';
 import { Http } from '@angular/http';
-import { Badge } from '@ionic-native/badge';
 
 @Component({
   selector: 'page-host',
@@ -27,7 +26,7 @@ export class HostPage {
 
   private tabName: string = "Host Tab";
 
-  constructor(private badge: Badge, public allMyData : AllMyData, private http:Http, private navCtrl: NavController, public alertCtrl: AlertController) {
+  constructor(public allMyData : AllMyData, private http:Http, private navCtrl: NavController, public alertCtrl: AlertController) {
     
   }
 
@@ -36,17 +35,6 @@ export class HostPage {
   }
 
   ionViewDidEnter(){
-    //this.badge.set(10);
-    this.badge.hasPermission()
-    .then((res) => {
-      console.log("this.badge.hasPermission = " + res);
-      this.allMyData.logError(this.tabName, "client", "this.badge.hasPermission = " + res, this.http);
-    })
-    .catch((err) => {
-      console.log("this.badge.hasPermission = error");
-      this.allMyData.logError(this.tabName, "client", "this.badge.hasPermission = " + err, this.http);
-    });
-
     this.allMyData.refreshPerson(this.http)
     .then((res) => {
 

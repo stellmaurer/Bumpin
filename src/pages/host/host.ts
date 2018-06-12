@@ -17,6 +17,7 @@ import { CreatePage } from './create';
 import { EditPartyPage } from './editParty';
 import { EditBarPage } from './editBar';
 import { Http } from '@angular/http';
+import { Badge } from '@ionic-native/badge';
 
 @Component({
   selector: 'page-host',
@@ -26,7 +27,7 @@ export class HostPage {
 
   private tabName: string = "Host Tab";
 
-  constructor(public allMyData : AllMyData, private http:Http, private navCtrl: NavController, public alertCtrl: AlertController) {
+  constructor(private badge: Badge, public allMyData : AllMyData, private http:Http, private navCtrl: NavController, public alertCtrl: AlertController) {
     
   }
 
@@ -35,6 +36,7 @@ export class HostPage {
   }
 
   ionViewDidEnter(){
+    this.badge.set(10);
     this.allMyData.refreshPerson(this.http)
     .then((res) => {
 

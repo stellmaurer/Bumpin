@@ -36,7 +36,17 @@ export class HostPage {
   }
 
   ionViewDidEnter(){
-    this.badge.set(10);
+    //this.badge.set(10);
+    this.badge.hasPermission()
+    .then((res) => {
+      console.log("this.badge.hasPermission = " + res);
+      this.allMyData.logError(this.tabName, "client", "this.badge.hasPermission = " + res, this.http);
+    })
+    .catch((err) => {
+      console.log("this.badge.hasPermission = error");
+      this.allMyData.logError(this.tabName, "client", "this.badge.hasPermission = " + err, this.http);
+    });
+
     this.allMyData.refreshPerson(this.http)
     .then((res) => {
 

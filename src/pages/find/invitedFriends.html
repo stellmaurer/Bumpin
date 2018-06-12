@@ -1,0 +1,47 @@
+<ion-header>
+    <ion-navbar>
+        <ion-title>Invitation Statuses</ion-title>
+    </ion-navbar>
+    </ion-header>
+
+<ion-content>
+    <ion-grid *ngIf="this.allMyData.friends.length == 0">
+        <ion-row>
+            <ion-col col-12 class="oneElement">
+                <div class="centerMe">
+                    <h1 [style.color]="'#32db64'">You don't have any friends from Facebook who have this app yet.</h1>
+                </div>
+            </ion-col>
+        </ion-row>
+    </ion-grid>
+
+    <ion-grid *ngIf="this.allMyData.friends.length != 0 && invitedFriends.length == 0">
+        <ion-row>
+            <ion-col col-12 class="oneElement">
+                <div class="centerMe">
+                    <h1 [style.color]="'#32db64'">None of your friends are invited to this party yet.</h1>
+                </div>
+            </ion-col>
+        </ion-row>
+    </ion-grid>
+
+    <ion-list no-lines *ngIf="this.allMyData.friends.length != 0 && invitedFriends.length != 0">
+
+        <ion-list-header color="background-info-color" *ngIf="going.length != 0">Going</ion-list-header>
+        <ion-item *ngFor="let invitee of going">
+            <ion-label color="primary">{{ invitee.name }}</ion-label>
+        </ion-item>
+
+        <ion-list-header color="background-info-color" *ngIf="maybe.length != 0">Maybe</ion-list-header>
+        <ion-item *ngFor="let invitee of maybe">
+            <ion-label color="yellow">{{ invitee.name }}</ion-label>
+        </ion-item>
+
+        <ion-list-header color="background-info-color" *ngIf="invited.length != 0">Invited</ion-list-header>
+        <ion-item *ngFor="let invitee of invited">
+            <ion-label color="secondary">{{ invitee.name }}</ion-label>
+        </ion-item>
+    </ion-list>
+
+</ion-content>
+      

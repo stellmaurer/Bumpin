@@ -13,14 +13,13 @@ import { Events } from 'ionic-angular';
 import {Http} from '@angular/http';
 import {AllMyData} from "../../model/allMyData"
 import { Injectable } from '@angular/core';
-import { LocationTracker } from '../../providers/location-tracker';
 
 @Injectable()
 export class Login {
 
   private tabName : string = "More Tab";
 
-  constructor(private allMyData : AllMyData, private http:Http, private events : Events, private fb : Facebook, private locationTracker: LocationTracker) {}
+  constructor(private allMyData : AllMyData, private http:Http, private events : Events, private fb : Facebook) {}
 
   public login(){
     return new Promise((resolve, reject) => {
@@ -131,4 +130,6 @@ export class Login {
       });
     });
   }
+
+  
 }

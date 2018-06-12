@@ -26,6 +26,6 @@ export class TabsPage {
   tab4Root: any = MorePage;
 
   constructor() {
-
+    
   }
 }

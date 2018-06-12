@@ -2,10 +2,14 @@ import { NgModule, ErrorHandler } from '@angular/core';
 import { IonicApp, IonicModule, IonicErrorHandler } from 'ionic-angular';
 import { MyApp } from './app.component';
 import { MorePage } from '../pages/more/more';
+import { NotificationsPage } from '../pages/more/notifications';
+import { FriendsPage } from '../pages/more/friends';
+import { MyStatusPage } from '../pages/more/myStatus';
 import { RatePage } from '../pages/rate/rate';
 import { HostPage } from '../pages/host/host';
 import { FindPage } from '../pages/find/find';
 import { InviteFriendsPage } from '../pages/find/inviteFriends';
+import { InvitedFriendsPage } from '../pages/find/invitedFriends';
 import { PartyPopover } from '../pages/find/partyPopover'
 import { BarPopover } from '../pages/find/barPopover'
 import { TabsPage } from '../pages/tabs/tabs';
@@ -20,6 +24,8 @@ import { AllMyData } from '../model/allMyData';
 import { LocationTracker } from '../providers/location-tracker';
 import { BackgroundGeolocation } from '@ionic-native/background-geolocation';
 import { Geolocation } from '@ionic-native/geolocation';
+import { Push } from '@ionic-native/push';
+import { Badge } from '@ionic-native/badge';
 import { Facebook } from '@ionic-native/facebook';
 import { Login } from '../pages/login/login';
 import { StatusBar } from '@ionic-native/status-bar';
@@ -45,10 +51,14 @@ const cloudSettings: CloudSettings = {
   declarations: [
     MyApp,
     MorePage,
+    NotificationsPage,
+    FriendsPage,
+    MyStatusPage,
     RatePage,
     HostPage,
     FindPage,
     InviteFriendsPage,
+    InvitedFriendsPage,
     CreatePartyPage,
     EditPartyPage,
     EditBarPage,
@@ -63,7 +73,7 @@ const cloudSettings: CloudSettings = {
   imports: [
     BrowserModule,
     HttpModule,
-    IonicModule.forRoot(MyApp),
+    IonicModule.forRoot(MyApp,{statusbarPadding: false}),
     CloudModule.forRoot(cloudSettings),
     IonicStorageModule.forRoot()
   ],
@@ -71,10 +81,14 @@ const cloudSettings: CloudSettings = {
   entryComponents: [
     MyApp,
     MorePage,
+    NotificationsPage,
+    FriendsPage,
+    MyStatusPage,
     RatePage,
     HostPage,
     FindPage,
     InviteFriendsPage,
+    InvitedFriendsPage,
     CreatePartyPage,
     EditPartyPage,
     EditBarPage,
@@ -89,6 +103,8 @@ const cloudSettings: CloudSettings = {
   providers: [
     LocationTracker,
     BackgroundGeolocation,
+    Push,
+    Badge,
     Facebook,
     Geolocation,
     [AllMyData],

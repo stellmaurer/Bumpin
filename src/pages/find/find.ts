@@ -23,6 +23,7 @@ import { Utility } from '../../model/utility';
 import { AlertController } from 'ionic-angular';
 import { Login } from '../login/login';
 import * as MarkerClusterer from 'node-js-marker-clusterer';
+import { Storage } from '@ionic/storage';
  
 declare var google;
 
@@ -51,28 +52,52 @@ export class FindPage {
 
   geocoder : any;
 
-  private includeBars : boolean;
-  private includePartiesToday : boolean;
-  private includePartiesThisWeek : boolean;
-  private includeAllParties : boolean;
-  private includeBarsTemp : boolean;
-  private includePartiesTodayTemp : boolean;
-  private includePartiesThisWeekTemp : boolean;
-  private includeAllPartiesTemp : boolean;
+  private barFilterDontShowBars : boolean;
+  private barFilterAttendance : boolean;
+  private barFilterAvgRating : boolean;
+  private barFilterMoreWomen : boolean;
+  private barFilterMoreMen : boolean;
+  private barFilterFriendsPresent : boolean;
+  private barFilterDontShowBarsTemp : boolean;
+  private barFilterAttendanceTemp : boolean;
+  private barFilterAvgRatingTemp : boolean;
+  private barFilterMoreWomenTemp : boolean;
+  private barFilterMoreMenTemp : boolean;
+  private barFilterFriendsPresentTemp : boolean;
+
+  private partyFilterAnyToday : boolean;
+  private partyFilterAnyThisWeek : boolean;
+  private partyFilterDontShowParties : boolean;
+  private partyFilterAnyTodayTemp : boolean;
+  private partyFilterAnyThisWeekTemp : boolean;
+  private partyFilterDontShowPartiesTemp : boolean;
  
   constructor(private allMyData : AllMyData, private login : Login, public alertCtrl: AlertController, public locationTracker: LocationTracker, private events : Events, private http:Http, public navCtrl: NavController, public popoverCtrl: PopoverController) {
     this.allMyData.events = events;
     this.partyMarkersOnMap = new Map<string,any>();
     this.barMarkersOnMap = new Map<string,any>();
     this.locationTracker.startTracking();
-    this.includeBars = true;
-    this.includePartiesToday = true;
-    this.includePartiesThisWeek = true;
-    this.includeAllParties = true;
-    this.includeBarsTemp = true;
-    this.includePartiesTodayTemp = true;
-    this.includePartiesThisWeekTemp = true;
-    this.includeAllPartiesTemp = true;
+
+    this.partyFilterAnyToday = false;
+    this.partyFilterAnyThisWeek = false;
+    this.partyFilterDontShowParties = false;
+    this.partyFilterAnyTodayTemp = false;
+    this.partyFilterAnyThisWeekTemp = false;
+    this.partyFilterDontShowPartiesTemp = false;
+
+    this.barFilterDontShowBars = false;
+    this.barFilterAttendance = false;
+    this.barFilterAvgRating = false;
+    this.barFilterMoreWomen = false;
+    this.barFilterMoreMen = false;
+    this.barFilterFriendsPresent = false;
+    this.barFilterDontShowBarsTemp = false;
+    this.barFilterAttendanceTemp = false;
+    this.barFilterAvgRatingTemp = false;
+    this.barFilterMoreWomenTemp = false;
+    this.barFilterMoreMenTemp = false;
+    this.barFilterFriendsPresentTemp = false;
+
     this.barClusterMarkers = new Array<any>();
   }
 
@@ -87,7 +112,23 @@ export class FindPage {
   }
 
   ionViewWillEnter(){
-    this.allMyData.events.publish("timeToRefreshPartyAndBarData");
+    if(this.allMyData.me.facebookID != "Not yet set."){
+      this.refreshPartyAndBarData()
+      .then((res) => {
+        this.allMyData.storage.get('partyIDForPushNotification')
+        .then((partyID : any) => {
+          if(partyID != null){
+            let theParty = this.partyMarkersOnMap.get(partyID).party;
+            this.allMyData.storage.remove('partyIDForPushNotification');
+            this.map.panTo(this.partyMarkersOnMap.get(partyID).getPosition());
+            this.presentPartyPopover(theParty);
+          }
+        });
+      })
+      .catch((err) => {
+        console.log("error: " + err);
+      });
+    }
   }
 
   private setupThePage(){
@@ -119,6 +160,15 @@ export class FindPage {
       .then((res) => {
         this.events.publish("updateMyAtBarAndAtPartyStatuses");
         this.refreshPartyMarkers();
+        this.allMyData.storage.get('partyIDForPushNotification')
+        .then((partyID : any) => {
+          if(partyID != null){
+            let theParty = this.partyMarkersOnMap.get(partyID).party;
+            this.allMyData.storage.remove('partyIDForPushNotification');
+            this.map.panTo(this.partyMarkersOnMap.get(partyID).getPosition());
+            this.presentPartyPopover(theParty);
+          }
+        });
       })
       .catch((err) => {
         this.allMyData.logError(this.tabName, "server", "refreshParties query error : Err msg = " + err, this.http);
@@ -144,23 +194,7 @@ export class FindPage {
 
     this.allMyData.startPeriodicDataRetrieval(this.http);
     this.events.subscribe("timeToRefreshPartyAndBarData",() => {
-      this.allMyData.refreshPerson(this.http)
-      .then((res) => {
-        Promise.all([this.allMyData.refreshBarsCloseToMe(this.myCoordinates, this.http), this.allMyData.refreshBarsImHosting(this.http), this.allMyData.refreshParties(this.http)]).then(thePromise => {
-          return thePromise;
-        })
-        .then((res) => {
-          this.events.publish("updateMyAtBarAndAtPartyStatuses");
-          this.refreshPartyMarkers();
-          this.refreshBarMarkers();
-        })
-        .catch((err) => {
-          this.allMyData.logError(this.tabName, "server", "refreshBarsCloseToMe or refreshParties query error : Err msg = " + err, this.http);
-        });
-      })
-      .catch((err) => {
-        this.allMyData.logError(this.tabName, "server", "refreshPerson query error : Err msg = " + err, this.http);
-      });
+      this.refreshPartyAndBarData();
     });
 
     this.events.subscribe("aDifferentUserJustLoggedIn",() => {
@@ -182,6 +216,32 @@ export class FindPage {
 
     this.events.subscribe("timeToRefreshMapMarkers",() => {
       this.refreshMapMarkers();
+    });
+  }
+
+  private refreshPartyAndBarData(){
+    return new Promise((resolve, reject) => {
+      this.allMyData.refreshPerson(this.http)
+      .then((res) => {
+        Promise.all([this.allMyData.refreshBarsCloseToMe(this.myCoordinates, this.http), this.allMyData.refreshBarsImHosting(this.http), this.allMyData.refreshParties(this.http)]).then(thePromise => {
+          return thePromise;
+        })
+        .then((res) => {
+          this.events.publish("updateMyAtBarAndAtPartyStatuses");
+          this.refreshPartyMarkers();
+          this.refreshBarMarkers();
+          this.updateMyGoingOutStatusIfNeeded();
+          resolve("refreshedPartyAndBarData");
+        })
+        .catch((err) => {
+          this.allMyData.logError(this.tabName, "server", "refreshBarsCloseToMe or refreshParties query error : Err msg = " + err, this.http);
+          reject("refreshingPartyAndBarData failed. Err: " + err);
+        });
+      })
+      .catch((err) => {
+        reject("refreshingPartyAndBarData failed due to refreshPerson. Err: " + err);
+        this.allMyData.logError(this.tabName, "server", "refreshPerson query error : Err msg = " + err, this.http);
+      });
     });
   }
 
@@ -300,13 +360,8 @@ export class FindPage {
       }
       // Case 3 : this party isn't on the map
       else{
-        // Check the filters to see if we should put this marker on the map
-        let mapToAttachToMarker = this.map;
-        if(this.partyMarkerShouldBeVisible(value) == false){
-          mapToAttachToMarker = null;
-        }
         marker = new google.maps.Marker({
-          map: mapToAttachToMarker,
+          map: this.map,
           animation: google.maps.Animation.DROP,
           position: {lat: value.latitude, lng: value.longitude},
           icon : this.getMarkerIcon(value),
@@ -319,6 +374,8 @@ export class FindPage {
       }
       this.partyMarkersOnMap.set(key, marker); // update the party markers list with the new party info
     });
+
+    this.updateMapMarkersVisibility();
   }
 
   /*
@@ -371,7 +428,7 @@ export class FindPage {
       // Case 3 : this bar isn't on the map
       else{
         marker = new google.maps.Marker({
-          map: this.map,
+          map: null, // need to set the map to null here because the marker clusterer takes care of that
           animation: google.maps.Animation.DROP,
           position: {lat: value.latitude, lng: value.longitude},
           icon : this.getMarkerIcon(value),
@@ -385,7 +442,7 @@ export class FindPage {
       this.barMarkersOnMap.set(key, marker); // update the bar markers list with the new bar info
     });
 
-
+    /*
     this.barClusterMarkers = new Array<any>();
     this.barMarkersOnMap.forEach((value: any, key: string) => {
       let theMarkerToHide = this.barMarkersOnMap.get(key);
@@ -394,6 +451,8 @@ export class FindPage {
     });
     this.markerCluster.clearMarkers();
     this.markerCluster.addMarkers(this.barClusterMarkers);
+    */
+    this.updateMapMarkersVisibility();
   }
 
   private getMarkerIcon(partyOrBar: any): any{
@@ -415,6 +474,10 @@ export class FindPage {
   }
 
   private presentPartyPopover(party : Party) {
+    console.log("in find.ts: party = " + party);
+    console.log("in find.ts: this.allMyData = " + this.allMyData);
+    console.log("in find.ts: this.http = " + this.http);
+    console.log("in find.ts: this.navCtrl = " + this.navCtrl);
     let popover = this.popoverCtrl.create(PartyPopover, {party:party, allMyData:this.allMyData, http:this.http, navCtrl:this.navCtrl}, {cssClass:'partyPopover.scss'});
     popover.present();
   }
@@ -424,52 +487,126 @@ export class FindPage {
     popover.present();
   }
 
-  presentAlert() {
+  presentPartyFilterAlert() {
     let alert = this.alertCtrl.create();
-    alert.setTitle('What do you want to include on the map?');
+    alert.setTitle('How do you want to filter parties? (filters are subtractive)');
 
     alert.addInput({
       type: 'checkbox',
-      label: 'Bars',
-      checked: this.includeBars,
-      handler: data =>  { this.includeBarsTemp = !this.includeBarsTemp;}
+      label: "Don't show any parties",
+      checked: this.partyFilterDontShowParties,
+      handler: data =>  { this.partyFilterDontShowPartiesTemp = !this.partyFilterDontShowPartiesTemp;}
     });
     alert.addInput({
       type: 'checkbox',
-      label: 'Parties Today',
-      checked: this.includePartiesToday,
-      handler: data =>  { this.includePartiesTodayTemp = !this.includePartiesTodayTemp;}
+      label: 'Any this week',
+      checked: this.partyFilterAnyThisWeek,
+      handler: data =>  { this.partyFilterAnyThisWeekTemp = !this.partyFilterAnyThisWeekTemp;}
     });
     alert.addInput({
       type: 'checkbox',
-      label: 'Parties This Week',
-      checked: this.includePartiesThisWeek,
-      handler: data =>  { this.includePartiesThisWeekTemp = !this.includePartiesThisWeekTemp;}
+      label: 'Any today',
+      checked: this.partyFilterAnyToday,
+      handler: data =>  { this.partyFilterAnyTodayTemp = !this.partyFilterAnyTodayTemp;}
     });
-    alert.addInput({
-      type: 'checkbox',
-      label: 'All Parties',
-      checked: this.includeAllParties,
-      handler: data =>  { this.includeAllPartiesTemp = !this.includeAllPartiesTemp;}
-    });
-
 
     alert.addButton({
       text: 'Cancel',
       handler: data => {
-        this.includeBarsTemp = this.includeBars;
-        this.includePartiesTodayTemp = this.includePartiesToday;
-        this.includePartiesThisWeekTemp = this.includePartiesThisWeek;
-        this.includeAllPartiesTemp = this.includeAllParties;
+        this.partyFilterDontShowPartiesTemp = this.partyFilterDontShowParties;
+        this.partyFilterAnyThisWeekTemp = this.partyFilterAnyThisWeek;
+        this.partyFilterAnyTodayTemp = this.partyFilterAnyToday;
       }
     });
     alert.addButton({
       text: 'Okay',
       handler: data => {
-        this.includeBars = this.includeBarsTemp;
-        this.includePartiesToday = this.includePartiesTodayTemp;
-        this.includePartiesThisWeek = this.includePartiesThisWeekTemp;
-        this.includeAllParties = this.includeAllPartiesTemp;
+        this.partyFilterDontShowParties = this.partyFilterDontShowPartiesTemp;
+        this.partyFilterAnyThisWeek = this.partyFilterAnyThisWeekTemp;
+        this.partyFilterAnyToday = this.partyFilterAnyTodayTemp;
+        this.updateMapMarkersVisibility();
+      }
+    });
+    alert.present();
+  }
+
+  presentBarFilterAlert() {
+    let alert = this.alertCtrl.create();
+    alert.setTitle('How do you want to filter bars? (filters are subtractive)');
+
+    alert.addInput({
+      type: 'checkbox',
+      label: "Don't show any bars",
+      checked: this.barFilterDontShowBars,
+      handler: data =>  { this.barFilterDontShowBarsTemp = !this.barFilterDontShowBarsTemp;}
+    });
+    alert.addInput({
+      type: 'checkbox',
+      label: 'Attendance >= 1',
+      checked: this.barFilterAttendance,
+      handler: data =>  { this.barFilterAttendanceTemp = !this.barFilterAttendanceTemp;}
+    });
+    alert.addInput({
+      type: 'checkbox',
+      label: 'Avg rating >= Decent',
+      checked: this.barFilterAvgRating,
+      handler: data =>  { this.barFilterAvgRatingTemp = !this.barFilterAvgRatingTemp;}
+    });
+    alert.addInput({
+      type: 'checkbox',
+      label: 'More women than men',
+      checked: this.barFilterMoreWomen,
+      handler: data =>  { this.barFilterMoreWomenTemp = !this.barFilterMoreWomenTemp;}
+    });
+    alert.addInput({
+      type: 'checkbox',
+      label: 'More men than women',
+      checked: this.barFilterMoreMen,
+      handler: data =>  { this.barFilterMoreMenTemp = !this.barFilterMoreMenTemp;}
+    });
+    alert.addInput({
+      type: 'checkbox',
+      label: 'Friends present',
+      checked: this.barFilterFriendsPresent,
+      handler: data =>  { this.barFilterFriendsPresentTemp = !this.barFilterFriendsPresentTemp;}
+    });
+
+    /*
+    alert.addInput({
+      type: 'checkbox',
+      label: 'Bars without a line',
+      checked: this.includeBars,
+      handler: data =>  { this.includeBarsTemp = !this.includeBarsTemp;}
+    });
+    alert.addInput({
+      type: 'checkbox',
+      label: 'Bars without a line',
+      checked: this.includeBars,
+      handler: data =>  { this.includeBarsTemp = !this.includeBarsTemp;}
+    });
+    */
+
+
+    alert.addButton({
+      text: 'Cancel',
+      handler: data => {
+        this.barFilterDontShowBarsTemp = this.barFilterDontShowBars;
+        this.barFilterAttendanceTemp = this.barFilterAttendance;
+        this.barFilterAvgRatingTemp = this.barFilterAvgRating;
+        this.barFilterMoreWomenTemp = this.barFilterMoreWomen;
+        this.barFilterMoreMenTemp = this.barFilterMoreMen;
+        this.barFilterFriendsPresentTemp = this.barFilterFriendsPresent;
+      }
+    });
+    alert.addButton({
+      text: 'Okay',
+      handler: data => {
+        this.barFilterDontShowBars = this.barFilterDontShowBarsTemp;
+        this.barFilterAttendance = this.barFilterAttendanceTemp;
+        this.barFilterAvgRating = this.barFilterAvgRatingTemp;
+        this.barFilterMoreWomen = this.barFilterMoreWomenTemp;
+        this.barFilterMoreMen = this.barFilterMoreMenTemp;
+        this.barFilterFriendsPresent = this.barFilterFriendsPresentTemp;
         this.updateMapMarkersVisibility();
       }
     });
@@ -477,43 +614,80 @@ export class FindPage {
   }
 
   updateMapMarkersVisibility(){
-    if(this.includeBars == true){
-      this.showBarMarkers();
-    }else{
-      this.hideBarMarkers();
-    }
-
-    if(this.includeAllParties == true){
-      this.showAllPartyMarkers();
-    }else if(this.includePartiesThisWeek == true){
-      this.showPartyMarkersForThisWeekAndHideEverythingElse();
-    }else if(this.includePartiesToday == true){
-      this.showPartyMarkersForTodayAndHideEverythingElse();
-    }else{
-      this.hideAllPartyMarkers();
-    }
+    this.updateBarMarkersVisibility();
+    this.updatePartyMarkersVisibility();
   }
 
-  partyMarkerShouldBeVisible(party : Party){
-    let markerShouldBeVisible = false;
-    if(this.includeAllParties == true){
-      markerShouldBeVisible = true;
-    }else if(this.includePartiesThisWeek == true){
-      if(Utility.isPartyThisWeek(party) == true){
-        markerShouldBeVisible = true;
-      }else{
-        markerShouldBeVisible = false;
+  updateBarMarkersVisibility(){
+    this.markerCluster.clearMarkers();
+
+    let barMarkersToShow = new Array<any>();
+
+    this.barMarkersOnMap.forEach((value: any, key: string) => {
+      let barMarker = this.barMarkersOnMap.get(key);
+      let bar : Bar = barMarker.bar;
+
+      let barShouldBeShown = true;
+      if(this.barFilterDontShowBars == true){
+        barShouldBeShown = false;
       }
-    }else if(this.includePartiesToday == true){
-      if(Utility.isPartyToday(party) == true){
-        markerShouldBeVisible = true;
-      }else{
-        markerShouldBeVisible = false;
+      if(this.barFilterAttendance == true){
+        if(bar.numberOfPeopleAtBar < 1){
+          barShouldBeShown = false;
+        }
       }
-    }else{
-      markerShouldBeVisible = false;
+      if(this.barFilterAvgRating == true){
+        if(bar.averageRatingNumber < 2){
+          barShouldBeShown = false;
+        }
+      }
+      if(this.barFilterMoreWomen == true){
+        if(bar.percentageOfWomen <= 50){
+          barShouldBeShown = false;
+        }
+      }
+      if(this.barFilterMoreMen == true){
+        if(bar.percentageOfMen <= 50){
+          barShouldBeShown = false;
+        }
+      }
+      if(this.barFilterFriendsPresent == true){
+        if(this.isAFriendPresentAtThisBar(bar) == false){
+          barShouldBeShown = false
+        }
+      }
+
+      if(barShouldBeShown == true){
+        barMarkersToShow.push(barMarker);
+      }
+    });
+
+    this.markerCluster.addMarkers(barMarkersToShow);
+  }
+
+  isAFriendPresentAtThisBar(bar : Bar) : boolean {
+    for(let i = 0; i < this.allMyData.friends.length; i++){
+      if(bar.attendees.has(this.allMyData.friends[i].facebookID) == true){
+        let attendee = bar.attendees.get(this.allMyData.friends[i].facebookID);
+        var attendanceIsExpired = Utility.isAttendanceExpired(attendee.timeOfLastKnownLocation);
+        if(attendee.atBar && (attendanceIsExpired == false)){
+          return true;
+        }
+      }
     }
-    return markerShouldBeVisible;
+    return false;
+  }
+
+  updatePartyMarkersVisibility(){
+    if(this.partyFilterAnyToday == true){
+      this.showPartyMarkersForTodayAndHideEverythingElse();
+    }else if(this.partyFilterAnyThisWeek == true){
+      this.showPartyMarkersForThisWeekAndHideEverythingElse();
+    }else if(this.partyFilterDontShowParties == true){
+      this.hideAllPartyMarkers();
+    }else{
+      this.showAllPartyMarkers();
+    }
   }
 
   showPartyMarkersForTodayAndHideEverythingElse(){
@@ -552,11 +726,117 @@ export class FindPage {
     });
   }
 
-  hideBarMarkers(){
-    this.markerCluster.clearMarkers();
+  private updateMyGoingOutStatusIfNeeded(){
+    let overallStatusNumber = 0;
+    if(this.allMyData.me.status["manuallySet"] == "No"){
+      for(let i = 0; i < this.allMyData.barsCloseToMe.length; i++){
+        if(this.allMyData.barsCloseToMe[i].attendees.has(this.allMyData.me.facebookID)){
+          let myAttendeeInfo = this.allMyData.barsCloseToMe[i].attendees.get(this.allMyData.me.facebookID);
+          let statusNumber = this.getStatusNumber(myAttendeeInfo.status);
+          if(statusNumber > overallStatusNumber){
+            overallStatusNumber = statusNumber;
+          }
+        }
+      }
+
+      for(let i = 0; i < this.allMyData.barHostFor.length; i++){
+        if(this.allMyData.barHostFor[i].attendees.has(this.allMyData.me.facebookID)){
+          let myAttendeeInfo = this.allMyData.barHostFor[i].attendees.get(this.allMyData.me.facebookID);
+          let statusNumber = this.getStatusNumber(myAttendeeInfo.status);
+          if(statusNumber > overallStatusNumber){
+            overallStatusNumber = statusNumber;
+          }
+        }
+      }
+
+      for(let i = 0; i < this.allMyData.invitedTo.length; i++){
+        if(this.allMyData.invitedTo[i].invitees.has(this.allMyData.me.facebookID)){
+          let myInviteeInfo = this.allMyData.invitedTo[i].invitees.get(this.allMyData.me.facebookID);
+          let statusNumber = this.getStatusNumber(myInviteeInfo.status);
+          if(statusNumber > overallStatusNumber){
+            overallStatusNumber = statusNumber;
+          }
+        }
+      }
+
+      let oldStatusNumber = this.getStatusNumber(this.allMyData.me.status["goingOut"]);
+      let newStatusNumber = overallStatusNumber;
+      if(newStatusNumber > oldStatusNumber){
+        let newStatus = this.getStatusFromStatusNumber(newStatusNumber);
+        let manuallySet = "No";
+        this.allMyData.changeMyGoingOutStatus(newStatus, manuallySet, this.http)
+        .then((res) => {
+          
+        })
+        .catch((err) => {
+          this.allMyData.logError(this.tabName, "server", "changeMyGoingOutStatus query error : Err msg = " + err, this.http);
+        });
+      }
+
+    }
   }
 
-  showBarMarkers(){
-    this.markerCluster.addMarkers(this.barClusterMarkers);
+  // 0 = Unknown
+  // 1 = No
+  // 2 = Convince Me
+  // 3 = Maybe
+  // 4 = Yes
+  private getStatusNumber(status : string) : number {
+    let statusNumber = 0;
+    switch(status){
+      case "Unknown": {
+        statusNumber = 0;
+        break;
+      }
+      case "No": {
+        statusNumber = 1;
+        break;
+      }
+      case "Convince Me": {
+        statusNumber = 2;
+        break;
+      }
+      case "Maybe": {
+        statusNumber = 3;
+        break;
+      }
+      case "Yes": {
+        statusNumber = 4;
+        break;
+      }
+      case "Going": {
+        statusNumber = 4;
+        break;
+      }
+    }
+    return statusNumber;
   }
+
+  private getStatusFromStatusNumber(statusNumber : number) : string {
+    let status = "Unknown";
+    switch(statusNumber){
+      case 0: {
+        status = "Unknown";
+        break;
+      }
+      case 1: {
+        status = "No";
+        break;
+      }
+      case 2: {
+        status = "Convince Me";
+        break;
+      }
+      case 3: {
+        status = "Maybe";
+        break;
+      }
+      case 4: {
+        status = "Yes";
+        break;
+      }
+    }
+    return status;
+  }
+
 }

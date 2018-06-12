@@ -17,6 +17,8 @@ import { Http } from '@angular/http';
 import { Events } from 'ionic-angular';
 import { Utility } from "./utility";
 import { Injectable, NgZone } from '@angular/core';
+import { Storage } from '@ionic/storage';
+import { PushNotification } from "./pushNotification";
 
 // This class only gets created once and it happens when the app launches.
 //      Person is equal to your Person object in the database. It is used
@@ -34,10 +36,12 @@ export class AllMyData{
     public barsCloseToMe : Bar[];
     public thePartyOrBarIAmAt : any;
     public friends : Friend[];
+    public notifications : PushNotification[];
+    public numberOfUnseenNotifications : number;
     
     public events : Events;
 
-    constructor(public zone: NgZone) {
+    constructor(public zone: NgZone, public storage: Storage) {
         this.me = new Person();
         this.partyHostFor = new Array<Party>();
         this.barHostFor = new Array<Bar>();
@@ -45,6 +49,8 @@ export class AllMyData{
         this.barsCloseToMe = new Array<Bar>();
         this.thePartyOrBarIAmAt = null;
         this.friends = new Array<Friend>();
+        this.notifications = new Array<PushNotification>();
+        this.numberOfUnseenNotifications = 0;
     }
 
     public startPeriodicDataRetrieval(http : Http){
@@ -70,12 +76,12 @@ export class AllMyData{
     public createOrUpdatePerson(http : Http){
         return new Promise((resolve, reject) => {
             var query = new Query(this, http);
-            query.createOrUpdatePerson(this.me.facebookID, this.me.isMale, this.me.name)
+            query.createOrUpdatePerson()
             .then((res) => {
-                return query.getPerson(this.me.facebookID);
+                return this.refreshPerson(http);
             })
             .then((res) => {
-                resolve("CreateUpdateMeInDatabase query succeeded.");
+                resolve("createOrUpdatePerson query succeeded.");
             })
             .catch((err) => {
                 reject(err);
@@ -88,12 +94,87 @@ export class AllMyData{
             var query = new Query(this, http);
             query.getPerson(this.me.facebookID)
             .then((res) => {
+                this.changeMyGoingOutStatusToUnknownIfStatusIsExpired();
+                this.clearOutstandingNotificationCountForPerson(http);
                 resolve("getPerson query succeeded.");
             })
             .catch((err) => {
                 reject(err);
             });
         });
+    }
+
+    public getNotifications(http : Http){
+        return new Promise((resolve, reject) => {
+            var query = new Query(this, http);
+            query.getNotifications()
+            .then((res) => {
+                resolve("getNotifications query succeeded.");
+            })
+            .catch((err) => {
+                reject(err);
+            });
+        });
+    }
+
+    public clearOutstandingNotificationCountForPerson(http : Http){
+        return new Promise((resolve, reject) => {
+            var query = new Query(this, http);
+            query.clearOutstandingNotificationCount()
+            .then((res) => {
+                resolve("clearOutstandingNotificationCountForPerson query succeeded.");
+            })
+            .catch((err) => {
+                reject(err);
+            });
+        });
+    }
+
+    public markNotificationAsSeen(notification : PushNotification, http : Http){
+        return new Promise((resolve, reject) => {
+            var query = new Query(this, http);
+            query.markNotificationAsSeen(notification)
+            .then((res) => {
+                resolve("markNotificationAsSeen query succeeded.");
+            })
+            .catch((err) => {
+                reject(err);
+            });
+        });
+    }
+
+    public deleteNotification(notification : PushNotification, http : Http){
+        this.zone.run(() => {
+            this.deleteNotificationLocally(notification);
+        });
+        return new Promise((resolve, reject) => {
+            var query = new Query(this, http);
+            query.deleteNotification(notification)
+            .then((res) => {
+                resolve("deleteNotification query succeeded.");
+            })
+            .catch((err) => {
+                reject(err);
+            });
+        });
+    }
+
+    private deleteNotificationLocally(notification : PushNotification){
+        let indexToRemove = this.notifications.indexOf(notification);
+        let notifications = new Array<PushNotification>();
+        for(let i = 0; i < this.notifications.length; i++){
+            if(i != indexToRemove){
+                notifications.push(this.notifications[i]);
+            }
+        }
+        this.notifications = notifications;
+    }
+
+    private changeMyGoingOutStatusToUnknownIfStatusIsExpired(){
+        var goingOutStatusIsExpired = Utility.isGoingOutStatusExpired(this.me.status["timeGoingOutStatusWasSet"]);
+        if(goingOutStatusIsExpired){
+            this.me.status["goingOut"] = "Unknown";
+        }
     }
 
     public rateParty(party : Party, rating : string, http : Http){
@@ -133,7 +214,7 @@ export class AllMyData{
             newAttendee.timeLastRated = "2001-01-01T00:00:00Z";
             bar.attendees.set(this.me.facebookID, newAttendee);
         }
-
+        
         if(rating != bar.attendees.get(this.me.facebookID).rating){
             let timeLastRated = Utility.convertDateTimeToISOFormat(new Date());
             let timeOfLastKnownLocation = timeLastRated;
@@ -373,6 +454,51 @@ export class AllMyData{
             query.getPartiesImInvitedTo()
             .then((res) => {
                 resolve("getPartiesImInvitedTo query succeeded.");
+            })
+            .catch((err) => {
+                reject(err);
+            });
+        });
+    }
+
+    public refreshFriends(http : Http){
+        return new Promise((resolve, reject) => {
+            var query = new Query(this, http);
+            query.getFriends()
+            .then((res) => {
+                this.zone.run(() => {
+                    this.changeGoingOutStatusOfFriendsToUnknownIfStatusIsExpired();
+                });
+                resolve("getFriends query succeeded.");
+            })
+            .catch((err) => {
+                reject(err);
+            });
+        });
+    }
+
+    private changeGoingOutStatusOfFriendsToUnknownIfStatusIsExpired(){
+        for(let i = 0; i < this.friends.length; i++){
+            let friend = this.friends[i];
+            var goingOutStatusIsExpired = Utility.isGoingOutStatusExpired(friend.status["timeGoingOutStatusWasSet"]);
+            if(goingOutStatusIsExpired){
+                friend.status["goingOut"] = "Unknown";
+            }
+        }
+    }
+
+    public changeMyGoingOutStatus(status : string, manuallySet : string, http : Http){
+        let timeGoingOutStatusWasSet = Utility.convertDateTimeToISOFormat(new Date());
+        this.zone.run(() => {
+            this.me.status["goingOut"] = status;
+            this.me.status["timeGoingOutStatusWasSet"] = timeGoingOutStatusWasSet;
+            this.me.status["manuallySet"] = manuallySet;
+        });
+        return new Promise((resolve, reject) => {
+            var query = new Query(this, http);
+            query.updatePersonStatus(this.me.facebookID, status, timeGoingOutStatusWasSet, manuallySet)
+            .then((res) => {
+                resolve("updatePersonStatus query succeeded.");
             })
             .catch((err) => {
                 reject(err);

@@ -17,7 +17,6 @@ import { CreatePage } from './create';
 import { EditPartyPage } from './editParty';
 import { EditBarPage } from './editBar';
 import { Http } from '@angular/http';
-import { NgZone } from '@angular/core';
 
 @Component({
   selector: 'page-host',
@@ -27,7 +26,8 @@ export class HostPage {
 
   private tabName: string = "Host Tab";
 
-  constructor(private zone: NgZone, public allMyData : AllMyData, private http:Http, private navCtrl: NavController, public alertCtrl: AlertController) {
+  constructor(public allMyData : AllMyData, private http:Http, private navCtrl: NavController, public alertCtrl: AlertController) {
+    
   }
 
   ionViewDidLoad(){

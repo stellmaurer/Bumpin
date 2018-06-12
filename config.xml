@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget android-packageName="com.BumpinInc.Bumpin" android-versionCode="2" ios-CFBundleIdentifier="BumpinBundleIdentifier" ios-CFBundleVersion="1.0.2.1" version="1.0.2" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+<widget android-packageName="com.BumpinInc.Bumpin" android-versionCode="5" ios-CFBundleIdentifier="BumpinBundleIdentifier" ios-CFBundleVersion="1.0.5.1" version="1.0.5" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
     <name>Bumpin</name>
     <description>An awesome Ionic/Cordova app.</description>
     <author email="hi@ionicframework" href="http://ionicframework.com/">Ionic Framework Team</author>
@@ -11,6 +11,7 @@
     <allow-intent href="sms:*" />
     <allow-intent href="mailto:*" />
     <allow-intent href="geo:*" />
+    <allow-navigation href="*" />
     <edit-config file="*-Info.plist" mode="merge" target="NSLocationWhenInUseUsageDescription">
         <string>Your location will only be used to (1) show you what bars are around you, (2) help you navigate to parties and bars, (3) anonymously help crowd source party and bar attendance and men to women ratios, and (4) allow you to rate the party or bar you are at.</string>
     </edit-config>
@@ -26,6 +27,7 @@
     <preference name="SplashShowOnlyFirstTime" value="false" />
     <preference name="SplashScreen" value="screen" />
     <preference name="SplashScreenDelay" value="3000" />
+    <preference name="PlayServicesVersion" value="11.0.1" />
     <platform name="android">
         <config-file parent="/resources" target="./res/values/strings.xml">
             <string name="fb_app_id">468962606617084</string>
@@ -101,20 +103,27 @@
         <variable name="ALWAYS_USAGE_DESCRIPTION" value="This app requires background location tracking" />
     </plugin>
     <plugin name="cordova-plugin-nativestorage" spec="~2.2.2" />
-    <plugin name="cordova-plugin-splashscreen" spec="~4.0.1" />
     <plugin name="cordova-plugin-statusbar" spec="~2.2.1" />
     <plugin name="cordova-plugin-whitelist" spec="~1.3.1" />
     <plugin name="cordova-sqlite-storage" spec="~2.0.2" />
-    <plugin name="ionic-plugin-keyboard" spec="~2.2.1" />
-    <plugin name="cordova-plugin-ionic" spec="^2.0.4">
+    <plugin name="cordova-plugin-ionic-keyboard" spec="^2.0.5" />
+    <plugin name="phonegap-plugin-push" spec="^2.1.3">
+        <variable name="FCM_VERSION" value="11.6.2" />
+        <variable name="SENDER_ID" value="704208165367" />
+    </plugin>
+    <plugin name="cordova-plugin-splashscreen" spec="^5.0.2" />
+    <allow-navigation href="http://192.168.1.105:8100" />
+    <allow-navigation href="http://169.254.189.176:8100" />
+    <plugin name="cordova-plugin-badge" spec="^0.8.7" />
+    <plugin name="cordova-plugin-ionic" spec="^4.1.7">
         <variable name="APP_ID" value="111fb7d7" />
-        <variable name="CHANNEL_NAME" value="Master" />
+        <variable name="CHANNEL_NAME" value="Production" />
         <variable name="UPDATE_METHOD" value="background" />
+        <variable name="WARN_DEBUG" value="true" />
         <variable name="UPDATE_API" value="https://api.ionicjs.com" />
         <variable name="MAX_STORE" value="2" />
     </plugin>
-    <plugin name="cordova-plugin-ionic-keyboard" spec="^2.0.5" />
-    <plugin name="cordova-plugin-console" spec="^1.1.0" />
-    <engine name="browser" spec="^5.0.0" />
+    <engine name="browser" spec="^5.0.3" />
     <engine name="ios" spec="4.5.4" />
+    <engine name="android" spec="7.0.0" />
 </widget>

@@ -1,0 +1,52 @@
+page-myStatus {
+    .home {
+        display: flex;
+        flex-direction: column;
+    
+        ion-grid {
+            padding: 0;
+            height: 100%;
+        }
+
+        .oneElement {
+            text-align: center;
+            margin-left:auto;
+            margin-right:auto;
+        }
+
+        .verticalSpacingForTop {
+            margin-top: 40px;
+            margin-bottom: 20px;
+        }
+
+        .verticalSpacingForMiddle {
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+
+        .verticalSpacingForBottom {
+            margin-top: 20px;
+            margin-bottom: 40px;
+        }
+
+        #yes {
+            min-width: 90%;
+        }
+
+        #convinceMe {
+            min-width: 70%;
+        }
+
+        #maybe {
+            min-width: 50%;
+        }
+
+        #no {
+            min-width: 20%;
+        }
+    
+        .centerMe {
+            text-align: center;
+        }
+    }
+}

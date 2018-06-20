@@ -106,40 +106,35 @@ export class FindPage {
   }
 
   ionViewWillEnter(){
+    // refreshPerson query error : Err msg = FacebookID wasn't set before getPerson was called | FB ID = Not yet set.
     this.refreshPartyAndBarData();
   }
 
   private setupThePage(){
-    this.login.login()
+    this.loadMap()
     .then((res) => {
-      this.loadMap()
-      .then((res) => {
-        // Start retrieving user location
-        this.enableUserLocation();
-      })
-      .catch((err) => {
-        this.allMyData.logError(this.tabName, "google maps", "issue loading the google map : Err msg = " + err, this.http);
-      });
-
-      this.allMyData.startPeriodicDataRetrieval(this.http);
-      this.events.subscribe("timeToRefreshPartyAndBarData",() => {
-        this.refreshPartyAndBarData();
-      });
-
-      this.events.subscribe("aDifferentUserJustLoggedIn",() => {
-        this.refreshPartyAndBarData();
-      });
-
-      this.events.subscribe("timeToUpdateUI",() => {
-          this.updateTheUI();
-      });
-
-      this.events.subscribe("timeToRefreshMapMarkers",() => {
-        this.refreshMapMarkers();
-      });
+      // Start retrieving user location
+      this.enableUserLocation();
     })
     .catch((err) => {
-        // error logging is already done in the Login file
+      this.allMyData.logError(this.tabName, "google maps", "issue loading the google map : Err msg = " + err, this.http);
+    });
+
+    this.allMyData.startPeriodicDataRetrieval(this.http);
+    this.events.subscribe("timeToRefreshPartyAndBarData",() => {
+      this.refreshPartyAndBarData();
+    });
+
+    this.events.subscribe("aDifferentUserJustLoggedIn",() => {
+      this.refreshPartyAndBarData();
+    });
+
+    this.events.subscribe("timeToUpdateUI",() => {
+        this.updateTheUI();
+    });
+
+    this.events.subscribe("timeToRefreshMapMarkers",() => {
+      this.refreshMapMarkers();
     });
   }
 

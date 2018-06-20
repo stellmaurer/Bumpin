@@ -106,7 +106,6 @@ export class FindPage {
   }
 
   ionViewWillEnter(){
-    // refreshPerson query error : Err msg = FacebookID wasn't set before getPerson was called | FB ID = Not yet set.
     this.refreshPartyAndBarData();
   }
 

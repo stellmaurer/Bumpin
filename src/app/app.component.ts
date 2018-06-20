@@ -38,7 +38,7 @@ export class MyApp {
       this.initPushNotification();
 
       this.loginToFacebook();
-      
+
       /*this.statusBar.styleDefault();
       this.statusBar.overlaysWebView(false);
       this.statusBar.backgroundColorByHexString('#32db64');*/

@@ -14,6 +14,7 @@ import { FindPage } from '../pages/find/find';
 import { NavController } from 'ionic-angular';
 import { Http } from '@angular/http';
 import { AllMyData } from '../model/allMyData';
+import { Login } from '../pages/login/login';
 
 @Component({
   templateUrl: 'app.html',
@@ -24,21 +25,35 @@ export class MyApp {
   @ViewChild('myNav') nav : NavController
   private rootPage:any;
 
-  constructor(public app: App, private allMyData: AllMyData, private http: Http, public platform: Platform, private statusBar: StatusBar, private splashScreen: SplashScreen, private badge: Badge, public push: Push, public alertCtrl: AlertController, private backgroundGeolocation: BackgroundGeolocation, private events : Events, private storage: Storage) {
+  constructor(public app: App, private login : Login, private allMyData: AllMyData, private http: Http, public platform: Platform, private statusBar: StatusBar, private splashScreen: SplashScreen, private badge: Badge, public push: Push, public alertCtrl: AlertController, private backgroundGeolocation: BackgroundGeolocation, private events : Events, private storage: Storage) {
     this.platform.ready().then(() => {
-      this.storePlatform();
-      this.initPushNotification();
-      this.rootPage = TabsPage;
-      this.splashScreen.hide();
       this.statusBar.hide();
 
+      this.badge.clear();
       this.platform.resume.subscribe((result)=>{//Foreground
         this.badge.clear();
       });
 
+      this.storePlatform();
+      this.initPushNotification();
+
+      this.loginToFacebook();
+      
       /*this.statusBar.styleDefault();
       this.statusBar.overlaysWebView(false);
       this.statusBar.backgroundColorByHexString('#32db64');*/
+    });
+  }
+
+  private loginToFacebook(){
+    this.login.login()
+    .then((res) => {
+      this.rootPage = TabsPage;
+      this.splashScreen.hide();
+    })
+    .catch((err) => {
+        // error logging is already done in the Login file
+        this.loginToFacebook(); // try again until logging in works
     });
   }
 
@@ -113,6 +128,7 @@ export class MyApp {
                 if(message.includes("invited")){
                   this.storage.set('partyIDForPushNotification', data.additionalData.partyOrBarID);
                   this.app.getRootNav().getActiveChildNav().select(0);
+                  //this.app.getRootNav().getActiveChildNav()
                 }
               }else if(message.includes("bar")){
                 if(message.includes("host")){
@@ -132,6 +148,7 @@ export class MyApp {
           }
           if(message.includes("invited")){
             this.storage.set('partyIDForPushNotification', data.additionalData.partyOrBarID);
+            this.app.getRootNav().getActiveChildNav().select(0);
           }
         }else if(message.includes("bar")){
           this.app.getRootNav().getActiveChildNav().select(2);

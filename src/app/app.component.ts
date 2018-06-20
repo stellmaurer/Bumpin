@@ -114,6 +114,7 @@ export class MyApp {
                 if(message.includes("invited")){
                   this.storage.set('partyIDForPushNotification', data.additionalData.partyOrBarID);
                   this.app.getRootNav().getActiveChildNav().select(0);
+                  //this.app.getRootNav().getActiveChildNav()
                 }
               }else if(message.includes("bar")){
                 if(message.includes("host")){

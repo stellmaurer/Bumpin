@@ -102,120 +102,44 @@ export class FindPage {
   }
 
   ionViewDidLoad(){
-    this.login.login()
-    .then((res) => {
-      this.setupThePage();
-    })
-    .catch((err) => {
-        // error logging is already done in the Login file
-    });
+    this.setupThePage();
   }
 
   ionViewWillEnter(){
-    if(this.allMyData.me.facebookID != "Not yet set."){
-      this.refreshPartyAndBarData()
-      .then((res) => {
-        this.allMyData.storage.get('partyIDForPushNotification')
-        .then((partyID : any) => {
-          if(partyID != null){
-            let theParty = this.partyMarkersOnMap.get(partyID).party;
-            this.allMyData.storage.remove('partyIDForPushNotification');
-            this.map.panTo(this.partyMarkersOnMap.get(partyID).getPosition());
-            this.presentPartyPopover(theParty);
-          }
-        });
-      })
-      .catch((err) => {
-        console.log("error: " + err);
-      });
-    }
+    this.refreshPartyAndBarData();
   }
 
   private setupThePage(){
-    this.loadMap()
+    this.login.login()
     .then((res) => {
-      // Start retrieving user location
-      this.enableUserLocation();
-      // Get bars that are close to me from the database
-      this.allMyData.refreshBarsCloseToMe(this.myCoordinates,this.http)
+      this.loadMap()
       .then((res) => {
-        this.events.publish("updateMyAtBarAndAtPartyStatuses");
-        this.refreshBarMarkers();
+        // Start retrieving user location
+        this.enableUserLocation();
       })
       .catch((err) => {
-        this.allMyData.logError(this.tabName, "server", "refreshBarsCloseToMe query error : Err msg = " + err, this.http);
+        this.allMyData.logError(this.tabName, "google maps", "issue loading the google map : Err msg = " + err, this.http);
       });
 
-      this.allMyData.refreshBarsImHosting(this.http)
-      .then((res) => {
-        this.events.publish("updateMyAtBarAndAtPartyStatuses");
-        this.refreshBarMarkers();
-      })
-      .catch((err) => {
-        this.allMyData.logError(this.tabName, "server", "refreshBarsImHosting query error : Err msg = " + err, this.http);
+      this.allMyData.startPeriodicDataRetrieval(this.http);
+      this.events.subscribe("timeToRefreshPartyAndBarData",() => {
+        this.refreshPartyAndBarData();
       });
 
-      // Get parties that I'm invited to from the database
-      this.allMyData.refreshParties(this.http)
-      .then((res) => {
-        this.events.publish("updateMyAtBarAndAtPartyStatuses");
-        this.refreshPartyMarkers();
-        this.allMyData.storage.get('partyIDForPushNotification')
-        .then((partyID : any) => {
-          if(partyID != null){
-            let theParty = this.partyMarkersOnMap.get(partyID).party;
-            this.allMyData.storage.remove('partyIDForPushNotification');
-            this.map.panTo(this.partyMarkersOnMap.get(partyID).getPosition());
-            this.presentPartyPopover(theParty);
-          }
-        });
-      })
-      .catch((err) => {
-        this.allMyData.logError(this.tabName, "server", "refreshParties query error : Err msg = " + err, this.http);
+      this.events.subscribe("aDifferentUserJustLoggedIn",() => {
+        this.refreshPartyAndBarData();
+      });
+
+      this.events.subscribe("timeToUpdateUI",() => {
+          this.updateTheUI();
+      });
+
+      this.events.subscribe("timeToRefreshMapMarkers",() => {
+        this.refreshMapMarkers();
       });
     })
     .catch((err) => {
-      this.allMyData.logError(this.tabName, "google maps", "issue loading the google map : Err msg = " + err, this.http);
-    });
-
-    this.allMyData.refreshPerson(this.http)
-    .then((res) => {
-      this.allMyData.refreshPartiesImHosting(this.http)
-      .then((res) => {
-        
-      })
-      .catch((err) => {
-        this.allMyData.logError(this.tabName, "server", "refreshPartiesImHosting query error : Err msg = " + err, this.http);
-      });
-    })
-    .catch((err) => {
-      this.allMyData.logError(this.tabName, "server", "refreshPerson query error : Err msg = " + err, this.http);
-    });
-
-    this.allMyData.startPeriodicDataRetrieval(this.http);
-    this.events.subscribe("timeToRefreshPartyAndBarData",() => {
-      this.refreshPartyAndBarData();
-    });
-
-    this.events.subscribe("aDifferentUserJustLoggedIn",() => {
-      Promise.all([this.allMyData.refreshBarsCloseToMe(this.myCoordinates, this.http), this.allMyData.refreshBarsImHosting(this.http), this.allMyData.refreshParties(this.http)]).then(thePromise => {
-        return thePromise;
-      })
-      .then((res) => {
-        this.refreshPartyMarkers();
-        this.refreshBarMarkers();
-      })
-      .catch((err) => {
-        this.allMyData.logError(this.tabName, "server", "refreshBarsCloseToMe or refreshParties query error : Err msg = " + err, this.http);
-      });
-    });
-
-    this.events.subscribe("timeToUpdateUI",() => {
-        this.updateTheUI();
-    });
-
-    this.events.subscribe("timeToRefreshMapMarkers",() => {
-      this.refreshMapMarkers();
+        // error logging is already done in the Login file
     });
   }
 
@@ -223,7 +147,7 @@ export class FindPage {
     return new Promise((resolve, reject) => {
       this.allMyData.refreshPerson(this.http)
       .then((res) => {
-        Promise.all([this.allMyData.refreshBarsCloseToMe(this.myCoordinates, this.http), this.allMyData.refreshBarsImHosting(this.http), this.allMyData.refreshParties(this.http)]).then(thePromise => {
+        Promise.all([this.allMyData.refreshBarsCloseToMe(this.myCoordinates, this.http), this.allMyData.refreshBarsImHosting(this.http), this.allMyData.refreshParties(this.http), this.allMyData.refreshPartiesImHosting(this.http)]).then(thePromise => {
           return thePromise;
         })
         .then((res) => {
@@ -231,6 +155,15 @@ export class FindPage {
           this.refreshPartyMarkers();
           this.refreshBarMarkers();
           this.updateMyGoingOutStatusIfNeeded();
+          this.allMyData.storage.get('partyIDForPushNotification')
+          .then((partyID : any) => {
+            if(partyID != null){
+              let theParty = this.partyMarkersOnMap.get(partyID).party;
+              this.allMyData.storage.remove('partyIDForPushNotification');
+              this.map.panTo(this.partyMarkersOnMap.get(partyID).getPosition());
+              this.presentPartyPopover(theParty);
+            }
+          });
           resolve("refreshedPartyAndBarData");
         })
         .catch((err) => {

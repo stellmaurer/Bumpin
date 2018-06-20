@@ -32,6 +32,7 @@ export class MyApp {
       this.splashScreen.hide();
       this.statusBar.hide();
 
+      this.badge.clear();
       this.platform.resume.subscribe((result)=>{//Foreground
         this.badge.clear();
       });
@@ -132,6 +133,7 @@ export class MyApp {
           }
           if(message.includes("invited")){
             this.storage.set('partyIDForPushNotification', data.additionalData.partyOrBarID);
+            this.app.getRootNav().getActiveChildNav().select(0);
           }
         }else if(message.includes("bar")){
           this.app.getRootNav().getActiveChildNav().select(2);

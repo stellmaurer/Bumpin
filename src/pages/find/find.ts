@@ -114,6 +114,7 @@ export class FindPage {
     .then((res) => {
       // Start retrieving user location
       this.enableUserLocation();
+      this.addCenterControlToMap();
     })
     .catch((err) => {
       this.allMyData.logError(this.tabName, "google maps", "issue loading the google map : Err msg = " + err, this.http);
@@ -240,6 +241,15 @@ export class FindPage {
         ". This probably was caused by the user not allowing the app to use their location.");
       });
     });
+  }
+
+  private addCenterControlToMap() {
+    var controlDiv = document.getElementById('locateControl');
+    let tempThis = this;
+    controlDiv.addEventListener('click', function() {
+      tempThis.map.setCenter(tempThis.myCoordinates);
+    });
+    this.map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(controlDiv);
   }
 
   /*

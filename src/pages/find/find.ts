@@ -21,7 +21,6 @@ import { BarPopover } from './barPopover';
 import { LocationTracker } from '../../providers/location-tracker';
 import { Utility } from '../../model/utility';
 import { AlertController } from 'ionic-angular';
-import { Login } from '../login/login';
 import * as MarkerClusterer from 'node-js-marker-clusterer';
 import { Storage } from '@ionic/storage';
  
@@ -64,6 +63,7 @@ export class FindPage {
   private barFilterMoreWomenTemp : boolean;
   private barFilterMoreMenTemp : boolean;
   private barFilterFriendsPresentTemp : boolean;
+  private numberOfActiveBarFilters : number;
 
   private partyFilterAnyToday : boolean;
   private partyFilterAnyThisWeek : boolean;
@@ -71,8 +71,9 @@ export class FindPage {
   private partyFilterAnyTodayTemp : boolean;
   private partyFilterAnyThisWeekTemp : boolean;
   private partyFilterDontShowPartiesTemp : boolean;
+  private numberOfActivePartyFilters : number;
  
-  constructor(private allMyData : AllMyData, private login : Login, public alertCtrl: AlertController, public locationTracker: LocationTracker, private events : Events, private http:Http, public navCtrl: NavController, public popoverCtrl: PopoverController) {
+  constructor(private allMyData : AllMyData, private storage: Storage, public alertCtrl: AlertController, public locationTracker: LocationTracker, private events : Events, private http:Http, public navCtrl: NavController, public popoverCtrl: PopoverController) {
     this.allMyData.events = events;
     this.partyMarkersOnMap = new Map<string,any>();
     this.barMarkersOnMap = new Map<string,any>();
@@ -97,6 +98,11 @@ export class FindPage {
     this.barFilterMoreWomenTemp = false;
     this.barFilterMoreMenTemp = false;
     this.barFilterFriendsPresentTemp = false;
+
+    this.numberOfActivePartyFilters = 0;
+    this.numberOfActiveBarFilters = 0;
+
+    this.populateFiltersFromLocalDataStorage();
 
     this.barClusterMarkers = new Array<any>();
   }
@@ -248,6 +254,7 @@ export class FindPage {
     let tempThis = this;
     controlDiv.addEventListener('click', function() {
       tempThis.map.setCenter(tempThis.myCoordinates);
+      tempThis.map.setZoom(15);
     });
     this.map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(controlDiv);
   }
@@ -461,6 +468,8 @@ export class FindPage {
         this.partyFilterDontShowParties = this.partyFilterDontShowPartiesTemp;
         this.partyFilterAnyThisWeek = this.partyFilterAnyThisWeekTemp;
         this.partyFilterAnyToday = this.partyFilterAnyTodayTemp;
+        this.updateNumberOfActivePartyFilters();
+        this.storeFiltersInLocalDataStorage();
         this.updateMapMarkersVisibility();
       }
     });
@@ -544,10 +553,136 @@ export class FindPage {
         this.barFilterMoreWomen = this.barFilterMoreWomenTemp;
         this.barFilterMoreMen = this.barFilterMoreMenTemp;
         this.barFilterFriendsPresent = this.barFilterFriendsPresentTemp;
+        this.updateNumberOfActiveBarFilters();
+        this.storeFiltersInLocalDataStorage();
         this.updateMapMarkersVisibility();
       }
     });
     alert.present();
+  }
+
+  private updateNumberOfActiveFilters(){
+    this.updateNumberOfActivePartyFilters();
+    this.updateNumberOfActiveBarFilters();
+  }
+
+  private updateNumberOfActivePartyFilters(){
+    this.numberOfActivePartyFilters = 0;
+    if(this.partyFilterDontShowParties){
+      this.numberOfActivePartyFilters++;
+    }
+    if(this.partyFilterAnyThisWeek){
+      this.numberOfActivePartyFilters++;
+    }
+    if(this.partyFilterAnyToday){
+      this.numberOfActivePartyFilters++;
+    }
+  }
+
+  private updateNumberOfActiveBarFilters(){
+    this.numberOfActiveBarFilters = 0;
+    if(this.barFilterDontShowBars){
+      this.numberOfActiveBarFilters++;
+    }
+    if(this.barFilterAttendance){
+      this.numberOfActiveBarFilters++;
+    }
+    if(this.barFilterAvgRating){
+      this.numberOfActiveBarFilters++;
+    }
+    if(this.barFilterMoreWomen){
+      this.numberOfActiveBarFilters++;
+    }
+    if(this.barFilterMoreMen){
+      this.numberOfActiveBarFilters++;
+    }
+    if(this.barFilterFriendsPresent){
+      this.numberOfActiveBarFilters++;
+    }
+  }
+
+  private storeFiltersInLocalDataStorage(){
+    this.storage.set('partyFilterDontShowParties', this.boolToString(this.partyFilterDontShowParties));
+    this.storage.set('partyFilterAnyThisWeek', this.boolToString(this.partyFilterAnyThisWeek));
+    this.storage.set('partyFilterAnyToday', this.boolToString(this.partyFilterAnyToday));
+    this.storage.set('barFilterDontShowBars', this.boolToString(this.barFilterDontShowBars));
+    this.storage.set('barFilterAttendance', this.boolToString(this.barFilterAttendance));
+    this.storage.set('barFilterAvgRating', this.boolToString(this.barFilterAvgRating));
+    this.storage.set('barFilterMoreWomen', this.boolToString(this.barFilterMoreWomen));
+    this.storage.set('barFilterMoreMen', this.boolToString(this.barFilterMoreMen));
+    this.storage.set('barFilterFriendsPresent', this.boolToString(this.barFilterFriendsPresent));
+  }
+
+  private populateFiltersFromLocalDataStorage(){
+    return new Promise((resolve, reject) => {
+      Promise.all([this.getFilterFromLocalDataStorage('partyFilterDontShowParties'), 
+                  this.getFilterFromLocalDataStorage('partyFilterAnyThisWeek'),
+                  this.getFilterFromLocalDataStorage('partyFilterAnyToday'),
+                  this.getFilterFromLocalDataStorage('barFilterDontShowBars'),
+                  this.getFilterFromLocalDataStorage('barFilterAttendance'),
+                  this.getFilterFromLocalDataStorage('barFilterAvgRating'),
+                  this.getFilterFromLocalDataStorage('barFilterMoreWomen'),
+                  this.getFilterFromLocalDataStorage('barFilterMoreMen'),
+                  this.getFilterFromLocalDataStorage('barFilterFriendsPresent')
+                  ]).then(filters => {
+        this.partyFilterDontShowParties = filters[0];
+        this.partyFilterAnyThisWeek = filters[1];
+        this.partyFilterAnyToday = filters[2];
+        this.barFilterDontShowBars = filters[3];
+        this.barFilterAttendance = filters[4];
+        this.barFilterAvgRating = filters[5];
+        this.barFilterMoreWomen = filters[6];
+        this.barFilterMoreMen = filters[7];
+        this.barFilterFriendsPresent = filters[8];
+
+        this.partyFilterDontShowPartiesTemp = filters[0];
+        this.partyFilterAnyThisWeekTemp = filters[1];
+        this.partyFilterAnyTodayTemp = filters[2];
+        this.barFilterDontShowBarsTemp = filters[3];
+        this.barFilterAttendanceTemp = filters[4];
+        this.barFilterAvgRatingTemp = filters[5];
+        this.barFilterMoreWomenTemp = filters[6];
+        this.barFilterMoreMenTemp = filters[7];
+        this.barFilterFriendsPresentTemp = filters[8];
+
+        this.updateNumberOfActiveFilters();
+
+        resolve("populating filters from local data storage was successful");
+      });
+    });
+  }
+
+  private getFilterFromLocalDataStorage(filter : string) : Promise<boolean> {
+    return new Promise((resolve, reject) => {
+      this.storage.get(filter)
+      .then((val) => {
+        if((val == null) || (val == "false")){
+          resolve(false);
+        }else {
+          resolve(true);
+        }
+      })
+      .catch((err) => {
+        this.allMyData.logError(this.tabName, "client", "issue retrieving filter from local data storage : Err msg = " + err, this.http);
+        resolve(false);
+      });
+    });
+  }
+
+  private stringToBool(theString : string){
+    if(theString == "true"){
+      return true;
+    }else{
+      return false;
+    }
+  }
+
+  private boolToString(theBool : boolean){
+    if(theBool){
+      return "true";
+    }else{
+      return "false";
+    }
   }
 
   updateMapMarkersVisibility(){

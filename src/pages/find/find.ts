@@ -112,7 +112,20 @@ export class FindPage {
   }
 
   ionViewWillEnter(){
-    this.refreshPartyAndBarData();
+    this.refreshPartyAndBarDataOnceFacebookIDIsSet();
+  }
+
+  private refreshPartyAndBarDataOnceFacebookIDIsSet(){
+    if(this.allMyData.me.facebookID == "Not yet set."){
+      let facebookIDTimer = setTimeout(function(){
+        if(this.allMyData.me.facebookID != "Not yet set."){
+          this.refreshPartyAndBarData();
+          clearTimeout(facebookIDTimer);
+        }
+      }, 250);
+    }else{
+      this.refreshPartyAndBarData();
+    }
   }
 
   private setupThePage(){

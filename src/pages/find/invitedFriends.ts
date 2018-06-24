@@ -34,7 +34,6 @@ export class InvitedFriendsPage {
         this.maybe = new Array<Invitee>();
         this.invited = new Array<Invitee>();
         this.determineWhichFriendsAreInvitedToTheParty();
-        console.log("in invitedFriends page constructor");
     }
 
     private determineWhichFriendsAreInvitedToTheParty(){

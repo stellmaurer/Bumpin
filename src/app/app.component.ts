@@ -29,6 +29,8 @@ export class MyApp {
 
   constructor(public app: App, private login : Login, private allMyData: AllMyData, private http: Http, public platform: Platform, private statusBar: StatusBar, private splashScreen: SplashScreen, private badge: Badge, public push: Push, private geolocation: Geolocation, public alertCtrl: AlertController, private backgroundGeolocation: BackgroundGeolocation, private events : Events, private storage: Storage) {
     this.platform.ready().then(() => {
+      this.rootPage = TabsPage;
+
       this.statusBar.hide();
 
       this.badge.clear();
@@ -50,7 +52,7 @@ export class MyApp {
   private loginToFacebook(){
     this.login.login()
     .then((res) => {
-      this.rootPage = TabsPage;
+      this.events.publish("timeToRefreshPartyAndBarData");
       this.splashScreen.hide();
     })
     .catch((err) => {

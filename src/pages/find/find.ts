@@ -117,7 +117,7 @@ export class FindPage {
 
   private refreshPartyAndBarDataOnceFacebookIDIsSet(){
     if(this.allMyData.me.facebookID == "Not yet set."){
-      let facebookIDTimer = setInterval(function(){
+      let facebookIDTimer = setInterval(() => {
         if(this.allMyData.me.facebookID != "Not yet set."){
           this.refreshPartyAndBarData();
           clearInterval(facebookIDTimer);

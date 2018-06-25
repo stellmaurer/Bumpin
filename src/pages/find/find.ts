@@ -117,10 +117,10 @@ export class FindPage {
 
   private refreshPartyAndBarDataOnceFacebookIDIsSet(){
     if(this.allMyData.me.facebookID == "Not yet set."){
-      let facebookIDTimer = setTimeout(function(){
+      let facebookIDTimer = setInterval(function(){
         if(this.allMyData.me.facebookID != "Not yet set."){
           this.refreshPartyAndBarData();
-          clearTimeout(facebookIDTimer);
+          clearInterval(facebookIDTimer);
         }
       }, 250);
     }else{

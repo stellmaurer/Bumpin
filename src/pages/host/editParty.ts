@@ -81,8 +81,8 @@ export class EditPartyPage {
 
   private keyPressedInAddressInput(event : any){
     let tempThis = this;
-    clearTimeout(this.addressInputTimer);
-    this.addressInputTimer = setTimeout(function(){ tempThis.updateMapMarker(); }, 1500);
+    clearInterval(this.addressInputTimer);
+    this.addressInputTimer = setInterval(function(){ tempThis.updateMapMarker(); }, 1500);
     if(event.keyCode == 13){
       this.updateMapMarker();
     }

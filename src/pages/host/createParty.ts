@@ -34,7 +34,7 @@ export class CreatePartyPage {
   private party : Party;
   private partyMarker : any;
   private inputError : string;
-  private addressInputTimer : any;
+  private addressInputTimer : NodeJS.Timer;
   
   private datePickerMinYear : number;
 
@@ -64,12 +64,14 @@ export class CreatePartyPage {
     });
   }
 
-  private keyPressedInAddressInput(event : any){
-    let tempThis = this;
+  private keyUpInAddressInput(event : any){
     clearTimeout(this.addressInputTimer);
-    this.addressInputTimer = setTimeout(function(){ tempThis.updateMapMarker(); }, 1500);
     if(event.keyCode == 13){
       this.updateMapMarker();
+    }else{
+      this.addressInputTimer = setTimeout(() => {
+        this.updateMapMarker();
+      }, 1500);
     }
   }
 

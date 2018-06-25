@@ -21,6 +21,8 @@ export class Person {
     public status : Map<string,string>;
     public platform : string;
     public deviceToken : string;
+    public numberOfFriendsThatMightGoOut : number;
+    public sevenPMLocalHourInZulu : number;
 
     constructor() {
         this.facebookID = "Not yet set.";
@@ -34,6 +36,8 @@ export class Person {
         this.peopleBlockingTheirActivityFromMe = new Map<string,boolean>();
         this.peopleToIgnore = new Map<string,boolean>();
         this.status = new Map<string,string>();
+        this.numberOfFriendsThatMightGoOut = 0;
+        this.sevenPMLocalHourInZulu = 0;
     }
 
     fixMaps(){

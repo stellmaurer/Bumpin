@@ -69,6 +69,19 @@ export class NotificationsPage {
                     this.deleteTheNotification(notification);
                 }
             }
+        }else if(notification.message.includes("go out")){
+            let notificationDate = new Date((1000 * notification.expiresAt) - ((1000*60*60*24) * 14));
+            let today = new Date();
+            if(notificationDate.getFullYear() == today.getFullYear() &&
+               notificationDate.getMonth() == today.getMonth() &&
+               notificationDate.getDate() == today.getDate()){
+                this.allMyData.storage.set('goingOutStatusNotification', "-1");
+                this.app.getRootNav().getActiveChildNav().select(3);
+            }else{
+                this.presentAlertWithMessage("This notification was for an earlier date.");
+                this.deleteTheNotification(notification);
+            }
+            
         }
     }
 

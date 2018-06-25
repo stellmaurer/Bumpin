@@ -54,13 +54,11 @@ export class FriendsPage {
     private sortFriendsIntoStatusGroups(){
         for(let i = 0; i < this.allMyData.friends.length; i++){
             let friend = this.allMyData.friends[i];
-            console.log("friend going out status = " + friend.status["goingOut"]);
             if (friend.status["goingOut"] == "Unknown"){
                 this.unknown.push(friend);
             }else if (friend.status["goingOut"] == "No"){
                 this.no.push(friend);
             }else if (friend.status["goingOut"] == "Convince Me"){
-                console.log("just pushed " + friend.name + " into this.convinceMe array.");
                 this.convinceMe.push(friend);
             }else if (friend.status["goingOut"] == "Maybe"){
                 this.maybe.push(friend);

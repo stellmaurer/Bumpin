@@ -47,6 +47,16 @@ export class MorePage {
     });
   }
 
+  ionViewWillEnter(){
+    this.allMyData.storage.get('goingOutStatusNotification')
+    .then((message : any) => {
+      if(message != null){
+        this.allMyData.storage.remove('goingOutStatusNotification');
+        this.goToFriendStatusPage();
+      }
+    });
+  }
+
   private goToNotificationsPage(){
     this.navCtrl.push(NotificationsPage, {}, {animate: false});
   }

@@ -40,6 +40,7 @@ export class AllMyData{
     public numberOfUnseenNotifications : number;
     
     public events : Events;
+    public dataRetrievalTimer : NodeJS.Timer;
 
     constructor(public zone: NgZone, public storage: Storage) {
         this.me = new Person();
@@ -53,10 +54,11 @@ export class AllMyData{
         this.numberOfUnseenNotifications = 0;
     }
 
-    public startPeriodicDataRetrieval(http : Http){
-        var tempThis = this;
-        setInterval(function(){
-            tempThis.events.publish("timeToRefreshPartyAndBarData");
+    public refreshDataAndResetPeriodicDataRetrievalTimer(http : Http){
+        this.events.publish("timeToRefreshPartyAndBarData");
+        clearInterval(this.dataRetrievalTimer);
+        this.dataRetrievalTimer = setInterval(() => {
+            this.events.publish("timeToRefreshPartyAndBarData");
         }, 60000);
     }
 
@@ -488,6 +490,8 @@ export class AllMyData{
     }
 
     public changeMyGoingOutStatus(status : string, manuallySet : string, http : Http){
+        let lastTimeGoingOutStatusWasSet = new Date(this.me.status["timeGoingOutStatusWasSet"]);
+        let lastGoingOutStatus = this.me.status["goingOut"];
         let timeGoingOutStatusWasSet = Utility.convertDateTimeToISOFormat(new Date());
         this.zone.run(() => {
             this.me.status["goingOut"] = status;
@@ -498,7 +502,52 @@ export class AllMyData{
             var query = new Query(this, http);
             query.updatePersonStatus(this.me.facebookID, status, timeGoingOutStatusWasSet, manuallySet)
             .then((res) => {
-                resolve("updatePersonStatus query succeeded.");
+                let today = new Date();
+
+                if(lastTimeGoingOutStatusWasSet.getFullYear() == today.getFullYear() &&
+                lastTimeGoingOutStatusWasSet.getMonth() == today.getMonth() && 
+                lastTimeGoingOutStatusWasSet.getDate() == today.getDate()){
+                    if(lastGoingOutStatus == "No" && status != "No"){
+                        return this.letMyFriendsKnowThatIMightGoOutTonight(http);
+                    }else if(lastGoingOutStatus != "No" && status == "No"){
+                        return this.letMyFriendsKnowThatImNotGoingOutAnymore(http);
+                    }else{
+                        resolve("changeMyGoingOutStatus query successfully completed.");
+                    }
+                }else{
+                    if(status == "No"){
+                        resolve("changeMyGoingOutStatus query successfully completed.");
+                        return;
+                    }else{
+                        return this.letMyFriendsKnowThatIMightGoOutTonight(http);
+                    }
+                }
+            })
+            .catch((err) => {
+                reject(err);
+            });
+        });
+    }
+
+    public letMyFriendsKnowThatIMightGoOutTonight(http : Http){
+        return new Promise((resolve, reject) => {
+            var query = new Query(this, http);
+            query.letMyFriendsKnowThatIMightGoOutTonight()
+            .then((res) => {
+                resolve("letMyFriendsKnowThatIMightGoOutTonight query succeeded.");
+            })
+            .catch((err) => {
+                reject(err);
+            });
+        });
+    }
+
+    public letMyFriendsKnowThatImNotGoingOutAnymore(http : Http){
+        return new Promise((resolve, reject) => {
+            var query = new Query(this, http);
+            query.letMyFriendsKnowThatImNotGoingOutAnymore()
+            .then((res) => {
+                resolve("letMyFriendsKnowThatImNotGoingOutAnymore query succeeded.");
             })
             .catch((err) => {
                 reject(err);

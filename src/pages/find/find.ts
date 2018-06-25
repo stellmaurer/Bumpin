@@ -112,7 +112,20 @@ export class FindPage {
   }
 
   ionViewWillEnter(){
-    this.refreshPartyAndBarData();
+    this.allMyData.refreshDataAndResetPeriodicDataRetrievalTimer(this.http);
+  }
+
+  private refreshPartyAndBarDataOnceFacebookIDAndLocationAreSet(){
+    if(this.allMyData.me.facebookID == "Not yet set." || this.myCoordinates === undefined){
+      let timer = setInterval(() => {
+        if((this.allMyData.me.facebookID != "Not yet set.") && (this.myCoordinates !== undefined)){
+          this.refreshPartyAndBarData();
+          clearInterval(timer);
+        }
+      }, 250);
+    }else{
+      this.refreshPartyAndBarData();
+    }
   }
 
   private setupThePage(){
@@ -126,13 +139,12 @@ export class FindPage {
       this.allMyData.logError(this.tabName, "google maps", "issue loading the google map : Err msg = " + err, this.http);
     });
 
-    this.allMyData.startPeriodicDataRetrieval(this.http);
     this.events.subscribe("timeToRefreshPartyAndBarData",() => {
-      this.refreshPartyAndBarData();
+      this.refreshPartyAndBarDataOnceFacebookIDAndLocationAreSet();
     });
 
     this.events.subscribe("aDifferentUserJustLoggedIn",() => {
-      this.refreshPartyAndBarData();
+      this.refreshPartyAndBarDataOnceFacebookIDAndLocationAreSet();
     });
 
     this.events.subscribe("timeToUpdateUI",() => {

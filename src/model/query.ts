@@ -61,16 +61,24 @@ export class Query{
         if(data.friends.paging.next != undefined){
             this.pageThroughMoreFriends(data.friends.paging.next)
             .then((res) => {
-                this.sortFacebookFriendsByName();
+                // This step takes out friends who downloaded the app, 
+                //     but then deleted their Person object from the database
+                this.getFriends()
+                .catch((err) => {
+                    this.allMyData.logError("More Tab", "client", "issue getting friends from db : Err msg = " + err, this.http);
+                });
             })
             .catch((err) => {
                 this.allMyData.logError("More Tab", "login", "error while paging through user's FB friends : Err msg = " + err, this.http);
             });
         }else{
-            this.sortFacebookFriendsByName();
+            // This step takes out friends who downloaded the app, 
+            //     but then deleted their Person object from the database
+            this.getFriends()
+            .catch((err) => {
+                this.allMyData.logError("More Tab", "client", "issue getting friends from db : Err msg = " + err, this.http);
+            });
         }
-
-        
     }
 
     private pageThroughMoreFriends(url : string){
@@ -215,6 +223,12 @@ export class Query{
             });
         });
     }
+
+    private getSevenPMLocalHourInZulu() : string {
+        var sevenPMLocalTime = new Date();
+        sevenPMLocalTime.setHours(19);
+        return sevenPMLocalTime.getUTCHours().toString();
+    }
     
     public createOrUpdatePerson(){
         return new Promise((resolve, reject) => {
@@ -224,7 +238,8 @@ export class Query{
                 var url = "http://bumpin-env.us-west-2.elasticbeanstalk.com:80/createOrUpdatePerson";
                 let body = "facebookID=" + this.allMyData.me.facebookID + "&isMale=" + this.allMyData.me.isMale + 
                             "&name=" + encodeURIComponent(this.allMyData.me.name) + "&platform=" + platform +
-                            "&deviceToken=" + encodeURIComponent(deviceToken);
+                            "&deviceToken=" + encodeURIComponent(deviceToken) +
+                            "&sevenPMLocalHourInZulu=" + encodeURIComponent(this.getSevenPMLocalHourInZulu());
                 var headers = new Headers();
                 headers.append('content-type', "application/x-www-form-urlencoded");
                 let options= new RequestOptions({headers: headers});
@@ -239,6 +254,55 @@ export class Query{
               .catch((err) => {
                 reject(err);
               });
+        });
+    }
+
+    private getFriendFacebookIDsAsQueryParameter() : string{
+        var facebookIDs : string = "";
+        if(this.allMyData.friends != null){
+            for(let i = 0; i < this.allMyData.friends.length; i++){
+                facebookIDs += this.allMyData.friends[i].facebookID + ",";
+            }
+            if(facebookIDs.length >= 1){
+                facebookIDs = facebookIDs.substr(0, facebookIDs.length-1); // take off the last comma
+            }
+        }
+        return facebookIDs;
+    }
+
+    // curl http://localhost:5000/incrementNumberOfFriendsThatMightGoOutForTheseFriends -d "facebookID=10154326505409816&friendFacebookIDs=10155227369101712,1617903301590247,10203989030603248"
+    public letMyFriendsKnowThatIMightGoOutTonight(){
+        return new Promise((resolve, reject) => {
+            var url = "http://bumpin-env.us-west-2.elasticbeanstalk.com:80/incrementNumberOfFriendsThatMightGoOutForTheseFriends";
+            let body = "facebookID=" + this.allMyData.me.facebookID + "&friendFacebookIDs=" + this.getFriendFacebookIDsAsQueryParameter();
+            var headers = new Headers();
+            headers.append('content-type', "application/x-www-form-urlencoded");
+            let options= new RequestOptions({headers: headers});
+            this.http.post(url, body, options).map(res => res.json()).subscribe(data => {
+                if(data.succeeded){
+                    resolve(data);
+                }else{
+                    reject(data.error);
+                }
+            });
+        });
+    }
+
+    // curl http://localhost:5000/decrementNumberOfFriendsThatMightGoOutForTheseFriends -d "facebookID=10154326505409816&friendFacebookIDs=10155227369101712,1617903301590247,10203989030603248"
+    public letMyFriendsKnowThatImNotGoingOutAnymore(){
+        return new Promise((resolve, reject) => {
+            var url = "http://bumpin-env.us-west-2.elasticbeanstalk.com:80/decrementNumberOfFriendsThatMightGoOutForTheseFriends";
+            let body = "facebookID=" + this.allMyData.me.facebookID + "&friendFacebookIDs=" + this.getFriendFacebookIDsAsQueryParameter();
+            var headers = new Headers();
+            headers.append('content-type', "application/x-www-form-urlencoded");
+            let options= new RequestOptions({headers: headers});
+            this.http.post(url, body, options).map(res => res.json()).subscribe(data => {
+                if(data.succeeded){
+                    resolve(data);
+                }else{
+                    reject(data.error);
+                }
+            });
         });
     }
 
@@ -518,16 +582,7 @@ export class Query{
 
     public getFriends(){
         return new Promise((resolve, reject) => {
-            var facebookIDs : string = "";
-            if(this.allMyData.friends != null){
-                for(let i = 0; i < this.allMyData.friends.length; i++){
-                    facebookIDs += this.allMyData.friends[i].facebookID + ",";
-                }
-                if(facebookIDs.length >= 1){
-                    facebookIDs = facebookIDs.substr(0, facebookIDs.length-1); // take off the last comma
-                }
-            }
-            var url = "http://bumpin-env.us-west-2.elasticbeanstalk.com:80/getFriends?facebookIDs=" + facebookIDs;
+            var url = "http://bumpin-env.us-west-2.elasticbeanstalk.com:80/getFriends?facebookIDs=" + this.getFriendFacebookIDsAsQueryParameter();
             this.http.get(url).map(res => res.json()).subscribe(data => {
                 if(data.succeeded){
                     this.allMyData.friends = deserialize<Friend[]>(Friend, data.people);

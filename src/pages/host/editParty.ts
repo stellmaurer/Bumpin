@@ -79,12 +79,14 @@ export class EditPartyPage {
     });
   }
 
-  private keyPressedInAddressInput(event : any){
-    let tempThis = this;
+  private keyUpInAddressInput(event : any){
     clearTimeout(this.addressInputTimer);
-    this.addressInputTimer = setTimeout(function(){ tempThis.updateMapMarker(); }, 1500);
     if(event.keyCode == 13){
       this.updateMapMarker();
+    }else{
+      this.addressInputTimer = setTimeout(() => {
+        this.updateMapMarker();
+      }, 1500);
     }
   }
 

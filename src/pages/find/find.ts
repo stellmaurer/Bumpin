@@ -112,15 +112,15 @@ export class FindPage {
   }
 
   ionViewWillEnter(){
-    this.refreshPartyAndBarDataOnceFacebookIDIsSet();
+    this.allMyData.refreshDataAndResetPeriodicDataRetrievalTimer(this.http);
   }
 
-  private refreshPartyAndBarDataOnceFacebookIDIsSet(){
-    if(this.allMyData.me.facebookID == "Not yet set."){
-      let facebookIDTimer = setInterval(() => {
-        if(this.allMyData.me.facebookID != "Not yet set."){
+  private refreshPartyAndBarDataOnceFacebookIDAndLocationAreSet(){
+    if(this.allMyData.me.facebookID == "Not yet set." || this.myCoordinates === undefined){
+      let timer = setInterval(() => {
+        if((this.allMyData.me.facebookID != "Not yet set.") && (this.myCoordinates !== undefined)){
           this.refreshPartyAndBarData();
-          clearInterval(facebookIDTimer);
+          clearInterval(timer);
         }
       }, 250);
     }else{
@@ -139,13 +139,12 @@ export class FindPage {
       this.allMyData.logError(this.tabName, "google maps", "issue loading the google map : Err msg = " + err, this.http);
     });
 
-    this.allMyData.startPeriodicDataRetrieval(this.http);
     this.events.subscribe("timeToRefreshPartyAndBarData",() => {
-      this.refreshPartyAndBarData();
+      this.refreshPartyAndBarDataOnceFacebookIDAndLocationAreSet();
     });
 
     this.events.subscribe("aDifferentUserJustLoggedIn",() => {
-      this.refreshPartyAndBarData();
+      this.refreshPartyAndBarDataOnceFacebookIDAndLocationAreSet();
     });
 
     this.events.subscribe("timeToUpdateUI",() => {

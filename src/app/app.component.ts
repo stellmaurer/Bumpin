@@ -52,7 +52,6 @@ export class MyApp {
   private loginToFacebook(){
     this.login.login()
     .then((res) => {
-      this.events.publish("timeToRefreshPartyAndBarData");
       this.splashScreen.hide();
     })
     .catch((err) => {

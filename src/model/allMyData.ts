@@ -40,6 +40,7 @@ export class AllMyData{
     public numberOfUnseenNotifications : number;
     
     public events : Events;
+    public dataRetrievalTimer : NodeJS.Timer;
 
     constructor(public zone: NgZone, public storage: Storage) {
         this.me = new Person();
@@ -53,10 +54,11 @@ export class AllMyData{
         this.numberOfUnseenNotifications = 0;
     }
 
-    public startPeriodicDataRetrieval(http : Http){
-        var tempThis = this;
-        setInterval(function(){
-            tempThis.events.publish("timeToRefreshPartyAndBarData");
+    public refreshDataAndResetPeriodicDataRetrievalTimer(http : Http){
+        this.events.publish("timeToRefreshPartyAndBarData");
+        clearInterval(this.dataRetrievalTimer);
+        this.dataRetrievalTimer = setInterval(() => {
+            this.events.publish("timeToRefreshPartyAndBarData");
         }, 60000);
     }
 

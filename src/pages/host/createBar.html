@@ -34,7 +34,7 @@
 
     <ion-item>
       <ion-label stacked>Bar Key</ion-label>
-      <ion-input type="text" [(ngModel)]="bar.key" (blur)="getAddressForBarKey();" (keypress)="keyPressedInBarKeyInput($event);"></ion-input>
+      <ion-input type="text" [(ngModel)]="bar.key" (blur)="getAddressForBarKey();" (keyup)="keyUpInBarKeyInput($event);"></ion-input>
     </ion-item>
   
     <ion-item>

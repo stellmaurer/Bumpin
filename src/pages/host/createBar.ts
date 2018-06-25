@@ -83,7 +83,7 @@ export class CreateBarPage {
     });
   }
 
-  private keyPressedInBarKeyInput(event : any){
+  private keyUpInBarKeyInput(event : any){
     if(event.keyCode == 13){
       this.getAddressForBarKey();
     }

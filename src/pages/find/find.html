@@ -27,6 +27,7 @@
 </ion-header>
  
 <ion-content class="theMap">
+  <ion-spinner *ngIf="currentlyLoadingData == true" name="ios" id="loadingIndicator"></ion-spinner>
   <div #map id="map"></div>
   <ion-icon id="locateControl" name="locate"></ion-icon>
 </ion-content>

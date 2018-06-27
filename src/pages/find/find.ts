@@ -9,7 +9,7 @@
  *******************************************************/
 
 import { Component, ViewChild, ElementRef } from '@angular/core';
-import { NavController, Events } from 'ionic-angular';
+import { NavController, Events, Loading } from 'ionic-angular';
 import { Geolocation } from 'ionic-native';
 import { Http } from '@angular/http';
 import { Party } from "../../model/party";
@@ -72,6 +72,8 @@ export class FindPage {
   private partyFilterAnyThisWeekTemp : boolean;
   private partyFilterDontShowPartiesTemp : boolean;
   private numberOfActivePartyFilters : number;
+
+  private currentlyLoadingData : boolean;
  
   constructor(private allMyData : AllMyData, private storage: Storage, public alertCtrl: AlertController, public locationTracker: LocationTracker, private events : Events, private http:Http, public navCtrl: NavController, public popoverCtrl: PopoverController) {
     this.allMyData.events = events;
@@ -102,6 +104,8 @@ export class FindPage {
     this.numberOfActivePartyFilters = 0;
     this.numberOfActiveBarFilters = 0;
 
+    this.currentlyLoadingData = false;
+
     this.populateFiltersFromLocalDataStorage();
 
     this.barClusterMarkers = new Array<any>();
@@ -113,19 +117,6 @@ export class FindPage {
 
   ionViewWillEnter(){
     this.allMyData.refreshDataAndResetPeriodicDataRetrievalTimer(this.http);
-  }
-
-  private refreshPartyAndBarDataOnceFacebookIDAndLocationAreSet(){
-    if(this.allMyData.me.facebookID == "Not yet set." || this.myCoordinates === undefined){
-      let timer = setInterval(() => {
-        if((this.allMyData.me.facebookID != "Not yet set.") && (this.myCoordinates !== undefined)){
-          this.refreshPartyAndBarData();
-          clearInterval(timer);
-        }
-      }, 250);
-    }else{
-      this.refreshPartyAndBarData();
-    }
   }
 
   private setupThePage(){
@@ -154,6 +145,34 @@ export class FindPage {
     this.events.subscribe("timeToRefreshMapMarkers",() => {
       this.refreshMapMarkers();
     });
+  }
+
+  private refreshPartyAndBarDataOnceFacebookIDAndLocationAreSet(){
+    this.currentlyLoadingData = true;
+    if(this.allMyData.me.facebookID == "Not yet set." || this.myCoordinates === undefined){
+      let timer = setInterval(() => {
+        if((this.allMyData.me.facebookID != "Not yet set.") && (this.myCoordinates !== undefined)){
+          clearInterval(timer);
+          console.log("reloading data");
+          this.refreshPartyAndBarData()
+          .then((res) => {
+            this.currentlyLoadingData = false;
+          })
+          .catch((err) => {
+            this.currentlyLoadingData = false;
+          });
+        }
+      }, 250);
+    }else{
+      console.log("reloading data");
+      this.refreshPartyAndBarData()
+      .then((res) => {
+        this.currentlyLoadingData = false;
+      })
+      .catch((err) => {
+        this.currentlyLoadingData = false;
+      });
+    }
   }
 
   private refreshPartyAndBarData(){
@@ -430,10 +449,6 @@ export class FindPage {
   }
 
   private presentPartyPopover(party : Party) {
-    console.log("in find.ts: party = " + party);
-    console.log("in find.ts: this.allMyData = " + this.allMyData);
-    console.log("in find.ts: this.http = " + this.http);
-    console.log("in find.ts: this.navCtrl = " + this.navCtrl);
     let popover = this.popoverCtrl.create(PartyPopover, {party:party, allMyData:this.allMyData, http:this.http, navCtrl:this.navCtrl}, {cssClass:'partyPopover.scss'});
     popover.present();
   }

@@ -17,6 +17,7 @@ import { AllMyData } from '../model/allMyData';
 import { Login } from '../pages/login/login';
 import { Geolocation } from '@ionic-native/geolocation';
 import { FriendsPage } from '../pages/more/friends';
+import { LocationTracker } from '../providers/location-tracker';
 
 @Component({
   templateUrl: 'app.html',
@@ -27,7 +28,7 @@ export class MyApp {
   @ViewChild('myNav') nav : NavController
   private rootPage:any;
 
-  constructor(public app: App, private login : Login, private allMyData: AllMyData, private http: Http, public platform: Platform, private statusBar: StatusBar, private splashScreen: SplashScreen, private badge: Badge, public push: Push, private geolocation: Geolocation, public alertCtrl: AlertController, private backgroundGeolocation: BackgroundGeolocation, private events : Events, private storage: Storage) {
+  constructor(public app: App, private login : Login, private allMyData: AllMyData, private http: Http, public platform: Platform, private statusBar: StatusBar, private splashScreen: SplashScreen, private badge: Badge, public push: Push, private geolocation: Geolocation, private locationTracker: LocationTracker, public alertCtrl: AlertController, private backgroundGeolocation: BackgroundGeolocation, private events : Events, private storage: Storage) {
     this.platform.ready().then(() => {
       this.rootPage = TabsPage;
 
@@ -52,6 +53,7 @@ export class MyApp {
   private loginToFacebook(){
     this.login.login()
     .then((res) => {
+      this.locationTracker.startTracking();
       this.splashScreen.hide();
     })
     .catch((err) => {

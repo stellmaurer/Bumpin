@@ -79,7 +79,6 @@ export class FindPage {
     this.allMyData.events = events;
     this.partyMarkersOnMap = new Map<string,any>();
     this.barMarkersOnMap = new Map<string,any>();
-    this.locationTracker.startTracking();
 
     this.partyFilterAnyToday = false;
     this.partyFilterAnyThisWeek = false;

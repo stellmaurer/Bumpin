@@ -18,12 +18,15 @@ import { Bar } from '../model/bar';
 import { Utility } from '../model/utility';
 import { Http } from '@angular/http';
 import { Events } from 'ionic-angular';
+import { Diagnostic } from '@ionic-native/diagnostic';
+import { Observable, Subscription } from 'rxjs';
  
 @Injectable()
 export class LocationTracker {
  
   private analyticsID: string = "Location Tracker";
-  public watch: any;    
+  public watch: Observable<Geoposition>;   
+  private geolocationSubscription : Subscription; 
   public lat: number = 0;
   public lng: number = 0;
   private appWasJustStarted : boolean;
@@ -33,7 +36,7 @@ export class LocationTracker {
   private barsThatAreInMyVicinity: Map<string,Bar>;
   private barsThatWereInMyVicinity: Map<string,Bar>;
  
-  constructor(private allMyData : AllMyData, private events : Events, public zone: NgZone, private backgroundGeolocation: BackgroundGeolocation, private geolocation: Geolocation, private http : Http) {
+  constructor(private allMyData : AllMyData, private diagnostic: Diagnostic, private events : Events, public zone: NgZone, private backgroundGeolocation: BackgroundGeolocation, private geolocation: Geolocation, private http : Http) {
     this.appWasJustStarted = true;
     this.vicinityDistance = 300;
     this.partiesThatAreInMyVicinity = new Map<string,Party>();
@@ -43,6 +46,23 @@ export class LocationTracker {
   }
  
   startTracking() {
+    this.startTrackingUserLocationIfLocationPermissionGranted();
+  }
+
+  startTrackingUserLocationIfLocationPermissionGranted(){
+    this.diagnostic.isLocationAuthorized()
+    .then((isLocationAuthorized : boolean) => {
+      if(isLocationAuthorized == true){
+        this.actuallyStartTracking();
+      }else{
+        this.stopTracking();
+      }
+    }).catch((err) => {
+      this.allMyData.logError(this.analyticsID, "client", "checkLocationPermissions error : Err msg = " + err, this.http);
+    });
+  }
+
+  actuallyStartTracking(){
     let foregroundConfig = {
       enableHighAccuracy: true
     };
@@ -52,11 +72,11 @@ export class LocationTracker {
       stationaryRadius: 5,
       distanceFilter: 5, 
       debug: false,
-      interval: 2000 
+      interval: 2000
     };
     this.backgroundGeolocation.configure(backgroundConfig);
     this.watch = this.geolocation.watchPosition(foregroundConfig).filter((p: any) => p.code === undefined);
-    this.watch.subscribe((position: Geoposition) => {
+    this.geolocationSubscription = this.watch.subscribe((position: Geoposition) => {
       var thePartyOrBarIAmCurrentlyAt = this.findPartiesOrBarsInMyVicinity(position.coords.latitude, position.coords.longitude);
       let needToUpdateAtBarStatuses = this.updateMyAtBarStatuses();
       let needToUpdateAtPartyStatuses = this.updateMyAtPartyStatuses();
@@ -89,8 +109,10 @@ export class LocationTracker {
   }
 
   stopTracking() {
-    this.watch.unsubscribe();
-    this.backgroundGeolocation.stop();
+    if(this.geolocationSubscription !== undefined){
+      this.geolocationSubscription.unsubscribe();
+    }
+    //this.backgroundGeolocation.stop();
   }
 
   updateMyAtPartyStatuses() : boolean{

@@ -34,6 +34,7 @@ import { CloudSettings, CloudModule } from '@ionic/cloud-angular';
 import { IonicStorageModule } from '@ionic/storage';
 import { BrowserModule } from '@angular/platform-browser';
 import { HttpModule } from '@angular/http';
+import { Diagnostic } from '@ionic-native/diagnostic';
 
 const cloudSettings: CloudSettings = {
   'core': {
@@ -106,6 +107,7 @@ const cloudSettings: CloudSettings = {
     Push,
     Badge,
     Facebook,
+    Diagnostic,
     Geolocation,
     [AllMyData],
     [Login],

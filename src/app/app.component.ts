@@ -5,7 +5,7 @@ import { AlertController, Nav, Platform, Events, Tabs, App } from 'ionic-angular
 
 import { TabsPage } from '../pages/tabs/tabs';
 import { ViewChild } from '@angular/core';
-import { BackgroundGeolocation } from '@ionic-native/background-geolocation';
+import { BackgroundGeolocation, BackgroundGeolocationConfig, BackgroundGeolocationResponse } from '@ionic-native/background-geolocation';
 import { Push, PushObject, PushOptions } from '@ionic-native/push';
 import { Badge } from '@ionic-native/badge';
 import { Storage } from '@ionic/storage';
@@ -28,7 +28,7 @@ export class MyApp {
   @ViewChild('myNav') nav : NavController
   private rootPage:any;
 
-  constructor(public app: App, private login : Login, private allMyData: AllMyData, private http: Http, public platform: Platform, private statusBar: StatusBar, private splashScreen: SplashScreen, private badge: Badge, public push: Push, private geolocation: Geolocation, private locationTracker: LocationTracker, public alertCtrl: AlertController, private backgroundGeolocation: BackgroundGeolocation, private events : Events, private storage: Storage) {
+  constructor(public app: App, private login : Login, private allMyData: AllMyData, private http: Http, public platform: Platform, private statusBar: StatusBar, private splashScreen: SplashScreen, private badge: Badge, public push: Push, private locationTracker: LocationTracker, public alertCtrl: AlertController, private backgroundGeolocation: BackgroundGeolocation, private geolocation: Geolocation, private events : Events, private storage: Storage) {
     this.platform.ready().then(() => {
       this.rootPage = TabsPage;
 

@@ -10,7 +10,7 @@
 
 import { Component, ViewChild, ElementRef } from '@angular/core';
 import { NavController, Events, Loading } from 'ionic-angular';
-import { Geolocation } from 'ionic-native';
+import { Geolocation, Geoposition } from 'ionic-native';
 import { Http } from '@angular/http';
 import { Party } from "../../model/party";
 import { Bar } from "../../model/bar";
@@ -23,6 +23,7 @@ import { Utility } from '../../model/utility';
 import { AlertController } from 'ionic-angular';
 import * as MarkerClusterer from 'node-js-marker-clusterer';
 import { Storage } from '@ionic/storage';
+import { BackgroundGeolocationResponse } from '@ionic-native/background-geolocation';
  
 declare var google;
 
@@ -121,12 +122,15 @@ export class FindPage {
   private setupThePage(){
     this.loadMap()
     .then((res) => {
-      // Start retrieving user location
-      this.enableUserLocation();
       this.addCenterControlToMap();
     })
     .catch((err) => {
       this.allMyData.logError(this.tabName, "google maps", "issue loading the google map : Err msg = " + err, this.http);
+    });
+
+    // Show user's location on the map if the user is allowing the app to use location
+    this.events.subscribe("setUpUIToShowUserLocation",() => {
+      this.enableUserLocation();
     });
 
     this.events.subscribe("timeToRefreshPartyAndBarData",() => {
@@ -225,11 +229,16 @@ export class FindPage {
   }
 
   private enableUserLocation(){
-    this.locationTracker.watch
-      .subscribe((location) => {
-        this.myCoordinates = {lat: this.locationTracker.lat, lng: this.locationTracker.lng};
+    this.locationTracker.watch.subscribe((location: Geoposition) => {
+        this.myCoordinates = {lat: location.coords.latitude, lng: location.coords.longitude};
         this.userLocationMarker.setPosition(this.myCoordinates);
     });
+    /*
+    this.locationTracker.watch
+      .subscribe((location: BackgroundGeolocationResponse) => {
+        this.myCoordinates = {lat: location.latitude, lng: location.longitude};
+        this.userLocationMarker.setPosition(this.myCoordinates);
+    });*/
   }
  
   private loadMap(){

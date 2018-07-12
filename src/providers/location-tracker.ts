@@ -9,7 +9,7 @@
  *******************************************************/
 
 import { Injectable, NgZone } from '@angular/core';
-import { BackgroundGeolocation } from '@ionic-native/background-geolocation';
+import { BackgroundGeolocation, BackgroundGeolocationConfig, BackgroundGeolocationResponse } from '@ionic-native/background-geolocation';
 import { Geolocation, Geoposition } from '@ionic-native/geolocation';
 import 'rxjs/add/operator/filter';
 import { AllMyData } from '../model/allMyData';
@@ -26,6 +26,7 @@ export class LocationTracker {
  
   private analyticsID: string = "Location Tracker";
   public watch: Observable<Geoposition>;   
+  //public watch: Observable<BackgroundGeolocationResponse>;
   private geolocationSubscription : Subscription; 
   public lat: number = 0;
   public lng: number = 0;
@@ -63,19 +64,12 @@ export class LocationTracker {
   }
 
   actuallyStartTracking(){
+    
     let foregroundConfig = {
       enableHighAccuracy: true
     };
-    let backgroundConfig = {
-      // stopOnTerminate: false, // this is used so that the app termination doesn't cause this code to terminate
-      desiredAccuracy: 0,
-      stationaryRadius: 5,
-      distanceFilter: 5, 
-      debug: false,
-      interval: 2000
-    };
-    this.backgroundGeolocation.configure(backgroundConfig);
     this.watch = this.geolocation.watchPosition(foregroundConfig).filter((p: any) => p.code === undefined);
+    this.events.publish("setUpUIToShowUserLocation");
     this.geolocationSubscription = this.watch.subscribe((position: Geoposition) => {
       var thePartyOrBarIAmCurrentlyAt = this.findPartiesOrBarsInMyVicinity(position.coords.latitude, position.coords.longitude);
       let needToUpdateAtBarStatuses = this.updateMyAtBarStatuses();
@@ -89,10 +83,50 @@ export class LocationTracker {
         this.lat = position.coords.latitude;
         this.lng = position.coords.longitude;
       });
-      //this.backgroundGeolocation.finish();
     });
-    // Turn ON the background-geolocation system.
-    //this.backgroundGeolocation.start();
+    
+    /*
+    let backgroundConfig = {
+      stopOnTerminate: false,
+      desiredAccuracy: 0,
+      stationaryRadius: 5,
+      distanceFilter: 5, 
+      debug: true,
+      url: 'http://72.33.2.116:5000/location'
+    };
+
+    this.watch = this.backgroundGeolocation.configure(backgroundConfig);
+    this.geolocationSubscription = this.backgroundGeolocation.configure(backgroundConfig).subscribe((location: BackgroundGeolocationResponse) => {
+      if(this.backgroundGeolocation.Mode == 0){
+        console.log("location-tracker.ts: in the background, " + "latitude = " + location.latitude + ", longitude = " + location.longitude);
+      }else{
+        console.log("location-tracker.ts: in the foreground, " + "latitude = " + location.latitude + ", longitude = " + location.longitude);
+        
+        var thePartyOrBarIAmCurrentlyAt = this.findPartiesOrBarsInMyVicinity(location.latitude, location.longitude);
+        let needToUpdateAtBarStatuses = this.updateMyAtBarStatuses();
+        let needToUpdateAtPartyStatuses = this.updateMyAtPartyStatuses();
+        let shouldUpdateUI = needToUpdateAtBarStatuses || needToUpdateAtPartyStatuses;
+        this.zone.run(() => {
+          this.allMyData.thePartyOrBarIAmAt = thePartyOrBarIAmCurrentlyAt;
+          if(shouldUpdateUI == true){
+            this.events.publish("timeToUpdateUI");
+          }
+          this.lat = location.latitude;
+          this.lng = location.longitude;
+        });
+      }
+
+
+      // IMPORTANT:  You must execute the finish method here to inform the native plugin that you're finished,
+      // and the background-task may be completed.  You must do this regardless if your HTTP request is successful or not.
+      // IF YOU DON'T, ios will CRASH YOUR APP for spending too much time in the background.
+      this.backgroundGeolocation.finish(); // FOR IOS ONLY
+
+    });
+
+    this.backgroundGeolocation.start();
+
+    */
 
     this.events.subscribe("updateMyAtBarAndAtPartyStatuses",() => {
       var thePartyOrBarIAmCurrentlyAt = this.findPartiesOrBarsInMyVicinity(this.lat, this.lng);
@@ -112,7 +146,7 @@ export class LocationTracker {
     if(this.geolocationSubscription !== undefined){
       this.geolocationSubscription.unsubscribe();
     }
-    //this.backgroundGeolocation.stop();
+    this.backgroundGeolocation.stop();
   }
 
   updateMyAtPartyStatuses() : boolean{

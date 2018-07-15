@@ -229,16 +229,16 @@ export class FindPage {
   }
 
   private enableUserLocation(){
-    this.locationTracker.watch.subscribe((location: Geoposition) => {
+    /*this.locationTracker.watch.subscribe((location: Geoposition) => {
         this.myCoordinates = {lat: location.coords.latitude, lng: location.coords.longitude};
         this.userLocationMarker.setPosition(this.myCoordinates);
-    });
-    /*
+    });*/
+    
     this.locationTracker.watch
       .subscribe((location: BackgroundGeolocationResponse) => {
         this.myCoordinates = {lat: location.latitude, lng: location.longitude};
         this.userLocationMarker.setPosition(this.myCoordinates);
-    });*/
+    });
   }
  
   private loadMap(){

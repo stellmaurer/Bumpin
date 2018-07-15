@@ -35,6 +35,7 @@ import { IonicStorageModule } from '@ionic/storage';
 import { BrowserModule } from '@angular/platform-browser';
 import { HttpModule } from '@angular/http';
 import { Diagnostic } from '@ionic-native/diagnostic';
+import { LocalNotifications } from '@ionic-native/local-notifications';
 
 const cloudSettings: CloudSettings = {
   'core': {
@@ -105,6 +106,7 @@ const cloudSettings: CloudSettings = {
     LocationTracker,
     BackgroundGeolocation,
     Push,
+    LocalNotifications,
     Badge,
     Facebook,
     Diagnostic,

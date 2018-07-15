@@ -28,8 +28,11 @@ export class MyApp {
   @ViewChild('myNav') nav : NavController
   private rootPage:any;
 
-  constructor(public app: App, private login : Login, private allMyData: AllMyData, private http: Http, public platform: Platform, private statusBar: StatusBar, private splashScreen: SplashScreen, private badge: Badge, public push: Push, private locationTracker: LocationTracker, public alertCtrl: AlertController, private backgroundGeolocation: BackgroundGeolocation, private geolocation: Geolocation, private events : Events, private storage: Storage) {
+  constructor(public app: App, private login : Login, private allMyData: AllMyData, private http: Http, public platform: Platform, private statusBar: StatusBar, private splashScreen: SplashScreen, private badge: Badge, public push: Push, private locationTracker: LocationTracker, public alertCtrl: AlertController, private backgroundGeolocation: BackgroundGeolocation, private events : Events, private storage: Storage) {
     this.platform.ready().then(() => {
+
+      this.locationTracker.startTracking();
+
       this.rootPage = TabsPage;
 
       this.statusBar.hide();
@@ -53,7 +56,7 @@ export class MyApp {
   private loginToFacebook(){
     this.login.login()
     .then((res) => {
-      this.locationTracker.startTracking();
+      //this.locationTracker.startTracking();
       this.splashScreen.hide();
     })
     .catch((err) => {

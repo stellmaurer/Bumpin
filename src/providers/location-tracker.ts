@@ -20,13 +20,14 @@ import { Http } from '@angular/http';
 import { Events } from 'ionic-angular';
 import { Diagnostic } from '@ionic-native/diagnostic';
 import { Observable, Subscription } from 'rxjs';
+import { LocalNotifications } from '@ionic-native/local-notifications';
  
 @Injectable()
 export class LocationTracker {
  
   private analyticsID: string = "Location Tracker";
-  public watch: Observable<Geoposition>;   
-  //public watch: Observable<BackgroundGeolocationResponse>;
+  //public watch: Observable<Geoposition>;   
+  public watch: Observable<BackgroundGeolocationResponse>;
   private geolocationSubscription : Subscription; 
   public lat: number = 0;
   public lng: number = 0;
@@ -37,7 +38,7 @@ export class LocationTracker {
   private barsThatAreInMyVicinity: Map<string,Bar>;
   private barsThatWereInMyVicinity: Map<string,Bar>;
  
-  constructor(private allMyData : AllMyData, private diagnostic: Diagnostic, private events : Events, public zone: NgZone, private backgroundGeolocation: BackgroundGeolocation, private geolocation: Geolocation, private http : Http) {
+  constructor(private allMyData : AllMyData, private localNotifications: LocalNotifications, private diagnostic: Diagnostic, private events : Events, public zone: NgZone, private backgroundGeolocation: BackgroundGeolocation, private http : Http) {
     this.appWasJustStarted = true;
     this.vicinityDistance = 300;
     this.partiesThatAreInMyVicinity = new Map<string,Party>();
@@ -51,7 +52,7 @@ export class LocationTracker {
   }
 
   startTrackingUserLocationIfLocationPermissionGranted(){
-    this.diagnostic.isLocationAuthorized()
+    /*this.diagnostic.isLocationAuthorized()
     .then((isLocationAuthorized : boolean) => {
       if(isLocationAuthorized == true){
         this.actuallyStartTracking();
@@ -60,18 +61,26 @@ export class LocationTracker {
       }
     }).catch((err) => {
       this.allMyData.logError(this.analyticsID, "client", "checkLocationPermissions error : Err msg = " + err, this.http);
-    });
+    });*/
+    this.actuallyStartTracking();
   }
 
   actuallyStartTracking(){
     
-    let foregroundConfig = {
-      enableHighAccuracy: true
+    let backgroundConfig = {
+      stopOnTerminate: false,
+      desiredAccuracy: 0,
+      stationaryRadius: 5,
+      distanceFilter: 5
     };
-    this.watch = this.geolocation.watchPosition(foregroundConfig).filter((p: any) => p.code === undefined);
-    this.events.publish("setUpUIToShowUserLocation");
-    this.geolocationSubscription = this.watch.subscribe((position: Geoposition) => {
-      var thePartyOrBarIAmCurrentlyAt = this.findPartiesOrBarsInMyVicinity(position.coords.latitude, position.coords.longitude);
+
+    this.watch = this.backgroundGeolocation.configure(backgroundConfig);
+    this.geolocationSubscription = this.backgroundGeolocation.configure(backgroundConfig).subscribe((location: BackgroundGeolocationResponse) => {
+      let dateOfLocation = new Date(location.time);
+      
+      this.allMyData.logError(this.analyticsID, "client", "location-tracker.ts: Mode = 1, location changed at: " + dateOfLocation.getHours() + ":" + dateOfLocation.getMinutes() + ":" + dateOfLocation.getSeconds(), this.http);
+
+      var thePartyOrBarIAmCurrentlyAt = this.findPartiesOrBarsInMyVicinity(location.latitude, location.longitude);
       let needToUpdateAtBarStatuses = this.updateMyAtBarStatuses();
       let needToUpdateAtPartyStatuses = this.updateMyAtPartyStatuses();
       let shouldUpdateUI = needToUpdateAtBarStatuses || needToUpdateAtPartyStatuses;
@@ -80,42 +89,31 @@ export class LocationTracker {
         if(shouldUpdateUI == true){
           this.events.publish("timeToUpdateUI");
         }
-        this.lat = position.coords.latitude;
-        this.lng = position.coords.longitude;
+        this.lat = location.latitude;
+        this.lng = location.longitude;
       });
-    });
-    
-    /*
-    let backgroundConfig = {
-      stopOnTerminate: false,
-      desiredAccuracy: 0,
-      stationaryRadius: 5,
-      distanceFilter: 5, 
-      debug: true,
-      url: 'http://72.33.2.116:5000/location'
-    };
 
-    this.watch = this.backgroundGeolocation.configure(backgroundConfig);
-    this.geolocationSubscription = this.backgroundGeolocation.configure(backgroundConfig).subscribe((location: BackgroundGeolocationResponse) => {
-      if(this.backgroundGeolocation.Mode == 0){
-        console.log("location-tracker.ts: in the background, " + "latitude = " + location.latitude + ", longitude = " + location.longitude);
+      let closestBar : Bar = null;
+      let min = Number.MAX_VALUE;
+
+      for(let bar of this.allMyData.barsCloseToMe){
+        let distanceToBar = Utility.getDistanceInMetersBetweenCoordinates(location.latitude, location.longitude, bar.latitude, bar.longitude);
+        if(distanceToBar <= min){
+          min = distanceToBar;
+          closestBar = bar;
+        }
+      }
+      if(closestBar == null){
+        this.localNotifications.schedule({
+          title: 'Mode 1, Location Updated',
+          text: 'Updated at ' + dateOfLocation.getHours() + ":" + dateOfLocation.getMinutes() + ":" + dateOfLocation.getSeconds() + ', closest bar is null'
+        });
       }else{
-        console.log("location-tracker.ts: in the foreground, " + "latitude = " + location.latitude + ", longitude = " + location.longitude);
-        
-        var thePartyOrBarIAmCurrentlyAt = this.findPartiesOrBarsInMyVicinity(location.latitude, location.longitude);
-        let needToUpdateAtBarStatuses = this.updateMyAtBarStatuses();
-        let needToUpdateAtPartyStatuses = this.updateMyAtPartyStatuses();
-        let shouldUpdateUI = needToUpdateAtBarStatuses || needToUpdateAtPartyStatuses;
-        this.zone.run(() => {
-          this.allMyData.thePartyOrBarIAmAt = thePartyOrBarIAmCurrentlyAt;
-          if(shouldUpdateUI == true){
-            this.events.publish("timeToUpdateUI");
-          }
-          this.lat = location.latitude;
-          this.lng = location.longitude;
+        this.localNotifications.schedule({
+          title: 'Mode 1, Location Updated',
+          text: 'Updated at ' + dateOfLocation.getHours() + ":" + dateOfLocation.getMinutes() + ":" + dateOfLocation.getSeconds() + ', closest bar is ' + closestBar.name
         });
       }
-
 
       // IMPORTANT:  You must execute the finish method here to inform the native plugin that you're finished,
       // and the background-task may be completed.  You must do this regardless if your HTTP request is successful or not.
@@ -126,7 +124,7 @@ export class LocationTracker {
 
     this.backgroundGeolocation.start();
 
-    */
+
 
     this.events.subscribe("updateMyAtBarAndAtPartyStatuses",() => {
       var thePartyOrBarIAmCurrentlyAt = this.findPartiesOrBarsInMyVicinity(this.lat, this.lng);

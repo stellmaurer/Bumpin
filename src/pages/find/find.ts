@@ -128,17 +128,19 @@ export class FindPage {
       this.allMyData.logError(this.tabName, "google maps", "issue loading the google map : Err msg = " + err, this.http);
     });
 
-    // Show user's location on the map if the user is allowing the app to use location
-    this.events.subscribe("setUpUIToShowUserLocation",() => {
-      this.enableUserLocation();
-    });
-
     this.events.subscribe("timeToRefreshPartyAndBarData",() => {
       this.refreshPartyAndBarDataOnceFacebookIDAndLocationAreSet();
     });
 
     this.events.subscribe("aDifferentUserJustLoggedIn",() => {
       this.refreshPartyAndBarDataOnceFacebookIDAndLocationAreSet();
+    });
+
+    this.events.subscribe("timeToUpdateUserLocation", () => {
+      this.myCoordinates = {lat: this.locationTracker.lat, lng: this.locationTracker.lng};
+      if(this.userLocationMarker !== undefined){
+        this.userLocationMarker.setPosition(this.myCoordinates);
+      }
     });
 
     this.events.subscribe("timeToUpdateUI",() => {
@@ -213,6 +215,10 @@ export class FindPage {
     });
   }
 
+  private updateUserLocation(){
+
+  }
+
   private updateTheUI(){
     for(let i = 0; i < this.allMyData.invitedTo.length; i++){
       this.allMyData.invitedTo[i].refreshPartyStats();
@@ -226,19 +232,6 @@ export class FindPage {
   private refreshMapMarkers(){
     this.refreshPartyMarkers();
     this.refreshBarMarkers();
-  }
-
-  private enableUserLocation(){
-    /*this.locationTracker.watch.subscribe((location: Geoposition) => {
-        this.myCoordinates = {lat: location.coords.latitude, lng: location.coords.longitude};
-        this.userLocationMarker.setPosition(this.myCoordinates);
-    });*/
-    
-    this.locationTracker.watch
-      .subscribe((location: BackgroundGeolocationResponse) => {
-        this.myCoordinates = {lat: location.latitude, lng: location.longitude};
-        this.userLocationMarker.setPosition(this.myCoordinates);
-    });
   }
  
   private loadMap(){

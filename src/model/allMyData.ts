@@ -34,6 +34,7 @@ export class AllMyData{
     public barHostFor : Bar[];
     public invitedTo : Party[];
     public barsCloseToMe : Bar[];
+    public barsCloseToMeMap : Map<string,Bar>;
     public thePartyOrBarIAmAt : any;
     public friends : Friend[];
     public notifications : PushNotification[];
@@ -48,6 +49,7 @@ export class AllMyData{
         this.barHostFor = new Array<Bar>();
         this.invitedTo = new Array<Party>();
         this.barsCloseToMe = new Array<Bar>();
+        this.barsCloseToMeMap = new Map<string,Bar>();
         this.thePartyOrBarIAmAt = null;
         this.friends = new Array<Friend>();
         this.notifications = new Array<PushNotification>();

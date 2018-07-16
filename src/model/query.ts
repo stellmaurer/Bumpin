@@ -679,11 +679,14 @@ export class Query{
                     this.allMyData.barsCloseToMe = deserialize<Bar[]>(Bar, data.bars);
                     if(this.allMyData.barsCloseToMe == null){
                         this.allMyData.barsCloseToMe = new Array<Bar>();
+                        this.allMyData.barsCloseToMeMap = new Map<string,Bar>();
                     }
                     for(let i = 0; i < this.allMyData.barsCloseToMe.length; i++){
                         this.allMyData.barsCloseToMe[i].fixMaps();
                         this.allMyData.barsCloseToMe[i].prepareBarObjectForTheUI();
+                        this.allMyData.barsCloseToMeMap.set(this.allMyData.barsCloseToMe[i].barID, this.allMyData.barsCloseToMe[i]);
                     }
+
                     resolve(data);
                 }else{
                     reject(data.error);

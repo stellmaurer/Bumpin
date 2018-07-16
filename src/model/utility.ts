@@ -94,7 +94,7 @@ export class Utility {
         var currentTimeInMilliseconds = new Date().getTime();
         var timeOfLastKnownLocationInMilliseconds = Date.parse(timeOfLastKnownLocation);
         var attendanceIsExpired = false;
-        if((currentTimeInMilliseconds - timeOfLastKnownLocationInMilliseconds) > 900000){ // 600,000 milliseconds is 15 minutes
+        if((currentTimeInMilliseconds - timeOfLastKnownLocationInMilliseconds) > 1800000){ // 1,800,000 milliseconds is 30 minutes
             attendanceIsExpired = true;
         }
         return attendanceIsExpired;

@@ -13,6 +13,16 @@ import {Bar} from "./bar";
 
 export class Utility {
 
+    public static partyIsCurrentlyInProgress(party : Party){
+        let partyStartTime = new Date(party.startTime).getTime();
+        let partyEndTime = new Date(party.endTime).getTime();
+        let rightNow = new Date().getTime();
+        if((partyStartTime <= rightNow) && (rightNow <= partyEndTime)){
+          return true;
+        }
+        return false;
+      }
+
     public static hasThisPartyStarted(party : Party) : boolean {
         var partyHasStarted = false;
         if(party == null){

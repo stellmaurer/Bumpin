@@ -186,6 +186,7 @@ export class AllMyData{
             let timeLastRated = Utility.convertDateTimeToISOFormat(new Date());
             let timeOfLastKnownLocation = timeLastRated;
             this.zone.run(() => {
+                party.invitees.get(this.me.facebookID).atParty = true;
                 party.invitees.get(this.me.facebookID).rating = rating;
                 party.invitees.get(this.me.facebookID).timeLastRated = timeLastRated;
                 party.invitees.get(this.me.facebookID).timeOfLastKnownLocation = timeOfLastKnownLocation;
@@ -206,7 +207,6 @@ export class AllMyData{
     }
 
     public rateBar(bar : Bar, rating : string, http : Http){
-        
         // If you're not an attendee of the bar, make yourself an attendee
         if(bar.attendees.get(this.me.facebookID) == null){
             var newAttendee = new Attendee();
@@ -223,6 +223,7 @@ export class AllMyData{
             let timeLastRated = Utility.convertDateTimeToISOFormat(new Date());
             let timeOfLastKnownLocation = timeLastRated;
             this.zone.run(() => {
+                bar.attendees.get(this.me.facebookID).atBar = true;
                 bar.attendees.get(this.me.facebookID).rating = rating;
                 bar.attendees.get(this.me.facebookID).timeLastRated = timeLastRated;
                 bar.attendees.get(this.me.facebookID).timeOfLastKnownLocation = timeOfLastKnownLocation;
@@ -332,6 +333,7 @@ export class AllMyData{
                 attendee.atBar = atBar;
                 attendee.timeOfLastKnownLocation = timeOfLastKnownLocation;
                 bar.refreshBarStats();
+                console.log("this.zone.run: finished refreshing bar stats");
             });
         }else{
             // update internal data
@@ -346,6 +348,7 @@ export class AllMyData{
             this.zone.run(() => {
                 bar.attendees.set(facebookID, newAttendee);
                 bar.refreshBarStats();
+                console.log("this.zone.run: finished refreshing bar stats");
             });
         }
         // update external data

@@ -1,0 +1,30 @@
+<ion-header>
+    <ion-navbar>
+      <ion-title>
+        Where are you?
+      </ion-title>
+    </ion-navbar>
+  </ion-header>
+  
+  <ion-content>
+  
+    <ion-grid *ngIf="partiesAndBarsWithinMyVicinity.length == 0">
+        <ion-row>
+            <ion-col col-12 class="oneElement">
+                <div class="centerMe">
+                    <h1 [style.color]="'#32db64'">There are no parties or bars close to you.</h1>
+                </div>
+            </ion-col>
+        </ion-row>
+    </ion-grid>
+
+    <ion-list *ngIf="partiesAndBarsWithinMyVicinity.length != 0">
+        <!--color="primary"-->
+        <button ion-item *ngFor="let partyOrBar of partiesAndBarsWithinMyVicinity" (click)="checkIn(partyOrBar)">
+            {{ getNameOfPartyOrBar(partyOrBar) }}
+        </button>  
+    </ion-list>
+  
+  </ion-content>
+  
+  

@@ -8,12 +8,6 @@
  * the express permission of Stephen Ellmaurer.
  *******************************************************/
 
-/********************* NOTE! - still may need to implement this sometime later on if it's an issue
-* Edge case: new party data is brought in while the user rates a party.
-*     In this case, the new party data will overwrite the local data
-*     and may confuse the user.
-*/
-
 import { Component } from '@angular/core';
 import {Http} from '@angular/http';
 
@@ -23,6 +17,7 @@ import {Bar} from "../../model/bar";
 import { AllMyData } from "../../model/allMyData";
 import {Utility} from "../../model/utility";
 import { Events } from 'ionic-angular';
+import { LocationTracker } from '../../providers/location-tracker';
 
 
 @Component({
@@ -30,10 +25,10 @@ import { Events } from 'ionic-angular';
   templateUrl: 'rate.html',
 })
 export class RatePage {
-  private tabName: string = "Rate Tab";
+  private tabName: string = "Check-in Tab";
   public party : Party;
   public bar : Bar;
-  constructor(private allMyData : AllMyData, private events : Events, private http:Http, public navCtrl: NavController) {}
+  constructor(private allMyData : AllMyData, private locationTracker: LocationTracker, private events : Events, private http:Http, public navCtrl: NavController) {}
 
   ionViewWillEnter(){
       this.updateTheUI();
@@ -43,22 +38,10 @@ export class RatePage {
   }
 
   updateTheUI(){
-      if(this.allMyData.thePartyOrBarIAmAt == null){
-          this.party = null;
-          this.bar = null;
-      } else if(this.allMyData.thePartyOrBarIAmAt instanceof Party){
-          this.party = this.allMyData.thePartyOrBarIAmAt;
-          this.bar = null;
-      } else if(this.allMyData.thePartyOrBarIAmAt instanceof Bar){
-          this.party = null;
-          this.bar = this.allMyData.thePartyOrBarIAmAt;
-      } else {
-          this.party = null;
-          this.bar = null;
-          this.allMyData.logError(this.tabName, "client", "There's a bug somewhere in the findThePartyOrBarIAmAt function.", this.http);
-      }
-      this.synchronizeLatestPartyData();
-      this.synchronizeLatestBarData();
+    this.party = this.locationTracker.partyUserIsCheckedInto;
+    this.bar = this.locationTracker.barUserIsCheckedInto;
+    this.synchronizeLatestPartyData();
+    this.synchronizeLatestBarData();
   }
 
 
@@ -102,5 +85,19 @@ export class RatePage {
         .catch((err) => {
           this.allMyData.logError(this.tabName, "server", "rateBar query error : Err msg = " + err, this.http);
         });
+  }
+
+  checkIn(){
+    this.locationTracker.userLastCheckedInAt = new Date();
+    this.locationTracker.userIsCheckedIn = true;
+    this.locationTracker.partyUserIsCheckedInto = null;
+    this.locationTracker.barUserIsCheckedInto = this.bar;
+    this.locationTracker.partyOrBarImAt = this.bar.barID;
+    this.allMyData.storage.set("userLastCheckedInAt", new Date());
+    this.allMyData.storage.set("userIsCheckedIn", true);
+    this.allMyData.storage.set("partyUserIsCheckedInto", null);
+    this.allMyData.storage.set("barUserIsCheckedInto", this.bar.barID);
+    this.allMyData.storage.set("partyOrBarImAt", this.bar.barID);
+    this.locationTracker.updateWhereIAmAt();
   }
 }

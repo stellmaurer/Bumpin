@@ -6,6 +6,7 @@ import { NotificationsPage } from '../pages/more/notifications';
 import { FriendsPage } from '../pages/more/friends';
 import { MyStatusPage } from '../pages/more/myStatus';
 import { RatePage } from '../pages/rate/rate';
+import { CheckInPage } from '../pages/rate/check-in';
 import { HostPage } from '../pages/host/host';
 import { FindPage } from '../pages/find/find';
 import { InviteFriendsPage } from '../pages/find/inviteFriends';
@@ -57,6 +58,7 @@ const cloudSettings: CloudSettings = {
     FriendsPage,
     MyStatusPage,
     RatePage,
+    CheckInPage,
     HostPage,
     FindPage,
     InviteFriendsPage,
@@ -87,6 +89,7 @@ const cloudSettings: CloudSettings = {
     FriendsPage,
     MyStatusPage,
     RatePage,
+    CheckInPage,
     HostPage,
     FindPage,
     InviteFriendsPage,

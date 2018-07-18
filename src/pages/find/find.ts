@@ -137,6 +137,7 @@ export class FindPage {
     });
 
     this.events.subscribe("timeToUpdateUserLocation", () => {
+      console.log("updating user location and locationTracker lat and lng");
       this.myCoordinates = {lat: this.locationTracker.lat, lng: this.locationTracker.lng};
       if(this.userLocationMarker !== undefined){
         this.userLocationMarker.setPosition(this.myCoordinates);
@@ -230,6 +231,7 @@ export class FindPage {
   }
 
   private refreshMapMarkers(){
+    console.log("in timeToRefreshMapMarkers");
     this.refreshPartyMarkers();
     this.refreshBarMarkers();
   }
@@ -450,12 +452,12 @@ export class FindPage {
   }
 
   private presentPartyPopover(party : Party) {
-    let popover = this.popoverCtrl.create(PartyPopover, {party:party, allMyData:this.allMyData, http:this.http, navCtrl:this.navCtrl}, {cssClass:'partyPopover.scss'});
+    let popover = this.popoverCtrl.create(PartyPopover, {party:party, allMyData:this.allMyData, locationTracker:this.locationTracker, http:this.http, navCtrl:this.navCtrl}, {cssClass:'partyPopover.scss'});
     popover.present();
   }
 
   private presentBarPopover(bar : Bar) {
-    let popover = this.popoverCtrl.create(BarPopover, {bar:bar, allMyData:this.allMyData, http:this.http}, {cssClass:'barPopover.scss'});
+    let popover = this.popoverCtrl.create(BarPopover, {bar:bar, allMyData:this.allMyData, locationTracker:this.locationTracker, http:this.http}, {cssClass:'barPopover.scss'});
     popover.present();
   }
 

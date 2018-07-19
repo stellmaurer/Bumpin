@@ -8,7 +8,7 @@
  * the express permission of Stephen Ellmaurer.
  *******************************************************/
 
-import { Component } from '@angular/core';
+import { Component, NgZone, ChangeDetectorRef } from '@angular/core';
 import {Http} from '@angular/http';
 
 import { NavController } from 'ionic-angular';
@@ -27,18 +27,14 @@ import { LocationTracker } from '../../providers/location-tracker';
 })
 export class CheckInPage {
   private tabName: string = "Check-in Tab";
-  public party : Party;
-  public bar : Bar;
   public partiesAndBarsWithinMyVicinity : any[];
-  constructor(private allMyData : AllMyData, public locationTracker: LocationTracker, private events : Events, private http:Http, public navCtrl: NavController) {
-    console.log("in constructor");
+  constructor(private allMyData : AllMyData, private ref: ChangeDetectorRef, public zone: NgZone, public locationTracker: LocationTracker, private events : Events, private http:Http, public navCtrl: NavController) {
     this.partiesAndBarsWithinMyVicinity = new Array<any>();
   }
 
-  ionViewWillEnter(){
-      console.log("in ionViewWillEnter");
-      this.locationTracker.findPartiesOrBarsInMyVicinity(this.locationTracker.lat, this.locationTracker.lng);
-      this.copyMapOfPartiesAndBarsThatAreInMyVicinityOverToASortedArray();
+  ionViewDidEnter(){
+    this.locationTracker.findPartiesOrBarsInMyVicinity(this.locationTracker.lat, this.locationTracker.lng);
+    this.copyMapOfPartiesAndBarsThatAreInMyVicinityOverToASortedArray();
   }
 
   private goToRatePage(){
@@ -63,6 +59,9 @@ export class CheckInPage {
   }
 
   private getNameOfPartyOrBar(partyOrBar : any){
+    if(partyOrBar == null){
+        return null;
+    }
     if(partyOrBar instanceof Party){
         return partyOrBar.title;
     }
@@ -71,32 +70,19 @@ export class CheckInPage {
     }
   }
 
-  checkIn(partyOrBar : any){
+  private getIDOfPartyOrBar(partyOrBar : any){
+    if(partyOrBar == null){
+        return null;
+    }
     if(partyOrBar instanceof Party){
-        this.locationTracker.userLastCheckedInAt = new Date();
-        this.locationTracker.userIsCheckedIn = true;
-        this.locationTracker.partyUserIsCheckedInto = partyOrBar;
-        this.locationTracker.barUserIsCheckedInto = null;
-        this.locationTracker.partyOrBarImAt = partyOrBar.partyID;
-        this.allMyData.storage.set("userLastCheckedInAt", new Date());
-        this.allMyData.storage.set("userIsCheckedIn", true);
-        this.allMyData.storage.set("partyUserIsCheckedInto", partyOrBar.partyID);
-        this.allMyData.storage.set("barUserIsCheckedInto", null);
-        this.allMyData.storage.set("partyOrBarImAt", partyOrBar.partyID);
+        return partyOrBar.partyID;
     }
     if(partyOrBar instanceof Bar){
-        this.locationTracker.userLastCheckedInAt = new Date();
-        this.locationTracker.userIsCheckedIn = true;
-        this.locationTracker.partyUserIsCheckedInto = null;
-        this.locationTracker.barUserIsCheckedInto = partyOrBar;
-        this.locationTracker.partyOrBarImAt = partyOrBar.barID;
-        this.allMyData.storage.set("userLastCheckedInAt", new Date());
-        this.allMyData.storage.set("userIsCheckedIn", true);
-        this.allMyData.storage.set("partyUserIsCheckedInto", null);
-        this.allMyData.storage.set("barUserIsCheckedInto", partyOrBar.barID);
-        this.allMyData.storage.set("partyOrBarImAt", partyOrBar.barID);
+        return partyOrBar.barID;
     }
-    this.locationTracker.updateWhereIAmAt();
-    this.goToRatePage();
+  }
+
+  checkIn(partyOrBar : any){
+    this.locationTracker.checkIn(partyOrBar);
   }
 }

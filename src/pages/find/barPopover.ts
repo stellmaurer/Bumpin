@@ -72,6 +72,7 @@ export class BarPopover {
     .catch((err) => {
       this.allMyData.logError(this.tabName, "server", "rateBar query error : Err msg = " + err, this.http);
     });
+    this.locationTracker.checkIn(this.bar);
   }
 
 

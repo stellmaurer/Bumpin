@@ -45,16 +45,18 @@ export class LocationTracker {
   public partyOrBarImAt: string;
   private partyOrBarIWasAt: string;
   private partyOrBarToSayImAt: string;
+  private partyOrBarIWasAtBeforeThePartyOrBarIWasJustAt: string;
   
  
   constructor(private allMyData : AllMyData, private storage: Storage, private localNotifications: LocalNotifications, private diagnostic: Diagnostic, private events : Events, public zone: NgZone, private backgroundGeolocation: BackgroundGeolocation, private geolocation: Geolocation, private http : Http) {
     this.vicinityDistance = 700;
-    this.partiesAndBarsThatAreInMyVicinity = new Map<string,Party>();
+    this.partiesAndBarsThatAreInMyVicinity = new Map<string,any>();
     this.mapOfTimeUserEnteredVicinityDistanceOfPartiesAndBars = new Map<string,Date>();
     this.closestPartyOrBar = null;
     this.partyOrBarImAt = null;
     this.partyOrBarIWasAt = null;
     this.partyOrBarToSayImAt = null;
+    this.partyOrBarIWasAtBeforeThePartyOrBarIWasJustAt = null;
 
     let yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
@@ -64,6 +66,7 @@ export class LocationTracker {
     this.barUserIsCheckedInto = null;
     this.storage.get("userLastCheckedInAt")
     .then((val : Date) => {
+      console.log("userLastCheckedInAt = " + val);
         if((val == null)){
           this.storage.set("userLastCheckedInAt", yesterday);
         }else {
@@ -72,8 +75,7 @@ export class LocationTracker {
     });
     this.storage.get("userIsCheckedIn")
     .then((val : boolean) => {
-      console.log("userIsCheckedIn val = ");
-      console.log(val);
+      console.log("userIsCheckedIn = " + val);
         if((val == null)){
           this.storage.set("userIsCheckedIn", false);
         }else {
@@ -82,6 +84,7 @@ export class LocationTracker {
     });
     this.storage.get("partyUserIsCheckedInTo")
     .then((partyID : string) => {
+      console.log("partyUserIsCheckedInTo = " + partyID);
         if((partyID != null)){
           for(let i = 0; i < this.allMyData.invitedTo.length; i++){
             if(this.allMyData.invitedTo[i].partyID == partyID){
@@ -92,22 +95,32 @@ export class LocationTracker {
     });
     this.storage.get("barUserIsCheckedInto")
     .then((barID : string) => {
+      console.log("barUserIsCheckedInto = " + barID);
         if((barID != null)){
           if(this.allMyData.barsCloseToMeMap.has(barID) == true){
             this.barUserIsCheckedInto = this.allMyData.barsCloseToMeMap.get(barID);
           }
         }
     });
-    this.storage.get("partyOrBarIAmAt")
+    this.storage.get("partyOrBarImAt")
     .then((id : string) => {
+      console.log("partyOrBarImAt = " + id);
         if((id != null)){
           this.partyOrBarImAt = id;
         }
     });
     this.storage.get("partyOrBarIWasAt")
     .then((id : string) => {
+      console.log("partyOrBarIWasAt = " + id);
         if((id != null)){
           this.partyOrBarIWasAt = id;
+        }
+    });
+    this.storage.get("partyOrBarIWasAtBeforeThePartyOrBarIWasJustAt")
+    .then((id : string) => {
+      console.log("partyOrBarIWasAtBeforeThePartyOrBarIWasJustAt = " + id);
+        if((id != null)){
+          this.partyOrBarIWasAtBeforeThePartyOrBarIWasJustAt = id;
         }
     });
   }
@@ -279,23 +292,23 @@ export class LocationTracker {
                 LocalNotifications.getPlugin().schedule({
                   id: 0,
                   foreground: true,
-                  title: 'Are you at ' + (<Party>this.closestPartyOrBar).title + '?',
-                  text: '1st timer: Time = ' + dateOfLocation.getHours() + ":" + dateOfLocation.getMinutes() + ":" + dateOfLocation.getSeconds()
+                  title: 'Are you at a party or bar?',
+                  text: 'If so, check in to let others know how it is.'
                 });
                 let timeToTriggerSecondNotification = new Date().setMinutes(new Date().getMinutes() + 1); // change to 30 min
                 let timeToTriggerThirdNotification = new Date().setMinutes(new Date().getMinutes() + 2); // change to 60 min
                 LocalNotifications.getPlugin().schedule({
                   id: 1,
                   foreground: true,
-                  title: 'Is ' + (<Party>this.closestPartyOrBar).title + ' Bumpin?',
-                  text: '2nd timer: (Scheduled) Time = ' + dateOfLocation.getHours() + ":" + dateOfLocation.getMinutes() + ":" + dateOfLocation.getSeconds(),
+                  title: 'Are you at a party or bar?',
+                  text: 'If so, check in to let others know how it is.',
                   trigger: {at: timeToTriggerSecondNotification}
                 });
                 LocalNotifications.getPlugin().schedule({
                     id: 2,
                     foreground: true,
-                    title: 'Is ' + (<Party>this.closestPartyOrBar).title + ' Bumpin?',
-                    text: '3rd timer: (Scheduled) Time = ' + dateOfLocation.getHours() + ":" + dateOfLocation.getMinutes() + ":" + dateOfLocation.getSeconds(),
+                    title: 'Are you at a party or bar?',
+                    text: 'If so, check in to let others know how it is.',
                     trigger: {at: timeToTriggerThirdNotification}
                 });
                 notificationHasBeenScheduled = true;
@@ -318,23 +331,23 @@ export class LocationTracker {
                 LocalNotifications.getPlugin().schedule({
                   id: 0,
                   foreground: true,
-                  title: 'Are you at ' + (<Bar>this.closestPartyOrBar).name + '?',
-                  text: '1st timer: Time = ' + dateOfLocation.getHours() + ":" + dateOfLocation.getMinutes() + ":" + dateOfLocation.getSeconds()
+                  title: 'Are you at a party or bar?',
+                  text: 'If so, check in to let others know how it is.'
                 });
                 let timeToTriggerSecondNotification = new Date().setMinutes(new Date().getMinutes() + 1); // change to 30 min
                 let timeToTriggerThirdNotification = new Date().setMinutes(new Date().getMinutes() + 2); // change to 60 min
                 LocalNotifications.getPlugin().schedule({
                   id: 1,
                   foreground: true,
-                  title: 'Is ' + (<Bar>this.closestPartyOrBar).name + ' Bumpin?',
-                  text: '2nd timer: (Scheduled) Time = ' + dateOfLocation.getHours() + ":" + dateOfLocation.getMinutes() + ":" + dateOfLocation.getSeconds(),
+                  title: 'Are you at a party or bar?',
+                  text: 'If so, check in to let others know how it is.',
                   trigger: {at: timeToTriggerSecondNotification}
                 });
                 LocalNotifications.getPlugin().schedule({
                   id: 2,
                   foreground: true,
-                  title: 'Is ' + (<Bar>this.closestPartyOrBar).name + ' Bumpin?',
-                  text: '3rd timer: (Scheduled) Time = ' + dateOfLocation.getHours() + ":" + dateOfLocation.getMinutes() + ":" + dateOfLocation.getSeconds(),
+                  title: 'Are you at a party or bar?',
+                  text: 'If so, check in to let others know how it is.',
                   trigger: {at: timeToTriggerThirdNotification}
                 });
                 notificationHasBeenScheduled = true;
@@ -401,7 +414,7 @@ export class LocationTracker {
                   schedule notifications in case we don't get another location update
                 }
       */
-     if(notificationHasBeenScheduled == false){
+     if((notificationHasBeenScheduled == false) && (this.userIsCheckedIn == false)){
         let earliestTimeUserEnteredVicinity = this.determineWhenTheFirstNotificationShouldBeTriggered();
         let timeToTriggerFirstNotification = new Date(earliestTimeUserEnteredVicinity);
         timeToTriggerFirstNotification.setSeconds(earliestTimeUserEnteredVicinity.getSeconds() + 30); // change to 5 min
@@ -414,56 +427,30 @@ export class LocationTracker {
           this.attendanceTimer1 = this.createTimerForUpdatingAttendance(timeToTriggerFirstNotification.getTime() - new Date().getTime()); // ~5 min
           this.attendanceTimer2 = this.createTimerForUpdatingAttendance(timeToTriggerSecondNotification.getTime() - new Date().getTime()); // ~30 min
           this.attendanceTimer3 = this.createTimerForUpdatingAttendance(timeToTriggerThirdNotification.getTime() - new Date().getTime()); // ~60 min
-        }
-
-        let name = "a bar";
-        if(this.amIStillInvitedToThisParty(this.partyOrBarToSayImAt) == true){
-          name = this.getPartyFromInvitedTo(this.partyOrBarToSayImAt).title;
-        }
-        if(this.allMyData.barsCloseToMeMap.has(this.partyOrBarToSayImAt) == true){
-          name = this.allMyData.barsCloseToMeMap.get(this.partyOrBarToSayImAt).name;
-        }
-
-        if(this.userIsCheckedIn == false){
-          if(this.partyOrBarToSayImAt != null){
-            LocalNotifications.getPlugin().schedule({
-              id: 0,
+          LocalNotifications.getPlugin().schedule({
+            id: 0,
+            foreground: true,
+            title: 'Are you at a party or bar?',
+            text: 'If so, check in to let others know how it is.',
+            trigger: {at: timeToTriggerFirstNotification}
+          });
+          LocalNotifications.getPlugin().schedule({
+              id: 1,
               foreground: true,
-              title: 'Are you at ' + name + '?',
-              text: '(Scheduled) Time = ' + dateOfLocation.getHours() + ":" + dateOfLocation.getMinutes() + ":" + dateOfLocation.getSeconds(),
-              trigger: {at: timeToTriggerFirstNotification}
-            });
-          }
+              title: 'Are you at a party or bar?',
+              text: 'If so, check in to let others know how it is.',
+              trigger: {at: timeToTriggerSecondNotification}
+          });
+          LocalNotifications.getPlugin().schedule({
+              id: 2,
+              foreground: true,
+              title: 'Are you at a party or bar?',
+              text: 'If so, check in to let others know how it is.',
+              trigger: {at: timeToTriggerThirdNotification}
+          });
         }
-
-        LocalNotifications.getPlugin().schedule({
-            id: 1,
-            foreground: true,
-            title: 'Is ' + name + ' Bumpin?',
-            text: '(Scheduled) Time = ' + dateOfLocation.getHours() + ":" + dateOfLocation.getMinutes() + ":" + dateOfLocation.getSeconds(),
-            trigger: {at: timeToTriggerSecondNotification}
-        });
-        LocalNotifications.getPlugin().schedule({
-            id: 2,
-            foreground: true,
-            title: 'Is ' + name + ' Bumpin?',
-            text: '(Scheduled) Time = ' + dateOfLocation.getHours() + ":" + dateOfLocation.getMinutes() + ":" + dateOfLocation.getSeconds(),
-            trigger: {at: timeToTriggerThirdNotification}
-        });
       }
 
-
-      /*
-      Upon checking in{
-        cancel any scheduled notifications
-        userCheckedIn = true
-        lastCheckInTime = new Date();
-        if assumption on where they are is incorrect {
-          update our assumption on where they are
-        }
-        schedule another check-in notification after 30 minutes
-      }
-      */
       if(notificationHasBeenScheduled == false){
         let closestBar : Bar = null;
         let min = Number.MAX_VALUE;
@@ -536,20 +523,113 @@ export class LocationTracker {
     this.backgroundGeolocation.stop();
   }
 
-  createTimerForUpdatingAttendance(howManyMilliSecondsFromNow : number) : NodeJS.Timer{
-    return setTimeout(() => {
-      this.partyOrBarImAt = this.partyOrBarToSayImAt;
-      this.updateWhereIAmAt();
-    }, howManyMilliSecondsFromNow);
+  /*
+    Upon checking in{
+      cancel any scheduled notifications
+      userCheckedIn = true
+      lastCheckInTime = new Date();
+      if assumption on where they are is incorrect {
+        update our assumption on where they are
+      }
+      schedule another check-in notification after 30 minutes
+    }
+  */
+  checkIn(partyOrBar : any){
+    LocalNotifications.getPlugin().clearAll();
+    clearTimeout(this.attendanceTimer1);
+    clearTimeout(this.attendanceTimer2);
+    clearTimeout(this.attendanceTimer3);
+    if(partyOrBar instanceof Party){
+        this.userLastCheckedInAt = new Date();
+        this.userIsCheckedIn = true;
+        this.partyUserIsCheckedInto = partyOrBar;
+        this.barUserIsCheckedInto = null;
+        this.allMyData.storage.set("userLastCheckedInAt", new Date());
+        this.allMyData.storage.set("userIsCheckedIn", true);
+        this.allMyData.storage.set("partyUserIsCheckedInto", partyOrBar.partyID);
+        this.allMyData.storage.set("barUserIsCheckedInto", null);
+        this.updateWhereIAmAt(partyOrBar.partyID);
+    }
+    if(partyOrBar instanceof Bar){
+        this.userLastCheckedInAt = new Date();
+        this.userIsCheckedIn = true;
+        this.partyUserIsCheckedInto = null;
+        this.barUserIsCheckedInto = partyOrBar;
+        this.allMyData.storage.set("userLastCheckedInAt", new Date());
+        this.allMyData.storage.set("userIsCheckedIn", true);
+        this.allMyData.storage.set("partyUserIsCheckedInto", null);
+        this.allMyData.storage.set("barUserIsCheckedInto", partyOrBar.barID);
+        this.updateWhereIAmAt(partyOrBar.barID);
+    }
+
+    let timeToTriggerNotification = new Date();
+    timeToTriggerNotification.setSeconds(timeToTriggerNotification.getSeconds() + 60)// change to 30 min
+    LocalNotifications.getPlugin().schedule({
+      id: 0,
+      foreground: true,
+      title: 'Are you at a party or bar?',
+      text: 'If so, check in to let others know how it is.',
+      trigger: {at: timeToTriggerNotification}
+    });
+    this.attendanceTimer1 = this.createTimerForUpdatingAttendance(60000); // change to 30 min
   }
 
-  public updateWhereIAmAt(){
-    Promise.all([this.updateAttendanceToFalseAtOldPartyOrBar(), this.updateAttendanceToTrueAtNewPartyOrBar()])
+
+        // partyImAt = null
+        // partyIWasAt = null
+        // partyIWasAtBeforeIWasAt = null
+
+        // partyOrBarToSayImAt = 1
+ // check into 1
+        // partyImAt = 1
+        // partyIWasAt = null
+        // partyIWasAtBeforeIWasAt = null
+
+        // partyOrBarToSayImAt = 2
+ // check into 2
+        // partyImAt = 2
+        // partyIWasAt = 1
+        // partyIWasAtBeforeIWasAt = null
+
+        // partyOrBarToSayImAt = 3
+// check into 3
+        // partyImAt = 3
+        // partyIWasAt = 2
+        // partyIWasAtBeforeIWasAt = 1
+
+        // partyOrBarToSayImAt = 2
+// check into 2
+        // partyImAt = 2
+        // partyIWasAt = 3
+        // partyIWasAtBeforeIWasAt = null
+        // partyOrBarToSayImAt = 2
+// check into 2
+        // partyImAt = 2
+        // partyIWasAt = 3
+        // partyIWasAtBeforeIWasAt = null
+
+        
+
+  public updateWhereIAmAt(partyOrBarToSayImAt : string){
+
+    if(partyOrBarToSayImAt == this.partyOrBarImAt){
+      // don't update anything
+    }else if(partyOrBarToSayImAt == this.partyOrBarIWasAt){
+      this.partyOrBarIWasAtBeforeThePartyOrBarIWasJustAt = null;
+      this.partyOrBarIWasAt = this.partyOrBarImAt;
+      this.partyOrBarImAt = partyOrBarToSayImAt;
+    }else{
+      this.partyOrBarIWasAtBeforeThePartyOrBarIWasJustAt = this.partyOrBarIWasAt;
+      this.partyOrBarIWasAt = this.partyOrBarImAt;
+      this.partyOrBarImAt = partyOrBarToSayImAt;
+    }
+    this.storage.set("partyOrBarIWasAtBeforeThePartyOrBarIWasJustAt",this.partyOrBarIWasAtBeforeThePartyOrBarIWasJustAt);
+    this.storage.set("partyOrBarIWasAt",this.partyOrBarIWasAt);
+    this.storage.set("partyOrBarImAt", this.partyOrBarImAt);
+
+    Promise.all([this.updateAttendanceToFalseAtOldPartyOrBar(), this.updateAttendanceToTrueAtNewPartyOrBar(), this.clearRatingForLeastRecentlyRatedPartyOrBarIfThisIsTheThirdPartyOrBarIveRated()])
       .then(thePromise => {
         this.events.publish("timeToRefreshMapMarkers");
-        this.partyOrBarIWasAt = this.partyOrBarImAt;
-        this.storage.set("partyOrBarImAt",this.partyOrBarImAt);
-        this.storage.set("partyOrBarIWasAt",this.partyOrBarIWasAt);
 
         this.zone.run(() => {
           if(this.amIStillInvitedToThisParty(this.partyOrBarToSayImAt) == true){
@@ -560,6 +640,45 @@ export class LocationTracker {
           }
         });
       });
+  }
+
+  private clearRatingForLeastRecentlyRatedPartyOrBarIfThisIsTheThirdPartyOrBarIveRated(){
+    return new Promise((resolve, reject) => {
+      if((this.partyOrBarIWasAtBeforeThePartyOrBarIWasJustAt != null) && 
+         (this.partyOrBarIWasAtBeforeThePartyOrBarIWasJustAt != this.partyOrBarIWasAt) &&
+         (this.partyOrBarIWasAtBeforeThePartyOrBarIWasJustAt != this.partyOrBarImAt)){
+        if(this.amIStillInvitedToThisParty(this.partyOrBarIWasAtBeforeThePartyOrBarIWasJustAt) == true){
+          let partyIWasAtBeforeThePartyIWasJustAt = this.getPartyFromInvitedTo(this.partyOrBarIWasAtBeforeThePartyOrBarIWasJustAt);
+          this.allMyData.clearRatingForParty(partyIWasAtBeforeThePartyIWasJustAt, this.http)
+          .then((res) => {
+            resolve(res);
+          })
+          .catch((err) => {
+            this.allMyData.logError(this.analyticsID, "server", "Issue clearing rating for party : Err msg = " + err, this.http);
+            resolve(err);
+          });
+        }
+        if(this.allMyData.barsCloseToMeMap.has(this.partyOrBarIWasAtBeforeThePartyOrBarIWasJustAt) == true){
+          let barIWasAtBeforeTheBarIWasJustAt = this.allMyData.barsCloseToMeMap.get(this.partyOrBarIWasAtBeforeThePartyOrBarIWasJustAt);
+          this.allMyData.clearRatingForBar(barIWasAtBeforeTheBarIWasJustAt, this.http)
+          .then((res) => {
+            resolve(res);
+          })
+          .catch((err) => {
+            this.allMyData.logError(this.analyticsID, "server", "Issue clearing rating for bar : Err msg = " + err, this.http);
+            resolve(err);
+          });
+        }
+      }else{
+        resolve("no ratings to get rid of - person did not rate more than 2 parties or bars within 30 minutes");
+      }
+    });
+  }
+
+  createTimerForUpdatingAttendance(howManyMilliSecondsFromNow : number) : NodeJS.Timer{
+    return setTimeout(() => {
+      this.updateWhereIAmAt(this.partyOrBarToSayImAt);
+    }, howManyMilliSecondsFromNow);
   }
 
   private updateAttendanceToFalseAtOldPartyOrBar(){
@@ -622,6 +741,17 @@ export class LocationTracker {
         resolve("nothing to update: person did not enter a party/bar");
       }
     });
+  }
+
+  getPartyOrBarFromID(id: string){
+    if(id == null){
+      return null;
+    }
+    if(this.amIStillInvitedToThisParty(id) == true){
+      return this.getPartyFromInvitedTo(id);
+    }else{
+      return this.allMyData.barsCloseToMeMap.get(id);
+    }
   }
 
   getPartyFromInvitedTo(partyID : string){

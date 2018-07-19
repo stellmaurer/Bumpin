@@ -19,10 +19,10 @@
     </ion-grid>
 
     <ion-list *ngIf="partiesAndBarsWithinMyVicinity.length != 0">
-        <!--color="primary"-->
-        <button ion-item *ngFor="let partyOrBar of partiesAndBarsWithinMyVicinity" (click)="checkIn(partyOrBar)">
-            {{ getNameOfPartyOrBar(partyOrBar) }}
-        </button>  
+        <ion-item *ngFor="let partyOrBar of partiesAndBarsWithinMyVicinity">
+            <ion-label [color]="locationTracker.partyOrBarImAt == getIDOfPartyOrBar(partyOrBar) ? 'primary' : 'white'">{{ getNameOfPartyOrBar(partyOrBar) }}</ion-label>
+            <ion-checkbox [color]="locationTracker.partyOrBarImAt == getIDOfPartyOrBar(partyOrBar) ? 'primary' : 'white'" [checked]="(locationTracker.partyOrBarImAt == getIDOfPartyOrBar(partyOrBar)) &&  (locationTracker.userIsCheckedIn == true)" (click)="checkIn(partyOrBar)"></ion-checkbox>
+        </ion-item>
     </ion-list>
   
   </ion-content>

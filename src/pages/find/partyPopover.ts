@@ -88,6 +88,7 @@ export class PartyPopover {
     .catch((err) => {
       this.allMyData.logError(this.tabName, "server", "rateParty query error : Err msg = " + err, this.http);
     });
+    this.locationTracker.checkIn(this.party);
   }
 
   changeAttendanceStatus(status : string){

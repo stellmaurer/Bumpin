@@ -137,7 +137,6 @@ export class FindPage {
     });
 
     this.events.subscribe("timeToUpdateUserLocation", () => {
-      console.log("updating user location and locationTracker lat and lng");
       this.myCoordinates = {lat: this.locationTracker.lat, lng: this.locationTracker.lng};
       if(this.userLocationMarker !== undefined){
         this.userLocationMarker.setPosition(this.myCoordinates);

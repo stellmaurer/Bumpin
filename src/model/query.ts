@@ -342,6 +342,42 @@ export class Query{
         });
     }
 
+    // curl http://bumpin-env.us-west-2.elasticbeanstalk.com:80/clearRatingForParty -d "partyID=10583166241324703384&facebookID=10155613117039816&timeLastRated=2017-03-04T00:57:00Z&timeOfLastKnownLocation=2017-03-04T01:25:00Z"
+    public clearRatingForParty(partyID : string, facebookID : string, timeLastRated : string, timeOfLastKnownLocation : string){
+        return new Promise((resolve, reject) => {
+            var url = "http://bumpin-env.us-west-2.elasticbeanstalk.com:80/clearRatingForParty";
+            let body = "partyID=" + partyID + "&facebookID=" + facebookID + "&timeLastRated=" + timeLastRated + "&timeOfLastKnownLocation=" + timeOfLastKnownLocation;
+            var headers = new Headers();
+            headers.append('content-type', "application/x-www-form-urlencoded");
+            let options= new RequestOptions({headers: headers});
+            this.http.post(url, body, options).map(res => res.json()).subscribe(data => {
+                if(data.succeeded){
+                    resolve(data);
+                }else{
+                    reject(data.error);
+                }
+            });
+        });
+    }
+
+    // curl http://bumpin-env.us-west-2.elasticbeanstalk.com:80/clearRatingForBar -d "barID=5272501342297530080&facebookID=370&isMale=true&name=Steve&status=Going&timeLastRated=2017-03-04T01:25:00Z&timeOfLastKnownLocation=2017-03-04T01:25:00Z"
+    public clearRatingForBar(barID : string, facebookID : string, isMale : boolean, name : string, status : string, timeLastRated : string, timeOfLastKnownLocation : string){
+        return new Promise((resolve, reject) => {
+            var url = "http://bumpin-env.us-west-2.elasticbeanstalk.com:80/clearRatingForBar";
+            let body = "barID=" + barID + "&facebookID=" + facebookID + "&isMale=" + isMale + "&name=" + name + "&status=" + status + "&timeLastRated=" + timeLastRated + "&timeOfLastKnownLocation=" + timeOfLastKnownLocation;
+            var headers = new Headers();
+            headers.append('content-type', "application/x-www-form-urlencoded");
+            let options= new RequestOptions({headers: headers});
+            this.http.post(url, body, options).map(res => res.json()).subscribe(data => {
+                if(data.succeeded){
+                    resolve(data);
+                }else{
+                    reject(data.error);
+                }
+            });
+        });
+    }
+
     // curl http://bumpin-env.us-west-2.elasticbeanstalk.com:80/changeAtPartyStatus -d "partyID=10583166241324703384&facebookID=10155613117039816&atParty=true"
     public changeAttendanceStatusToParty(partyID : string, facebookID : string, status : string){
         return new Promise((resolve, reject) => {

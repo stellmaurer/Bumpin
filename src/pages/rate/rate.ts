@@ -98,6 +98,6 @@ export class RatePage {
     this.allMyData.storage.set("partyUserIsCheckedInto", null);
     this.allMyData.storage.set("barUserIsCheckedInto", this.bar.barID);
     this.allMyData.storage.set("partyOrBarImAt", this.bar.barID);
-    this.locationTracker.updateWhereIAmAt();
+    //this.locationTracker.updateWhereIAmAt();
   }
 }

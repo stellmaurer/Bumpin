@@ -176,6 +176,29 @@
       </ion-col>
     </ion-row>
 
+    <ion-row>
+        <ion-col col-3 class="twoElementsSmall">
+          <div class="centerMe">
+            <label style="color: orange;">Decent</label>
+          </div>
+          <div class="centerMe">
+            <button ion-button [color]="primary" style="color: black;" (click)='rateBar("Decent");'>
+              {{bar.decentRatings}}
+            </button>
+          </div>
+        </ion-col>
+        <ion-col col-3 class="twoElementsSmall">
+          <div class="centerMe">
+            <label style="color: #f53d3d;">Weak</label>
+          </div>
+          <div class="centerMe">
+            <button ion-button [color]="primary" style="color: black;" (click)='rateBar("Weak");'>
+              {{bar.weakRatings}}
+            </button>
+          </div>
+        </ion-col>
+      </ion-row>
+
   </ion-grid>
 
   <!-- UI if user is not at a party or bar. -->

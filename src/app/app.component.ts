@@ -18,6 +18,7 @@ import { Login } from '../pages/login/login';
 import { Geolocation } from '@ionic-native/geolocation';
 import { FriendsPage } from '../pages/more/friends';
 import { LocationTracker } from '../providers/location-tracker';
+import { LocalNotifications } from '@ionic-native/local-notifications';
 
 @Component({
   templateUrl: 'app.html',
@@ -44,6 +45,8 @@ export class MyApp {
 
       this.storePlatform();
       this.initPushNotification();
+
+      this.setUpLocalNotificationHandlers();
 
       this.loginToFacebook();
 
@@ -74,6 +77,23 @@ export class MyApp {
     if(isAndroid == true){
       this.storage.set('platform', 'Android');
     }
+  }
+
+  private setUpLocalNotificationHandlers(){
+    let tempThis = this;
+    LocalNotifications.getPlugin().on('click', function (notification, eopts) {
+      tempThis.app.getRootNav().getActiveChildNav().select(1);
+    });
+    LocalNotifications.getPlugin().on('yes', function (notification, eopts) {
+      tempThis.app.getRootNav().getActiveChildNav().select(1);
+    });
+    LocalNotifications.getPlugin().on('no', function (notification, eopts) {
+      tempThis.locationTracker.clearNotifications();
+      tempThis.locationTracker.updateWhereIAmAt(null);
+      tempThis.locationTracker.userSaidTheyAreNotAtAPartyOrBar = true;
+      tempThis.storage.set("userSaidTheyAreNotAtAPartyOrBar", true);
+      tempThis.locationTracker.createTimerForClearingUserSaidTheyAreNotAtAPartyOrBar();
+    });
   }
 
   initPushNotification() {

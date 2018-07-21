@@ -49,7 +49,7 @@ export class LocationTracker {
   
  
   constructor(private allMyData : AllMyData, private storage: Storage, private localNotifications: LocalNotifications, private diagnostic: Diagnostic, private events : Events, public zone: NgZone, private backgroundGeolocation: BackgroundGeolocation, private geolocation: Geolocation, private http : Http) {
-    this.vicinityDistance = 700;
+    this.vicinityDistance = 2000;
     this.partiesAndBarsThatAreInMyVicinity = new Map<string,any>();
     this.mapOfTimeUserEnteredVicinityDistanceOfPartiesAndBars = new Map<string,Date>();
     this.closestPartyOrBar = null;
@@ -759,6 +759,13 @@ export class LocationTracker {
       if(this.allMyData.invitedTo[i].partyID == partyID){
         return this.allMyData.invitedTo[i];
       }
+    }
+    return null;
+  }
+
+  getBarFromBarMap(barID : string){
+    if(this.allMyData.barsCloseToMeMap.has(barID) == true){
+      return this.allMyData.barsCloseToMeMap.get(barID);
     }
     return null;
   }

@@ -56,7 +56,6 @@ export class MyApp {
   private loginToFacebook(){
     this.login.login()
     .then((res) => {
-      //this.locationTracker.startTracking();
       this.splashScreen.hide();
     })
     .catch((err) => {

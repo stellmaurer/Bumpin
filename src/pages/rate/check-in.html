@@ -1,13 +1,13 @@
 <ion-header>
     <ion-navbar>
-      <ion-title>
+        <ion-title>
         Where are you?
-      </ion-title>
+        </ion-title>
     </ion-navbar>
-  </ion-header>
-  
-  <ion-content>
-  
+</ion-header>
+
+<ion-content class="home">
+
     <ion-grid *ngIf="partiesAndBarsWithinMyVicinity.length == 0">
         <ion-row>
             <ion-col col-12 class="oneElement">
@@ -21,10 +21,10 @@
     <ion-list *ngIf="partiesAndBarsWithinMyVicinity.length != 0">
         <ion-item *ngFor="let partyOrBar of partiesAndBarsWithinMyVicinity">
             <ion-label [color]="locationTracker.partyOrBarImAt == getIDOfPartyOrBar(partyOrBar) ? 'primary' : 'white'">{{ getNameOfPartyOrBar(partyOrBar) }}</ion-label>
-            <ion-checkbox [color]="locationTracker.partyOrBarImAt == getIDOfPartyOrBar(partyOrBar) ? 'primary' : 'white'" [checked]="(locationTracker.partyOrBarImAt == getIDOfPartyOrBar(partyOrBar)) &&  (locationTracker.userIsCheckedIn == true)" (click)="checkIn(partyOrBar)"></ion-checkbox>
+            <ion-checkbox [color]="locationTracker.partyOrBarImAt == getIDOfPartyOrBar(partyOrBar) ? 'primary' : 'white'" [checked]="(locationTracker.partyOrBarImAt == getIDOfPartyOrBar(partyOrBar)) && (locationTracker.userIsCheckedIn == true)" (click)="checkIn($event,partyOrBar)" (ionChange)="ionChangeEvent($event,partyOrBar)"></ion-checkbox>
         </ion-item>
     </ion-list>
-  
-  </ion-content>
+
+</ion-content>
   
   

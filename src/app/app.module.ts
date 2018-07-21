@@ -5,7 +5,8 @@ import { MorePage } from '../pages/more/more';
 import { NotificationsPage } from '../pages/more/notifications';
 import { FriendsPage } from '../pages/more/friends';
 import { MyStatusPage } from '../pages/more/myStatus';
-import { RatePage } from '../pages/rate/rate';
+import { CheckIntoPartyPopoverPage } from '../pages/rate/checkIntoPartyPopover';
+import { CheckIntoBarPopoverPage } from '../pages/rate/checkIntoBarPopover';
 import { CheckInPage } from '../pages/rate/check-in';
 import { HostPage } from '../pages/host/host';
 import { FindPage } from '../pages/find/find';
@@ -57,7 +58,8 @@ const cloudSettings: CloudSettings = {
     NotificationsPage,
     FriendsPage,
     MyStatusPage,
-    RatePage,
+    CheckIntoPartyPopoverPage,
+    CheckIntoBarPopoverPage,
     CheckInPage,
     HostPage,
     FindPage,
@@ -88,7 +90,8 @@ const cloudSettings: CloudSettings = {
     NotificationsPage,
     FriendsPage,
     MyStatusPage,
-    RatePage,
+    CheckIntoPartyPopoverPage,
+    CheckIntoBarPopoverPage,
     CheckInPage,
     HostPage,
     FindPage,

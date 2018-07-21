@@ -8,17 +8,16 @@
  * the express permission of Stephen Ellmaurer.
  *******************************************************/
 
-import { Component, NgZone, ChangeDetectorRef } from '@angular/core';
+import { Component, NgZone } from '@angular/core';
 import {Http} from '@angular/http';
-
-import { NavController } from 'ionic-angular';
+import { NavController, PopoverController, Checkbox } from 'ionic-angular';
 import {Party} from "../../model/party";
 import {Bar} from "../../model/bar";
-import {RatePage} from "./rate";
 import { AllMyData } from "../../model/allMyData";
-import {Utility} from "../../model/utility";
 import { Events } from 'ionic-angular';
 import { LocationTracker } from '../../providers/location-tracker';
+import { CheckIntoPartyPopoverPage } from './checkIntoPartyPopover';
+import { CheckIntoBarPopoverPage } from './checkIntoBarPopover';
 
 
 @Component({
@@ -26,63 +25,98 @@ import { LocationTracker } from '../../providers/location-tracker';
   templateUrl: 'check-in.html',
 })
 export class CheckInPage {
-  private tabName: string = "Check-in Tab";
-  public partiesAndBarsWithinMyVicinity : any[];
-  constructor(private allMyData : AllMyData, private ref: ChangeDetectorRef, public zone: NgZone, public locationTracker: LocationTracker, private events : Events, private http:Http, public navCtrl: NavController) {
-    this.partiesAndBarsWithinMyVicinity = new Array<any>();
-  }
+    private tabName: string = "Check-in Tab";
+    public partiesAndBarsWithinMyVicinity : any[];
+    public party : Party;
+    public bar : Bar;
+    public partyOrBarImAt : string;
 
-  ionViewDidEnter(){
-    this.locationTracker.findPartiesOrBarsInMyVicinity(this.locationTracker.lat, this.locationTracker.lng);
-    this.copyMapOfPartiesAndBarsThatAreInMyVicinityOverToASortedArray();
-  }
+    constructor(public popoverCtrl: PopoverController, private allMyData : AllMyData, public zone: NgZone, public locationTracker: LocationTracker, private events : Events, private http:Http, public navCtrl: NavController) {
+        this.partiesAndBarsWithinMyVicinity = new Array<any>();
+    }
 
-  private goToRatePage(){
-    this.navCtrl.push(RatePage, {}, {animate: false});
-  }
+    ionViewDidLoad(){
+        this.events.subscribe("timeToUpdateUI",() => {
+            this.updateTheUI();
+        });
+    }
 
-  private copyMapOfPartiesAndBarsThatAreInMyVicinityOverToASortedArray(){
-    this.partiesAndBarsWithinMyVicinity = new Array<any>();
-    this.locationTracker.partiesAndBarsThatAreInMyVicinity.forEach((value: any, key: string) => {
-        this.partiesAndBarsWithinMyVicinity.push(value);
-    });
-    let tempThis = this;
-    this.partiesAndBarsWithinMyVicinity.sort(function(a, b){
-        if(tempThis.getNameOfPartyOrBar(b) < tempThis.getNameOfPartyOrBar(a)){
-            return 1;
+    ionViewWillEnter(){
+        this.updateTheUI();
+    }
+
+    ionViewDidEnter(){
+        this.locationTracker.findPartiesOrBarsInMyVicinity(this.locationTracker.lat, this.locationTracker.lng);
+        this.copyMapOfPartiesAndBarsThatAreInMyVicinityOverToASortedArray();
+    }
+
+    updateTheUI(){
+        this.party = this.locationTracker.getPartyFromInvitedTo(this.locationTracker.partyOrBarImAt);
+        this.bar = this.locationTracker.getBarFromBarMap(this.locationTracker.partyOrBarImAt);
+    }
+
+    private copyMapOfPartiesAndBarsThatAreInMyVicinityOverToASortedArray(){
+        this.partiesAndBarsWithinMyVicinity = new Array<any>();
+        this.locationTracker.partiesAndBarsThatAreInMyVicinity.forEach((value: any, key: string) => {
+            this.partiesAndBarsWithinMyVicinity.push(value);
+        });
+        let tempThis = this;
+        this.partiesAndBarsWithinMyVicinity.sort(function(a, b){
+            if(tempThis.getNameOfPartyOrBar(b) < tempThis.getNameOfPartyOrBar(a)){
+                return 1;
+            }
+            if(tempThis.getNameOfPartyOrBar(b) > tempThis.getNameOfPartyOrBar(a)){
+                return -1;
+            }
+            return 0;
+        });
+    }
+
+    private getNameOfPartyOrBar(partyOrBar : any){
+        if(partyOrBar == null){
+            return null;
         }
-        if(tempThis.getNameOfPartyOrBar(b) > tempThis.getNameOfPartyOrBar(a)){
-            return -1;
+        if(partyOrBar instanceof Party){
+            return partyOrBar.title;
         }
-        return 0;
-    });
-  }
+        if(partyOrBar instanceof Bar){
+            return partyOrBar.name;
+        }
+    }
 
-  private getNameOfPartyOrBar(partyOrBar : any){
-    if(partyOrBar == null){
-        return null;
+    private getIDOfPartyOrBar(partyOrBar : any){
+        if(partyOrBar == null){
+            return null;
+        }
+        if(partyOrBar instanceof Party){
+            return partyOrBar.partyID;
+        }
+        if(partyOrBar instanceof Bar){
+            return partyOrBar.barID;
+        }
     }
-    if(partyOrBar instanceof Party){
-        return partyOrBar.title;
-    }
-    if(partyOrBar instanceof Bar){
-        return partyOrBar.name;
-    }
-  }
 
-  private getIDOfPartyOrBar(partyOrBar : any){
-    if(partyOrBar == null){
-        return null;
+    ionChangeEvent(event : Checkbox, partyOrBar){
+        event.checked = (this.locationTracker.partyOrBarImAt == this.getIDOfPartyOrBar(partyOrBar)) && (this.locationTracker.userIsCheckedIn == true)
     }
-    if(partyOrBar instanceof Party){
-        return partyOrBar.partyID;
-    }
-    if(partyOrBar instanceof Bar){
-        return partyOrBar.barID;
-    }
-  }
 
-  checkIn(partyOrBar : any){
-    this.locationTracker.checkIn(partyOrBar);
-  }
+    checkIn(event : Checkbox, partyOrBar : any){
+        this.locationTracker.checkIn(partyOrBar);
+        if(partyOrBar instanceof Party){
+            this.presentPartyPopover(partyOrBar);
+        }
+        if(partyOrBar instanceof Bar){
+            this.presentBarPopover(partyOrBar);
+        }
+    }
+
+    private presentPartyPopover(party : Party) {
+        let popover = this.popoverCtrl.create(CheckIntoPartyPopoverPage, {party:party, allMyData:this.allMyData, locationTracker:this.locationTracker, http:this.http, navCtrl:this.navCtrl}, {cssClass:'checkIntoPartyPopover.scss'});
+        popover.present();
+    }
+    
+    private presentBarPopover(bar : Bar) {
+        let popover = this.popoverCtrl.create(CheckIntoBarPopoverPage, {bar:bar, allMyData:this.allMyData, locationTracker:this.locationTracker, http:this.http}, {cssClass:'checkIntoBarPopover.scss'});
+        popover.present();
+    }
 }

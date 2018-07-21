@@ -1,9 +1,29 @@
 page-check-in {
 
+    .needsPadding {
+        padding: 10px;
+    }
+
     .oneElement {
         text-align: center;
         margin-left:auto;
         margin-right:auto;
+    }
+
+    .twoElementsSmall {
+        text-align: center;
+        margin-left:auto;
+        margin-right:auto;
+        min-width: 100px;
+    }
+
+    .fourElements {
+        text-align: center;
+        padding-left: 2.5px;
+        padding-right: 2.5px;
+        margin-left:auto;
+        margin-right:auto;
+        min-width: 71px;
     }
 
     .centerMe {

@@ -9,14 +9,16 @@
  *******************************************************/
 
 import { Component } from '@angular/core';
-import { NavController, AlertController} from 'ionic-angular';
+import { NavController, AlertController, Events} from 'ionic-angular';
 import { AllMyData} from '../../model/allMyData';
 import { Party } from '../../model/party';
-import { Bar } from '../../model/bar';
+import { Bar, Host } from '../../model/bar';
 import { CreatePage } from './create';
 import { EditPartyPage } from './editParty';
 import { EditBarPage } from './editBar';
 import { Http } from '@angular/http';
+import { CreatePartyPage } from './createParty';
+import { CreateBarPage } from './createBar';
 
 @Component({
   selector: 'page-host',
@@ -25,13 +27,27 @@ import { Http } from '@angular/http';
 export class HostPage {
 
   private tabName: string = "Host Tab";
+  private partyToCreate : Party;
+  private barToCreate : Bar;
 
-  constructor(public allMyData : AllMyData, private http:Http, private navCtrl: NavController, public alertCtrl: AlertController) {
-    
+  constructor(public allMyData : AllMyData, private events:Events, private http:Http, private navCtrl: NavController, public alertCtrl: AlertController) {
+    this.partyToCreate = new Party();
+    this.barToCreate = new Bar();
+    this.setMeAsTheMainHostForTheParty();
+    this.setMeAsTheMainHostForTheBar();
+    this.partyToCreate.setDefaultStartAndEndTimesForParty();
   }
 
   ionViewDidLoad(){
-    
+    this.events.subscribe("userHasJustCreatedABar",() => {
+      this.barToCreate = new Bar();
+      this.setMeAsTheMainHostForTheBar();
+    });
+    this.events.subscribe("userHasJustCreatedAParty",() => {
+      this.partyToCreate = new Party();
+      this.setMeAsTheMainHostForTheParty();
+      this.partyToCreate.setDefaultStartAndEndTimesForParty();
+    });
   }
 
   ionViewDidEnter(){
@@ -56,6 +72,30 @@ export class HostPage {
     .catch((err) => {
       this.allMyData.logError(this.tabName, "server", "refreshPerson query error: Err msg = " + err, this.http);
     });
+  }
+
+  private setMeAsTheMainHostForTheParty(){
+    var mainHost : Host = new Host();
+    mainHost.isMainHost = true;
+    mainHost.name = this.allMyData.me.name;
+    mainHost.status = "Accepted";
+    this.partyToCreate.hosts.set(this.allMyData.me.facebookID, mainHost);
+  }
+
+  private setMeAsTheMainHostForTheBar(){
+    var mainHost : Host = new Host();
+    mainHost.isMainHost = true;
+    mainHost.name = this.allMyData.me.name;
+    mainHost.status = "Accepted";
+    this.barToCreate.hosts.set(this.allMyData.me.facebookID, mainHost);
+  }
+
+  goToCreatePartyPage(){
+    this.navCtrl.push(CreatePartyPage, {party:this.partyToCreate}, {animate: false});
+  }
+
+  goToCreateBarPage(){
+    this.navCtrl.push(CreateBarPage, {bar:this.barToCreate}, {animate: false});
   }
 
   partySelected(party : Party) {

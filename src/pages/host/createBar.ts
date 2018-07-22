@@ -10,7 +10,7 @@
 
 import { Component, ViewChild, ElementRef } from '@angular/core';
 import {Http} from '@angular/http';
-import { NavParams, NavController, AlertController} from 'ionic-angular';
+import { NavParams, NavController, AlertController, Events} from 'ionic-angular';
 import { AllMyData} from '../../model/allMyData';
 import { Bar } from '../../model/bar';
 import { Geolocation} from 'ionic-native';
@@ -37,7 +37,7 @@ export class CreateBarPage {
 
   private daysOfTheWeek : string[] = [ "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" ];
 
-  constructor(public allMyData : AllMyData, private http:Http, private navCtrl: NavController, params : NavParams, public alertCtrl: AlertController) {
+  constructor(public allMyData : AllMyData, private events:Events, private http:Http, private navCtrl: NavController, params : NavParams, public alertCtrl: AlertController) {
     this.bar = params.get("bar");
     this.datePickerMinYear = (new Date()).getFullYear();
   }
@@ -180,6 +180,7 @@ export class CreateBarPage {
     if(this.inputError == ""){
       this.allMyData.createBar(this.bar, this.http)
       .then((res) => {
+        this.events.publish("userHasJustCreatedABar");
         this.navCtrl.popTo(this.navCtrl.getByIndex(this.navCtrl.length()-3));
       })
       .catch((err) => {

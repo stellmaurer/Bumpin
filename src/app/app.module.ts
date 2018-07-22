@@ -19,7 +19,6 @@ import { CreatePartyPage } from '../pages/host/createParty';
 import { EditPartyPage } from '../pages/host/editParty';
 import { EditBarPage } from '../pages/host/editBar';
 import { CreateBarPage } from '../pages/host/createBar';
-import { CreatePage } from '../pages/host/create';
 import { EditHostListPage } from '../pages/host/editHostList';
 import { EditInviteeListPage } from '../pages/host/editInviteeList';
 import { AllMyData } from '../model/allMyData';
@@ -69,7 +68,6 @@ const cloudSettings: CloudSettings = {
     EditPartyPage,
     EditBarPage,
     CreateBarPage,
-    CreatePage,
     EditHostListPage,
     EditInviteeListPage,
     PartyPopover,
@@ -101,7 +99,6 @@ const cloudSettings: CloudSettings = {
     EditPartyPage,
     EditBarPage,
     CreateBarPage,
-    CreatePage,
     EditHostListPage,
     EditInviteeListPage,
     PartyPopover,

@@ -13,7 +13,6 @@ import { NavController, AlertController, Events} from 'ionic-angular';
 import { AllMyData} from '../../model/allMyData';
 import { Party } from '../../model/party';
 import { Bar, Host } from '../../model/bar';
-import { CreatePage } from './create';
 import { EditPartyPage } from './editParty';
 import { EditBarPage } from './editBar';
 import { Http } from '@angular/http';
@@ -112,10 +111,6 @@ export class HostPage {
     }else{
       this.navCtrl.push(EditBarPage, {bar: bar}, {animate: false});
     }
-  }
-
-  goToCreatePage(){
-    this.navCtrl.push(CreatePage, {}, {animate: false});
   }
 
   private acceptOrDeclineHostingAPartyAlert(party : Party) {

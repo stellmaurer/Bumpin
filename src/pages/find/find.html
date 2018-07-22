@@ -1,25 +1,18 @@
 <ion-header>
   <ion-navbar>
-
+    
     <ion-buttons left>
-      <button ion-button *ngIf="numberOfActivePartyFilters == 0" style="color: #32db64; background-color: #222" (click)='presentPartyFilterAlert();'>
-        Party Filter
-      </button>
-      <button ion-button *ngIf="numberOfActivePartyFilters > 0" style="color: #32db64; background-color: #222" (click)='presentPartyFilterAlert();'>
-        Party Filter ({{numberOfActivePartyFilters}})
-      </button>
+        <button ion-button style="background-color: #222;" [color]="allMyData.me.status.goingOut == 'Yes' ? 'primary' : 'danger'" (click)='changeMyGoingOutStatus();'>
+            {{ allMyData.me.status.goingOut == "Yes" ? "I'm going out" : "I'm not going out"}}
+        </button>
     </ion-buttons>
 
-    <ion-title>
-      Find
-    </ion-title>
-
     <ion-buttons end>
-      <button ion-button *ngIf="numberOfActiveBarFilters == 0" style="color: #32db64; background-color: #222" (click)='presentBarFilterAlert();'>
-        Bar Filter
+      <button ion-button *ngIf="numberOfActiveFilters == 0" style="color: #32db64; background-color: #222" (click)='presentFilterAlert();'>
+        Filters
       </button>
-      <button ion-button *ngIf="numberOfActiveBarFilters > 0" style="color: #32db64; background-color: #222" (click)='presentBarFilterAlert();'>
-        Bar Filter ({{numberOfActiveBarFilters}})
+      <button ion-button *ngIf="numberOfActiveFilters > 0" style="color: #32db64; background-color: #222" (click)='presentFilterAlert();'>
+        Filters ({{numberOfActiveFilters}})
       </button>
     </ion-buttons>
 

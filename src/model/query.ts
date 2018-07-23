@@ -600,6 +600,7 @@ export class Query{
             var url = "http://bumpin-env.us-west-2.elasticbeanstalk.com:80/myParties?partyIDs=" + partiesImInvitedTo;
             this.http.get(url).map(res => res.json()).subscribe(data => {
                 if(data.succeeded){
+                    this.allMyData.storage.set("invitedTo", data.parties);
                     this.allMyData.invitedTo = deserialize<Party[]>(Party, data.parties);
                     if(this.allMyData.invitedTo == null){
                         this.allMyData.invitedTo = new Array<Party>();
@@ -621,6 +622,7 @@ export class Query{
             var url = "http://bumpin-env.us-west-2.elasticbeanstalk.com:80/getFriends?facebookIDs=" + this.getFriendFacebookIDsAsQueryParameter();
             this.http.get(url).map(res => res.json()).subscribe(data => {
                 if(data.succeeded){
+                    this.allMyData.storage.set("friends", data.people);
                     this.allMyData.friends = deserialize<Friend[]>(Friend, data.people);
                     if(this.allMyData.friends == null){
                         this.allMyData.friends = new Array<Friend>();
@@ -634,6 +636,8 @@ export class Query{
                         }
                         return 0;
                     });
+
+                    this.allMyData.changeGoingOutStatusOfFriendsToUnknownIfStatusIsExpired();
                     resolve(data);
                 }else{
                     reject(data.error);
@@ -657,6 +661,7 @@ export class Query{
             var url = "http://bumpin-env.us-west-2.elasticbeanstalk.com:80/getPartiesImHosting?partyIDs=" + partiesImHosting;
             this.http.get(url).map(res => res.json()).subscribe(data => {
                 if(data.succeeded){
+                    this.allMyData.storage.set("partyHostFor", data.parties);
                     this.allMyData.partyHostFor = deserialize<Party[]>(Party, data.parties);
                     if(this.allMyData.partyHostFor == null){
                         this.allMyData.partyHostFor = new Array<Party>();
@@ -687,6 +692,7 @@ export class Query{
             var url = "http://bumpin-env.us-west-2.elasticbeanstalk.com:80/getBarsImHosting?barIDs=" + barsImHosting;
             this.http.get(url).map(res => res.json()).subscribe(data => {
                 if(data.succeeded){
+                    this.allMyData.storage.set("barHostFor", data.bars);
                     this.allMyData.barHostFor = deserialize<Bar[]>(Bar, data.bars);
                     if(this.allMyData.barHostFor == null){
                         this.allMyData.barHostFor = new Array<Bar>();
@@ -712,6 +718,7 @@ export class Query{
             var url = "http://bumpin-env.us-west-2.elasticbeanstalk.com:80/barsCloseToMe?" + coordinatesParameter;
             this.http.get(url).map(res => res.json()).subscribe(data => {
                 if(data.succeeded){
+                    this.allMyData.storage.set("barsCloseToMe", data.bars);
                     this.allMyData.barsCloseToMe = deserialize<Bar[]>(Bar, data.bars);
                     if(this.allMyData.barsCloseToMe == null){
                         this.allMyData.barsCloseToMe = new Array<Bar>();
@@ -722,7 +729,6 @@ export class Query{
                         this.allMyData.barsCloseToMe[i].prepareBarObjectForTheUI();
                         this.allMyData.barsCloseToMeMap.set(this.allMyData.barsCloseToMe[i].barID, this.allMyData.barsCloseToMe[i]);
                     }
-
                     resolve(data);
                 }else{
                     reject(data.error);

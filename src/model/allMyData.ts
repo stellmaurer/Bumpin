@@ -19,6 +19,7 @@ import { Utility } from "./utility";
 import { Injectable, NgZone } from '@angular/core';
 import { Storage } from '@ionic/storage';
 import { PushNotification } from "./pushNotification";
+import { deserialize } from "serializer.ts/Serializer";
 
 // This class only gets created once and it happens when the app launches.
 //      Person is equal to your Person object in the database. It is used
@@ -495,11 +496,18 @@ export class AllMyData{
         });
     }
 
-    public refreshBarsCloseToMe(coordinates : any, http : Http){
+    // use this by making function that uses it async, and then:
+    //          await this.sleep(10000);
+    private sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    public async refreshBarsCloseToMe(coordinates : any, http : Http){
         return new Promise((resolve, reject) => {
             var query = new Query(this, http);
             query.getBarsCloseToMe(coordinates)
             .then((res) => {
+                this.events.publish("barsCloseToMeWereRefreshed");
                 resolve("barsCloseToMe query succeeded.");
             })
             .catch((err) => {
@@ -508,11 +516,12 @@ export class AllMyData{
         });
     }
 
-    public refreshParties(http : Http){
+    public async refreshParties(http : Http){
         return new Promise((resolve, reject) => {
             var query = new Query(this, http);
             query.getPartiesImInvitedTo()
             .then((res) => {
+                this.events.publish("partiesImInvitedToWereRefreshed");
                 resolve("getPartiesImInvitedTo query succeeded.");
             })
             .catch((err) => {
@@ -521,14 +530,12 @@ export class AllMyData{
         });
     }
 
-    public refreshFriends(http : Http){
+    public async refreshFriends(http : Http){
         return new Promise((resolve, reject) => {
             var query = new Query(this, http);
             query.getFriends()
             .then((res) => {
-                this.zone.run(() => {
-                    this.changeGoingOutStatusOfFriendsToUnknownIfStatusIsExpired();
-                });
+                this.changeGoingOutStatusOfFriendsToUnknownIfStatusIsExpired();
                 resolve("getFriends query succeeded.");
             })
             .catch((err) => {
@@ -537,14 +544,16 @@ export class AllMyData{
         });
     }
 
-    private changeGoingOutStatusOfFriendsToUnknownIfStatusIsExpired(){
-        for(let i = 0; i < this.friends.length; i++){
-            let friend = this.friends[i];
-            var goingOutStatusIsExpired = Utility.isGoingOutStatusExpired(friend.status["timeGoingOutStatusWasSet"]);
-            if(goingOutStatusIsExpired){
-                friend.status["goingOut"] = "Unknown";
+    public changeGoingOutStatusOfFriendsToUnknownIfStatusIsExpired(){
+        this.zone.run(() => {
+            for(let i = 0; i < this.friends.length; i++){
+                let friend = this.friends[i];
+                var goingOutStatusIsExpired = Utility.isGoingOutStatusExpired(friend.status["timeGoingOutStatusWasSet"]);
+                if(goingOutStatusIsExpired){
+                    friend.status["goingOut"] = "Unknown";
+                }
             }
-        }
+        });
     }
 
     public changeMyGoingOutStatus(status : string, manuallySet : string, http : Http){
@@ -670,7 +679,7 @@ export class AllMyData{
         });
     }
 
-    public refreshPartiesImHosting(http : Http){
+    public async refreshPartiesImHosting(http : Http){
         return new Promise((resolve, reject) => {
             var query = new Query(this, http);
             this.zone.run(() => {
@@ -685,7 +694,7 @@ export class AllMyData{
         });
     }
 
-    public refreshBarsImHosting(http : Http){
+    public async refreshBarsImHosting(http : Http){
         return new Promise((resolve, reject) => {
             var query = new Query(this, http);
             this.zone.run(() => {
@@ -798,10 +807,129 @@ export class AllMyData{
     public logError(pageName : string, errorType : string, errorDescription : string, http : Http){
         this.logErrorHelper(pageName, errorType, errorDescription, http)
         .then((res) => {
-          
+            
         })
         .catch((err) => {
-          console.log(err);
+            console.log(err);
+        });
+    }
+
+    public initializePartiesImHostingFromLocalDataStorage(tabName : string, http : Http){
+        return new Promise((resolve, reject) => {
+          if(this.partyHostFor.length == 0){
+            this.storage.get("partyHostFor")
+            .then((val : string) => {
+              if((val != null) && (this.partyHostFor.length == 0)){
+                this.partyHostFor = deserialize<Party[]>(Party, val);
+                if(this.partyHostFor == null){
+                    this.partyHostFor = new Array<Party>();
+                }
+                for(let i = 0; i < this.partyHostFor.length; i++){
+                    this.partyHostFor[i].fixMaps();
+                    this.partyHostFor[i].preparePartyObjectForTheUI();
+                }
+                resolve("successfully retrieved and set partyHostFor from local data storage");
+              }else{
+                resolve("partyHostFor was either already refreshed from the database or local data was null");
+              }
+            })
+            .catch((err) => {
+              this.logError(tabName, "client", "issue getting partyHostFor from local data storage : Err msg = " + err, http);
+              resolve("couldn't retrieve or set partyHostFor from local data storage");
+            });
+          }else{
+            resolve("partyHostFor was already refreshed from the database");
+          }
+        });
+      }
+    
+      public initializePartiesImInvitedToFromLocalDataStorage(tabName : string, http : Http){
+        return new Promise((resolve, reject) => {
+          if(this.invitedTo.length == 0){
+            this.storage.get("invitedTo")
+            .then((val : string) => {
+              if((val != null) && (this.invitedTo.length == 0)){
+                this.invitedTo = deserialize<Party[]>(Party, val);
+                if(this.invitedTo == null){
+                    this.invitedTo = new Array<Party>();
+                }
+                for(let i = 0; i < this.invitedTo.length; i++){
+                    this.invitedTo[i].fixMaps();
+                    this.invitedTo[i].preparePartyObjectForTheUI();
+                }
+                resolve("successfully retrieved and set invitedTo from local data storage");
+              }else{
+                resolve("invitedTo was either already refreshed from the database or local data was null");
+              }
+            })
+            .catch((err) => {
+              this.logError(tabName, "client", "issue getting invitedTo from local data storage : Err msg = " + err, http);
+              resolve("couldn't retrieve or set invitedTo from local data storage");
+            });
+          }else{
+            resolve("invitedTo was already refreshed from the database");
+          }
+        });
+      }
+    
+      public initializeBarsCloseToMeFromLocalDataStorage(tabName : string, http : Http){
+        return new Promise((resolve, reject) => {
+          if(this.barsCloseToMe.length == 0){
+            this.storage.get("barsCloseToMe")
+            .then((val : string) => {
+              if((val != null) && (this.barsCloseToMe.length == 0)){
+                this.barsCloseToMe = deserialize<Bar[]>(Bar, val);
+                if(this.barsCloseToMe == null){
+                    this.barsCloseToMe = new Array<Bar>();
+                    this.barsCloseToMeMap = new Map<string,Bar>();
+                }
+                for(let i = 0; i < this.barsCloseToMe.length; i++){
+                    this.barsCloseToMe[i].fixMaps();
+                    this.barsCloseToMe[i].prepareBarObjectForTheUI();
+                    this.barsCloseToMeMap.set(this.barsCloseToMe[i].barID, this.barsCloseToMe[i]);
+                }
+                resolve("successfully retrieved and set barsCloseToMe from local data storage");
+              }else{
+                resolve("barsCloseToMe was either already refreshed from the database or local data was null");
+              }
+              
+            })
+            .catch((err) => {
+              this.logError(tabName, "client", "issue getting barsCloseToMe from local data storage : Err msg = " + err, http);
+              resolve("couldn't retrieve or set barsCloseToMe from local data storage");
+            });
+          }else{
+            resolve("barsCloseToMe was already refreshed from the database");
+          }
+        });
+      }
+    
+      public initializeBarsImHostingFromLocalDataStorage(tabName : string, http : Http){
+        return new Promise((resolve, reject) => {
+          if(this.barHostFor.length == 0){
+            this.storage.get("barHostFor")
+            .then((val : string) => {
+              if((val != null) && (this.barHostFor.length == 0)){
+                this.barHostFor = deserialize<Bar[]>(Bar, val);
+                if(this.barHostFor == null){
+                    this.barHostFor = new Array<Bar>();
+                }
+                for(let i = 0; i < this.barHostFor.length; i++){
+                    this.barHostFor[i].fixMaps();
+                    this.barHostFor[i].prepareBarObjectForTheUI();
+                }
+                resolve("successfully retrieved and set barHostFor from local data storage");
+              }else{
+                resolve("barHostFor was either already refreshed from the database or local data was null");
+              }
+            })
+            .catch((err) => {
+              this.logError(tabName, "client", "issue getting barHostFor from local data storage : Err msg = " + err, http);
+              resolve("couldn't retrieve or set barHostFor data from local data storage");
+            });
+          }else{
+            resolve("barHostFor was already refreshed from the database");
+          }
         });
       }
 }

@@ -28,13 +28,16 @@ export class HostPage {
   private tabName: string = "Host Tab";
   private partyToCreate : Party;
   private barToCreate : Bar;
+  private currentlyLoadingData : boolean;
 
   constructor(public allMyData : AllMyData, private events:Events, private http:Http, private navCtrl: NavController, public alertCtrl: AlertController) {
+    this.currentlyLoadingData = true;
     this.partyToCreate = new Party();
     this.barToCreate = new Bar();
     this.setMeAsTheMainHostForTheParty();
     this.setMeAsTheMainHostForTheBar();
     this.partyToCreate.setDefaultStartAndEndTimesForParty();
+    this.initializePartyAndBarDataFromLocalDataStorage();
   }
 
   ionViewDidLoad(){
@@ -50,26 +53,33 @@ export class HostPage {
   }
 
   ionViewDidEnter(){
+    this.currentlyLoadingData = true;
+
     this.allMyData.refreshPerson(this.http)
     .then((res) => {
 
-      this.allMyData.refreshPartiesImHosting(this.http)
-      .then((res) => {
-      })
-      .catch((err) => {
-        this.allMyData.logError(this.tabName, "server", "refreshPartiesImHosting query error: Err msg = " + err, this.http);
-      });
-
-      this.allMyData.refreshBarsImHosting(this.http)
-      .then((res) => {
-      })
-      .catch((err) => {
-        this.allMyData.logError(this.tabName, "server", "refreshBarsImHosting query error: Err msg = " + err, this.http);
-      });
+      Promise.all([this.allMyData.refreshPartiesImHosting(this.http),
+                   this.allMyData.refreshBarsImHosting(this.http)])
+        .then(thePromise => {
+          this.currentlyLoadingData = false;
+        })
+        .catch((err) => {
+          this.currentlyLoadingData = false;
+          this.allMyData.logError(this.tabName, "server", "refreshPartiesImHosting or refreshBarsImHosting query error: Err msg = " + err, this.http);
+        });
 
     })
     .catch((err) => {
       this.allMyData.logError(this.tabName, "server", "refreshPerson query error: Err msg = " + err, this.http);
+      this.currentlyLoadingData = false;
+    });
+  }
+
+  private initializePartyAndBarDataFromLocalDataStorage(){
+    Promise.all([this.allMyData.initializeBarsImHostingFromLocalDataStorage(this.tabName, this.http),
+                 this.allMyData.initializePartiesImHostingFromLocalDataStorage(this.tabName, this.http)])
+    .then(thePromise => {
+      
     });
   }
 

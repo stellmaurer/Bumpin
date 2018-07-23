@@ -5,6 +5,9 @@
         Create Bar
       </button>
     </ion-buttons>
+    <ion-buttons center style="text-align:center;">
+      <ion-spinner *ngIf="currentlyLoadingData == true" name="ios" id="loadingIndicator"></ion-spinner>
+    </ion-buttons>
     <ion-buttons end>
       <button ion-button style="color: #32db64; background-color: #222" (click)='goToCreatePartyPage();'>
         Create Party

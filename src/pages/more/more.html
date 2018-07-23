@@ -3,6 +3,9 @@
     <ion-title>
       More
     </ion-title>
+    <ion-buttons end>
+        <ion-spinner *ngIf="currentlyLoadingData == true" name="ios" id="loadingIndicator"></ion-spinner>
+    </ion-buttons>
   </ion-navbar>
 </ion-header>
 

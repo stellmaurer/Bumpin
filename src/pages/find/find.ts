@@ -84,6 +84,8 @@ export class FindPage {
     this.populateFiltersFromLocalDataStorage();
 
     this.barClusterMarkers = new Array<any>();
+
+    this.initializePartyAndBarDataFromLocalDataStorage();
   }
 
   ionViewDidLoad(){
@@ -92,6 +94,17 @@ export class FindPage {
 
   ionViewWillEnter(){
     this.allMyData.refreshDataAndResetPeriodicDataRetrievalTimer(this.http);
+  }
+
+  private initializePartyAndBarDataFromLocalDataStorage(){
+    Promise.all([this.allMyData.initializeBarsCloseToMeFromLocalDataStorage(this.tabName, this.http), 
+                 this.allMyData.initializeBarsImHostingFromLocalDataStorage(this.tabName, this.http),
+                 this.allMyData.initializePartiesImInvitedToFromLocalDataStorage(this.tabName, this.http),
+                 this.allMyData.initializePartiesImHostingFromLocalDataStorage(this.tabName, this.http)])
+    .then(thePromise => {
+      this.refreshPartyMarkers();
+      this.refreshBarMarkers();
+    });
   }
 
   private setupThePage(){
@@ -163,7 +176,6 @@ export class FindPage {
           return thePromise;
         })
         .then((res) => {
-          this.events.publish("updateMyAtBarAndAtPartyStatuses");
           this.refreshPartyMarkers();
           this.refreshBarMarkers();
           this.updateMyGoingOutStatusIfNeeded();

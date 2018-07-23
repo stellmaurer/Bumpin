@@ -33,16 +33,7 @@ export class CheckInPage {
 
     constructor(public popoverCtrl: PopoverController, private allMyData : AllMyData, public zone: NgZone, public locationTracker: LocationTracker, private events : Events, private http:Http, public navCtrl: NavController) {
         this.partiesAndBarsWithinMyVicinity = new Array<any>();
-    }
-
-    ionViewDidLoad(){
-        this.events.subscribe("timeToUpdateUI",() => {
-            this.updateTheUI();
-        });
-    }
-
-    ionViewWillEnter(){
-        this.updateTheUI();
+        this.initializePartyAndBarDataFromLocalDataStorage();
     }
 
     ionViewDidEnter(){
@@ -50,9 +41,17 @@ export class CheckInPage {
         this.copyMapOfPartiesAndBarsThatAreInMyVicinityOverToASortedArray();
     }
 
-    updateTheUI(){
-        this.party = this.locationTracker.getPartyFromInvitedTo(this.locationTracker.partyOrBarImAt);
-        this.bar = this.locationTracker.getBarFromBarMap(this.locationTracker.partyOrBarImAt);
+    private initializePartyAndBarDataFromLocalDataStorage(){
+        if(this.allMyData.barsCloseToMe.length == 0){
+            Promise.all([this.allMyData.initializeBarsCloseToMeFromLocalDataStorage(this.tabName, this.http), 
+                this.allMyData.initializeBarsImHostingFromLocalDataStorage(this.tabName, this.http),
+                this.allMyData.initializePartiesImInvitedToFromLocalDataStorage(this.tabName, this.http),
+                this.allMyData.initializePartiesImHostingFromLocalDataStorage(this.tabName, this.http)])
+            .then(thePromise => {
+                this.locationTracker.findPartiesOrBarsInMyVicinity(this.locationTracker.lat, this.locationTracker.lng);
+                this.copyMapOfPartiesAndBarsThatAreInMyVicinityOverToASortedArray();
+            });
+        }
     }
 
     private copyMapOfPartiesAndBarsThatAreInMyVicinityOverToASortedArray(){

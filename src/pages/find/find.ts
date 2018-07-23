@@ -63,6 +63,7 @@ export class FindPage {
   private numberOfActiveFilters : number;
 
   private currentlyLoadingData : boolean;
+  private usersActualCoordinatesHaveBeenSet : boolean;
  
   constructor(private allMyData : AllMyData, private storage: Storage, public alertCtrl: AlertController, public locationTracker: LocationTracker, private events : Events, private http:Http, public navCtrl: NavController, public popoverCtrl: PopoverController) {
     this.allMyData.events = events;
@@ -80,6 +81,16 @@ export class FindPage {
     this.numberOfActiveFilters = 0;
 
     this.currentlyLoadingData = false;
+
+    this.usersActualCoordinatesHaveBeenSet = false;
+    this.storage.get("usersActualCoordinatesHaveBeenSet")
+    .then((val : boolean) => {
+        if((val == null)){
+          this.storage.set("usersActualCoordinatesHaveBeenSet", false);
+        }else {
+          this.usersActualCoordinatesHaveBeenSet = val;
+        }
+    });
 
     this.populateFiltersFromLocalDataStorage();
 
@@ -128,6 +139,14 @@ export class FindPage {
       this.myCoordinates = {lat: this.locationTracker.lat, lng: this.locationTracker.lng};
       if(this.userLocationMarker !== undefined){
         this.userLocationMarker.setPosition(this.myCoordinates);
+      }
+
+      // This makes it so the user can enable location at any time and see immediate changes to the map
+      if(this.usersActualCoordinatesHaveBeenSet == false){
+        this.usersActualCoordinatesHaveBeenSet = true;
+        this.allMyData.refreshDataAndResetPeriodicDataRetrievalTimer(this.http);
+        this.map.setCenter(this.myCoordinates);
+        this.map.setZoom(15);
       }
     });
 
@@ -272,7 +291,12 @@ export class FindPage {
         }
         
         this.map = new google.maps.Map(this.mapElement.nativeElement, mapOptions);
-
+        let image = 'assets/greencircle.png';
+        this.userLocationMarker = new google.maps.Marker({
+          map: this.map,
+          position: {lat: 40.082064, lng: -97.390820},
+          icon: image
+        });
         this.markerCluster = new MarkerClusterer(this.map, [], {imagePath: 'assets/m', maxZoom: 14});
         resolve("the google map has loaded after an error: " + err + 
         ". This probably was caused by the user not allowing the app to use their location.");

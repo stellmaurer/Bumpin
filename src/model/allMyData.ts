@@ -502,7 +502,7 @@ export class AllMyData{
         return new Promise(resolve => setTimeout(resolve, ms));
     }
 
-    public async refreshBarsCloseToMe(coordinates : any, http : Http){
+    public refreshBarsCloseToMe(coordinates : any, http : Http){
         return new Promise((resolve, reject) => {
             var query = new Query(this, http);
             query.getBarsCloseToMe(coordinates)

@@ -150,17 +150,20 @@ export class LocationTracker {
   }
 
   startTrackingUserLocationIfLocationPermissionGranted(){
-    /*this.diagnostic.isLocationAuthorized()
-    .then((isLocationAuthorized : boolean) => {
-      if(isLocationAuthorized == true){
-        this.actuallyStartTracking();
-      }else{
-        this.stopTracking();
-      }
-    }).catch((err) => {
-      this.allMyData.logError(this.analyticsID, "client", "checkLocationPermissions error : Err msg = " + err, this.http);
-    });*/
     this.actuallyStartTracking();
+    let timer = setInterval(() => {
+      this.diagnostic.isLocationAuthorized()
+      .then((isLocationAuthorized : boolean) => {
+        if(isLocationAuthorized == true){
+          clearInterval(timer);
+          this.actuallyStartTracking();
+        }else{
+          this.stopTracking();
+        }
+      }).catch((err) => {
+        this.allMyData.logError(this.analyticsID, "client", "checkLocationPermissions error : Err msg = " + err, this.http);
+      });
+    }, 250);
   }
 
   actuallyStartTracking(){

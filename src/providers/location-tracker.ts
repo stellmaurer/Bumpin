@@ -436,14 +436,22 @@ export class LocationTracker {
             id: -1,
             foreground: true,
             title: 'Location Updated',
-            text: 'Updated at ' + dateOfLocation.getHours() + ":" + dateOfLocation.getMinutes() + ":" + dateOfLocation.getSeconds() + ', closest bar is null'
+            text: 'Updated at ' + dateOfLocation.getHours() + ":" + dateOfLocation.getMinutes() + ":" + dateOfLocation.getSeconds() + ', closest bar is null',
+            channel: "PushPluginChannel",
+            color: '#32db64',
+            icon: 'res://push_notification_icon',
+            smallIcon: 'res://push_notification_icon'
           });
         }else{
           LocalNotifications.getPlugin().schedule({
             id: -1,
             foreground: true,
             title: 'Distance to bar = ' + min,
-            text: 'Updated at ' + dateOfLocation.getHours() + ":" + dateOfLocation.getMinutes() + ":" + dateOfLocation.getSeconds() + ', closest bar is ' + closestBar.name
+            text: 'Updated at ' + dateOfLocation.getHours() + ":" + dateOfLocation.getMinutes() + ":" + dateOfLocation.getSeconds() + ', closest bar is ' + closestBar.name,
+            channel: "PushPluginChannel",
+            color: '#32db64',
+            icon: 'res://push_notification_icon',
+            smallIcon: 'res://push_notification_icon'
           });
         }
       }
@@ -626,7 +634,11 @@ export class LocationTracker {
           actions: [
             { id: 'yes', title: 'Yes', launch: true },
             { id: 'no',  title: 'No' }
-          ]
+          ],
+          channel: "PushPluginChannel",
+          color: '#32db64',
+          icon: 'res://push_notification_icon',
+          smallIcon: 'res://push_notification_icon'
         });
         this.numberOfActiveNotificationTimers--;
         this.lastNotificationWasAt = new Date();

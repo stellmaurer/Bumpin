@@ -342,6 +342,42 @@ export class Query{
         });
     }
 
+    // curl http://bumpin-env.us-west-2.elasticbeanstalk.com:80/clearRatingForParty -d "partyID=10583166241324703384&facebookID=10155613117039816&timeLastRated=2017-03-04T00:57:00Z&timeOfLastKnownLocation=2017-03-04T01:25:00Z"
+    public clearRatingForParty(partyID : string, facebookID : string, timeLastRated : string, timeOfLastKnownLocation : string){
+        return new Promise((resolve, reject) => {
+            var url = "http://bumpin-env.us-west-2.elasticbeanstalk.com:80/clearRatingForParty";
+            let body = "partyID=" + partyID + "&facebookID=" + facebookID + "&timeLastRated=" + timeLastRated + "&timeOfLastKnownLocation=" + timeOfLastKnownLocation;
+            var headers = new Headers();
+            headers.append('content-type', "application/x-www-form-urlencoded");
+            let options= new RequestOptions({headers: headers});
+            this.http.post(url, body, options).map(res => res.json()).subscribe(data => {
+                if(data.succeeded){
+                    resolve(data);
+                }else{
+                    reject(data.error);
+                }
+            });
+        });
+    }
+
+    // curl http://bumpin-env.us-west-2.elasticbeanstalk.com:80/clearRatingForBar -d "barID=5272501342297530080&facebookID=370&isMale=true&name=Steve&status=Going&timeLastRated=2017-03-04T01:25:00Z&timeOfLastKnownLocation=2017-03-04T01:25:00Z"
+    public clearRatingForBar(barID : string, facebookID : string, isMale : boolean, name : string, status : string, timeLastRated : string, timeOfLastKnownLocation : string){
+        return new Promise((resolve, reject) => {
+            var url = "http://bumpin-env.us-west-2.elasticbeanstalk.com:80/clearRatingForBar";
+            let body = "barID=" + barID + "&facebookID=" + facebookID + "&isMale=" + isMale + "&name=" + name + "&status=" + status + "&timeLastRated=" + timeLastRated + "&timeOfLastKnownLocation=" + timeOfLastKnownLocation;
+            var headers = new Headers();
+            headers.append('content-type', "application/x-www-form-urlencoded");
+            let options= new RequestOptions({headers: headers});
+            this.http.post(url, body, options).map(res => res.json()).subscribe(data => {
+                if(data.succeeded){
+                    resolve(data);
+                }else{
+                    reject(data.error);
+                }
+            });
+        });
+    }
+
     // curl http://bumpin-env.us-west-2.elasticbeanstalk.com:80/changeAtPartyStatus -d "partyID=10583166241324703384&facebookID=10155613117039816&atParty=true"
     public changeAttendanceStatusToParty(partyID : string, facebookID : string, status : string){
         return new Promise((resolve, reject) => {
@@ -564,6 +600,7 @@ export class Query{
             var url = "http://bumpin-env.us-west-2.elasticbeanstalk.com:80/myParties?partyIDs=" + partiesImInvitedTo;
             this.http.get(url).map(res => res.json()).subscribe(data => {
                 if(data.succeeded){
+                    this.allMyData.storage.set("invitedTo", data.parties);
                     this.allMyData.invitedTo = deserialize<Party[]>(Party, data.parties);
                     if(this.allMyData.invitedTo == null){
                         this.allMyData.invitedTo = new Array<Party>();
@@ -585,6 +622,7 @@ export class Query{
             var url = "http://bumpin-env.us-west-2.elasticbeanstalk.com:80/getFriends?facebookIDs=" + this.getFriendFacebookIDsAsQueryParameter();
             this.http.get(url).map(res => res.json()).subscribe(data => {
                 if(data.succeeded){
+                    this.allMyData.storage.set("friends", data.people);
                     this.allMyData.friends = deserialize<Friend[]>(Friend, data.people);
                     if(this.allMyData.friends == null){
                         this.allMyData.friends = new Array<Friend>();
@@ -598,6 +636,8 @@ export class Query{
                         }
                         return 0;
                     });
+
+                    this.allMyData.changeGoingOutStatusOfFriendsToUnknownIfStatusIsExpired();
                     resolve(data);
                 }else{
                     reject(data.error);
@@ -621,6 +661,7 @@ export class Query{
             var url = "http://bumpin-env.us-west-2.elasticbeanstalk.com:80/getPartiesImHosting?partyIDs=" + partiesImHosting;
             this.http.get(url).map(res => res.json()).subscribe(data => {
                 if(data.succeeded){
+                    this.allMyData.storage.set("partyHostFor", data.parties);
                     this.allMyData.partyHostFor = deserialize<Party[]>(Party, data.parties);
                     if(this.allMyData.partyHostFor == null){
                         this.allMyData.partyHostFor = new Array<Party>();
@@ -651,6 +692,7 @@ export class Query{
             var url = "http://bumpin-env.us-west-2.elasticbeanstalk.com:80/getBarsImHosting?barIDs=" + barsImHosting;
             this.http.get(url).map(res => res.json()).subscribe(data => {
                 if(data.succeeded){
+                    this.allMyData.storage.set("barHostFor", data.bars);
                     this.allMyData.barHostFor = deserialize<Bar[]>(Bar, data.bars);
                     if(this.allMyData.barHostFor == null){
                         this.allMyData.barHostFor = new Array<Bar>();
@@ -676,13 +718,16 @@ export class Query{
             var url = "http://bumpin-env.us-west-2.elasticbeanstalk.com:80/barsCloseToMe?" + coordinatesParameter;
             this.http.get(url).map(res => res.json()).subscribe(data => {
                 if(data.succeeded){
+                    this.allMyData.storage.set("barsCloseToMe", data.bars);
                     this.allMyData.barsCloseToMe = deserialize<Bar[]>(Bar, data.bars);
                     if(this.allMyData.barsCloseToMe == null){
                         this.allMyData.barsCloseToMe = new Array<Bar>();
+                        this.allMyData.barsCloseToMeMap = new Map<string,Bar>();
                     }
                     for(let i = 0; i < this.allMyData.barsCloseToMe.length; i++){
                         this.allMyData.barsCloseToMe[i].fixMaps();
                         this.allMyData.barsCloseToMe[i].prepareBarObjectForTheUI();
+                        this.allMyData.barsCloseToMeMap.set(this.allMyData.barsCloseToMe[i].barID, this.allMyData.barsCloseToMe[i]);
                     }
                     resolve(data);
                 }else{

@@ -14,6 +14,7 @@ import {Bar} from "../../model/bar";
 import { AllMyData } from "../../model/allMyData";
 import {Http} from '@angular/http';
 import {Utility} from "../../model/utility";
+import { LocationTracker } from '../../providers/location-tracker';
 
 @Component({
   selector: 'page-barPopover',
@@ -24,6 +25,7 @@ export class BarPopover {
   private tabName: string = "Find Tab";
   public bar : Bar;
   private allMyData : AllMyData;
+  private locationTracker : LocationTracker;
   private http : Http;
 
   static get parameters() {
@@ -32,6 +34,7 @@ export class BarPopover {
 
   constructor(public viewCtrl: ViewController, params : NavParams) {
     this.allMyData = params.get("allMyData");
+    this.locationTracker = params.get("locationTracker");
     this.http = params.get("http");
     this.bar = params.get("bar");
   }
@@ -42,6 +45,14 @@ export class BarPopover {
 
   close() {
     this.viewCtrl.dismiss();
+  }
+
+  private userIsWithinVicinityDistanceOfThisBar(bar : Bar){
+    let distance = Utility.getDistanceInMetersBetweenCoordinates(bar.latitude, bar.longitude, this.locationTracker.lat, this.locationTracker.lng);
+    if(distance < this.locationTracker.vicinityDistance){
+      return true;
+    }
+    return false;
   }
 
   synchronizeLatestBarData(){
@@ -55,24 +66,24 @@ export class BarPopover {
   rateBar(rating : string){
     this.synchronizeLatestBarData();
     this.allMyData.rateBar(this.bar, rating, this.http)
-        .then((res) => {
-        
-        })
-        .catch((err) => {
-          this.allMyData.logError(this.tabName, "server", "rateBar query error : Err msg = " + err, this.http);
-        });
+    .then((res) => {
+    
+    })
+    .catch((err) => {
+      this.allMyData.logError(this.tabName, "server", "rateBar query error : Err msg = " + err, this.http);
+    });
+    this.locationTracker.checkIn(this.bar);
   }
 
 
   changeAttendanceStatus(status : string){
     this.synchronizeLatestBarData();
     this.allMyData.changeAttendanceStatusToBar(this.bar, status, this.http)
-          .then((res) => {
-            
-          })
-          .catch((err) => {
-            this.allMyData.logError(this.tabName, "server", "changeAttendanceStatusToBar query error : Err msg = " + err, this.http);
-        });
-
+    .then((res) => {
+      
+    })
+    .catch((err) => {
+      this.allMyData.logError(this.tabName, "server", "changeAttendanceStatusToBar query error : Err msg = " + err, this.http);
+    });
   }
 }

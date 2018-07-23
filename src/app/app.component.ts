@@ -5,7 +5,7 @@ import { AlertController, Nav, Platform, Events, Tabs, App } from 'ionic-angular
 
 import { TabsPage } from '../pages/tabs/tabs';
 import { ViewChild } from '@angular/core';
-import { BackgroundGeolocation } from '@ionic-native/background-geolocation';
+import { BackgroundGeolocation, BackgroundGeolocationConfig, BackgroundGeolocationResponse } from '@ionic-native/background-geolocation';
 import { Push, PushObject, PushOptions } from '@ionic-native/push';
 import { Badge } from '@ionic-native/badge';
 import { Storage } from '@ionic/storage';
@@ -17,6 +17,8 @@ import { AllMyData } from '../model/allMyData';
 import { Login } from '../pages/login/login';
 import { Geolocation } from '@ionic-native/geolocation';
 import { FriendsPage } from '../pages/more/friends';
+import { LocationTracker } from '../providers/location-tracker';
+import { LocalNotifications } from '@ionic-native/local-notifications';
 
 @Component({
   templateUrl: 'app.html',
@@ -27,8 +29,11 @@ export class MyApp {
   @ViewChild('myNav') nav : NavController
   private rootPage:any;
 
-  constructor(public app: App, private login : Login, private allMyData: AllMyData, private http: Http, public platform: Platform, private statusBar: StatusBar, private splashScreen: SplashScreen, private badge: Badge, public push: Push, private geolocation: Geolocation, public alertCtrl: AlertController, private backgroundGeolocation: BackgroundGeolocation, private events : Events, private storage: Storage) {
+  constructor(public app: App, private login : Login, private allMyData: AllMyData, private http: Http, public platform: Platform, private statusBar: StatusBar, private splashScreen: SplashScreen, private badge: Badge, public push: Push, private locationTracker: LocationTracker, public alertCtrl: AlertController, private backgroundGeolocation: BackgroundGeolocation, private events : Events, private storage: Storage) {
     this.platform.ready().then(() => {
+
+      this.locationTracker.startTracking();
+
       this.rootPage = TabsPage;
 
       this.statusBar.hide();
@@ -40,6 +45,8 @@ export class MyApp {
 
       this.storePlatform();
       this.initPushNotification();
+
+      this.setUpLocalNotificationHandlers();
 
       this.loginToFacebook();
 
@@ -70,6 +77,23 @@ export class MyApp {
     if(isAndroid == true){
       this.storage.set('platform', 'Android');
     }
+  }
+
+  private setUpLocalNotificationHandlers(){
+    let tempThis = this;
+    LocalNotifications.getPlugin().on('click', function (notification, eopts) {
+      tempThis.app.getRootNav().getActiveChildNav().select(1);
+    });
+    LocalNotifications.getPlugin().on('yes', function (notification, eopts) {
+      tempThis.app.getRootNav().getActiveChildNav().select(1);
+    });
+    LocalNotifications.getPlugin().on('no', function (notification, eopts) {
+      tempThis.locationTracker.clearNotifications();
+      tempThis.locationTracker.updateWhereIAmAt(null);
+      tempThis.locationTracker.userSaidTheyAreNotAtAPartyOrBar = true;
+      tempThis.storage.set("userSaidTheyAreNotAtAPartyOrBar", true);
+      tempThis.locationTracker.createTimerForClearingUserSaidTheyAreNotAtAPartyOrBar();
+    });
   }
 
   initPushNotification() {

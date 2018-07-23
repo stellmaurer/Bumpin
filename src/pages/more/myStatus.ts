@@ -30,7 +30,7 @@ export class MyStatusPage {
             
         })
         .catch((err) => {
-            this.allMyData.logError(this.tabName, "server", "refreshFriends query error : Err msg = " + err, this.http);
+            this.allMyData.logError(this.tabName, "server", "changeMyGoingOutStatus query error : Err msg = " + err, this.http);
         });
     }
 }

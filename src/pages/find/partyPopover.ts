@@ -16,6 +16,7 @@ import {Http} from '@angular/http';
 import {Utility} from "../../model/utility";
 import { InviteFriendsPage } from './inviteFriends';
 import { InvitedFriendsPage } from './invitedFriends';
+import { LocationTracker } from '../../providers/location-tracker';
 
 @Component({
   selector: 'page-partyPopover',
@@ -29,6 +30,7 @@ export class PartyPopover {
   private http : Http;
   private params : NavParams;
   private navCtrl : NavController;
+  private locationTracker : LocationTracker;
 
   static get parameters() {
     return [[ViewController],[NavParams]];
@@ -37,6 +39,7 @@ export class PartyPopover {
   constructor(public viewCtrl: ViewController, params : NavParams) {
     this.params = params;
     this.allMyData = params.get("allMyData");
+    this.locationTracker = params.get("locationTracker");
     this.http = params.get("http");
     this.party = params.get("party");
     this.navCtrl = params.get("navCtrl");
@@ -48,6 +51,24 @@ export class PartyPopover {
 
   close() {
     this.viewCtrl.dismiss();
+  }
+
+  private userIsWithinVicinityDistanceOfThisParty(party : Party){
+    let distance = Utility.getDistanceInMetersBetweenCoordinates(party.latitude, party.longitude, this.locationTracker.lat, this.locationTracker.lng);
+    if(distance < this.locationTracker.vicinityDistance){
+      return true;
+    }
+    return false;
+  }
+
+  private partyIsCurrentlyInProgress(party : Party){
+    let partyStartTime = new Date(party.startTime).getTime();
+    let partyEndTime = new Date(party.endTime).getTime();
+    let rightNow = new Date().getTime();
+    if((partyStartTime <= rightNow) && (rightNow <= partyEndTime)){
+      return true;
+    }
+    return false;
   }
 
   synchronizeLatestPartyData(){
@@ -67,6 +88,7 @@ export class PartyPopover {
     .catch((err) => {
       this.allMyData.logError(this.tabName, "server", "rateParty query error : Err msg = " + err, this.http);
     });
+    this.locationTracker.checkIn(this.party);
   }
 
   changeAttendanceStatus(status : string){

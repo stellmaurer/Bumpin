@@ -10,7 +10,7 @@
 
 import { Component, ViewChild, ElementRef } from '@angular/core';
 import {Http} from '@angular/http';
-import { NavParams, NavController, AlertController} from 'ionic-angular';
+import { NavParams, NavController, AlertController, Events} from 'ionic-angular';
 import { AllMyData} from '../../model/allMyData';
 import { Party } from '../../model/party';
 import { Geolocation } from 'ionic-native';
@@ -38,7 +38,7 @@ export class CreatePartyPage {
   
   private datePickerMinYear : number;
 
-  constructor(public allMyData : AllMyData, private http:Http, private navCtrl: NavController, params : NavParams, public alertCtrl: AlertController) {
+  constructor(public allMyData : AllMyData, private http:Http, private events : Events, private navCtrl: NavController, params : NavParams, public alertCtrl: AlertController) {
     this.party = params.get("party");
     this.datePickerMinYear = (new Date()).getFullYear();
     this.addressInputTimer = null;
@@ -181,6 +181,7 @@ export class CreatePartyPage {
     if(this.inputError == ""){
       this.allMyData.createParty(this.party, this.http)
       .then((res) => {
+        this.events.publish("userHasJustCreatedAParty");
         this.navCtrl.popTo(this.navCtrl.getByIndex(this.navCtrl.length()-3));
       })
       .catch((err) => {

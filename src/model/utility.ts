@@ -13,6 +13,16 @@ import {Bar} from "./bar";
 
 export class Utility {
 
+    public static partyIsCurrentlyInProgress(party : Party){
+        let partyStartTime = new Date(party.startTime).getTime();
+        let partyEndTime = new Date(party.endTime).getTime();
+        let rightNow = new Date().getTime();
+        if((partyStartTime <= rightNow) && (rightNow <= partyEndTime)){
+          return true;
+        }
+        return false;
+      }
+
     public static hasThisPartyStarted(party : Party) : boolean {
         var partyHasStarted = false;
         if(party == null){
@@ -94,7 +104,7 @@ export class Utility {
         var currentTimeInMilliseconds = new Date().getTime();
         var timeOfLastKnownLocationInMilliseconds = Date.parse(timeOfLastKnownLocation);
         var attendanceIsExpired = false;
-        if((currentTimeInMilliseconds - timeOfLastKnownLocationInMilliseconds) > 900000){ // 600,000 milliseconds is 15 minutes
+        if((currentTimeInMilliseconds - timeOfLastKnownLocationInMilliseconds) > 1800000){ // 1,800,000 milliseconds is 30 minutes
             attendanceIsExpired = true;
         }
         return attendanceIsExpired;

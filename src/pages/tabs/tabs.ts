@@ -10,7 +10,7 @@
 
 import { Component } from '@angular/core';
 import { FindPage } from '../find/find'
-import { RatePage } from '../rate/rate';
+import { CheckInPage } from '../rate/check-in';
 import { HostPage } from '../host/host';
 import { MorePage } from '../more/more';
 
@@ -21,7 +21,7 @@ export class TabsPage {
   // this tells the tabs component which Pages
   // should be each tab's root Page
   tab1Root: any = FindPage;
-  tab2Root: any = RatePage;
+  tab2Root: any = CheckInPage;
   tab3Root: any = HostPage;
   tab4Root: any = MorePage;
 

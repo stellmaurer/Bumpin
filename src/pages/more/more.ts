@@ -26,25 +26,26 @@ export class MorePage {
   private tabName: string = "More Tab";
   private bugDescription: string;
   private featureRequest: string;
+  private currentlyLoadingData: boolean;
 
   constructor(private app: App, private login : Login, public allMyData : AllMyData, private http:Http, private navCtrl: NavController, public alertCtrl: AlertController) {
+    this.currentlyLoadingData = true;
     this.bugDescription = "";
     this.featureRequest = "";
   }
 
   ionViewDidEnter(){
-    this.allMyData.getNotifications(this.http)
-    .catch((err) => {
-      this.allMyData.logError(this.tabName, "server", "notifications query error : Err msg = " + err, this.http);
-    });
+    this.currentlyLoadingData = true;
 
-    this.allMyData.refreshPerson(this.http)
-    .then((res) => {
-      
-    })
-    .catch((err) => {
-      this.allMyData.logError(this.tabName, "server", "refreshPerson query error : Err msg = " + err, this.http);
-    });
+    Promise.all([this.allMyData.getNotifications(this.http),
+                 this.allMyData.refreshPerson(this.http)])
+      .then(thePromise => {
+        this.currentlyLoadingData = false;
+      })
+      .catch((err) => {
+        this.currentlyLoadingData = false;
+        this.allMyData.logError(this.tabName, "server", "refreshPerson or getNotifications query error: Err msg = " + err, this.http);
+      });
   }
 
   ionViewWillEnter(){

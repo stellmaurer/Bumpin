@@ -5,7 +5,9 @@ import { MorePage } from '../pages/more/more';
 import { NotificationsPage } from '../pages/more/notifications';
 import { FriendsPage } from '../pages/more/friends';
 import { MyStatusPage } from '../pages/more/myStatus';
-import { RatePage } from '../pages/rate/rate';
+import { CheckIntoPartyPopoverPage } from '../pages/rate/checkIntoPartyPopover';
+import { CheckIntoBarPopoverPage } from '../pages/rate/checkIntoBarPopover';
+import { CheckInPage } from '../pages/rate/check-in';
 import { HostPage } from '../pages/host/host';
 import { FindPage } from '../pages/find/find';
 import { InviteFriendsPage } from '../pages/find/inviteFriends';
@@ -17,7 +19,6 @@ import { CreatePartyPage } from '../pages/host/createParty';
 import { EditPartyPage } from '../pages/host/editParty';
 import { EditBarPage } from '../pages/host/editBar';
 import { CreateBarPage } from '../pages/host/createBar';
-import { CreatePage } from '../pages/host/create';
 import { EditHostListPage } from '../pages/host/editHostList';
 import { EditInviteeListPage } from '../pages/host/editInviteeList';
 import { AllMyData } from '../model/allMyData';
@@ -34,6 +35,8 @@ import { CloudSettings, CloudModule } from '@ionic/cloud-angular';
 import { IonicStorageModule } from '@ionic/storage';
 import { BrowserModule } from '@angular/platform-browser';
 import { HttpModule } from '@angular/http';
+import { Diagnostic } from '@ionic-native/diagnostic';
+import { LocalNotifications } from '@ionic-native/local-notifications';
 
 const cloudSettings: CloudSettings = {
   'core': {
@@ -54,7 +57,9 @@ const cloudSettings: CloudSettings = {
     NotificationsPage,
     FriendsPage,
     MyStatusPage,
-    RatePage,
+    CheckIntoPartyPopoverPage,
+    CheckIntoBarPopoverPage,
+    CheckInPage,
     HostPage,
     FindPage,
     InviteFriendsPage,
@@ -63,7 +68,6 @@ const cloudSettings: CloudSettings = {
     EditPartyPage,
     EditBarPage,
     CreateBarPage,
-    CreatePage,
     EditHostListPage,
     EditInviteeListPage,
     PartyPopover,
@@ -84,7 +88,9 @@ const cloudSettings: CloudSettings = {
     NotificationsPage,
     FriendsPage,
     MyStatusPage,
-    RatePage,
+    CheckIntoPartyPopoverPage,
+    CheckIntoBarPopoverPage,
+    CheckInPage,
     HostPage,
     FindPage,
     InviteFriendsPage,
@@ -93,7 +99,6 @@ const cloudSettings: CloudSettings = {
     EditPartyPage,
     EditBarPage,
     CreateBarPage,
-    CreatePage,
     EditHostListPage,
     EditInviteeListPage,
     PartyPopover,
@@ -104,8 +109,10 @@ const cloudSettings: CloudSettings = {
     LocationTracker,
     BackgroundGeolocation,
     Push,
+    LocalNotifications,
     Badge,
     Facebook,
+    Diagnostic,
     Geolocation,
     [AllMyData],
     [Login],

@@ -142,7 +142,7 @@ export class FindPage {
       }
 
       // This makes it so the user can enable location at any time and see immediate changes to the map
-      if(this.usersActualCoordinatesHaveBeenSet == false){
+      if((this.usersActualCoordinatesHaveBeenSet == false) && (this.map !== undefined)){
         this.usersActualCoordinatesHaveBeenSet = true;
         this.allMyData.refreshDataAndResetPeriodicDataRetrievalTimer(this.http);
         this.map.setCenter(this.myCoordinates);
@@ -478,7 +478,7 @@ export class FindPage {
   }
 
   private presentBarPopover(bar : Bar) {
-    let popover = this.popoverCtrl.create(BarPopover, {bar:bar, allMyData:this.allMyData, locationTracker:this.locationTracker, http:this.http}, {cssClass:'barPopover.scss'});
+    let popover = this.popoverCtrl.create(BarPopover, {bar:bar, allMyData:this.allMyData, locationTracker:this.locationTracker, http:this.http, navCtrl:this.navCtrl}, {cssClass:'barPopover.scss'});
     popover.present();
   }
 

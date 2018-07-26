@@ -709,6 +709,19 @@ export class AllMyData{
         });
     }
 
+    public getBarIDForClaimKey(bar: Bar, http: Http){
+        return new Promise((resolve, reject) => {
+            var query = new Query(this, http);
+            query.getBarIDForClaimKey(bar)
+            .then((res : any) => {
+                resolve(res.error);
+            })
+            .catch((err) => {
+                reject(err);
+            });
+        });
+    }
+
     public getAddressForBarKey(bar: Bar, http: Http){
         return new Promise((resolve, reject) => {
             var query = new Query(this, http);
@@ -731,6 +744,19 @@ export class AllMyData{
             query.createBar(bar)
             .then((res) => {
                 resolve("createBar query succeeded.");
+            })
+            .catch((err) => {
+                reject(err);
+            });
+        });
+    }
+
+    public claimBar(bar : Bar, http : Http){
+        return new Promise((resolve, reject) => {
+            var query = new Query(this, http);
+            query.claimBar(bar)
+            .then((res) => {
+                resolve("claimBar query succeeded.");
             })
             .catch((err) => {
                 reject(err);

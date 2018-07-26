@@ -207,5 +207,13 @@
         </ion-col>
     </ion-row>
 
+    <ion-row>
+      <ion-col col-12>
+        <button ion-button block [disabled]="iAmHostingThisBar" [color]="primary" style="color: black;" (click)='goToClaimBarPage();'>
+          Claim This Bar
+        </button>
+      </ion-col>
+    </ion-row>
+
   </ion-grid>
 </ion-scroll>

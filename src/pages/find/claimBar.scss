@@ -1,0 +1,62 @@
+page-claimBar {
+    ion-scroll { white-space: nowrap; }
+
+    .home {
+
+        ion-grid {
+            margin-top: 5px;
+            margin-bottom: 5px;
+        }
+
+        .needsPadding {
+            padding: 10px;
+        }
+
+        .oneElement {
+            text-align: center;
+            margin-left:auto;
+            margin-right:auto;
+        }
+
+        .twoElementsSmall {
+            text-align: center;
+            margin-left:auto;
+            margin-right:auto;
+            min-width: 100px;
+        }
+
+        .twoElementsMedium {
+            text-align: center;
+            margin-left:auto;
+            margin-right:auto;
+            min-width: 140px;
+        }
+
+        .twoElementsLarge {
+            text-align: center;
+            margin-left:auto;
+            margin-right:auto;
+            min-width: 240px;
+        }
+
+        .threeElements {
+            text-align: center;
+            margin-left:auto;
+            margin-right:auto;
+            min-width: 71px;
+        }
+
+        .fourElements {
+            text-align: center;
+            padding-left: 2.5px;
+            padding-right: 2.5px;
+            margin-left:auto;
+            margin-right:auto;
+            min-width: 71px;
+        }
+
+        .centerMe {
+            text-align: center;
+        }
+    }
+}

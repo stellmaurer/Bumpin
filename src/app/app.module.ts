@@ -37,6 +37,8 @@ import { BrowserModule } from '@angular/platform-browser';
 import { HttpModule } from '@angular/http';
 import { Diagnostic } from '@ionic-native/diagnostic';
 import { LocalNotifications } from '@ionic-native/local-notifications';
+import { ClaimBarPage } from '../pages/find/claimBar';
+
 
 const cloudSettings: CloudSettings = {
   'core': {
@@ -61,6 +63,7 @@ const cloudSettings: CloudSettings = {
     CheckIntoBarPopoverPage,
     CheckInPage,
     HostPage,
+    ClaimBarPage,
     FindPage,
     InviteFriendsPage,
     InvitedFriendsPage,
@@ -92,6 +95,7 @@ const cloudSettings: CloudSettings = {
     CheckIntoBarPopoverPage,
     CheckInPage,
     HostPage,
+    ClaimBarPage,
     FindPage,
     InviteFriendsPage,
     InvitedFriendsPage,

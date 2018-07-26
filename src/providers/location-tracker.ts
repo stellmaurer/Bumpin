@@ -163,7 +163,7 @@ export class LocationTracker {
       }).catch((err) => {
         this.allMyData.logError(this.analyticsID, "client", "checkLocationPermissions error : Err msg = " + err, this.http);
       });
-    }, 250);
+    }, 500);
   }
 
   actuallyStartTracking(){

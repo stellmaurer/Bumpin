@@ -9,12 +9,13 @@
  *******************************************************/
 
 import { Component } from '@angular/core';
-import {ViewController,NavParams} from 'ionic-angular';
+import {ViewController,NavParams, AlertController, NavController} from 'ionic-angular';
 import {Bar} from "../../model/bar";
 import { AllMyData } from "../../model/allMyData";
 import {Http} from '@angular/http';
 import {Utility} from "../../model/utility";
 import { LocationTracker } from '../../providers/location-tracker';
+import { ClaimBarPage } from '../find/claimBar';
 
 @Component({
   selector: 'page-barPopover',
@@ -27,16 +28,20 @@ export class BarPopover {
   private allMyData : AllMyData;
   private locationTracker : LocationTracker;
   private http : Http;
+  private navCtrl : NavController;
+  private iAmHostingThisBar : boolean;
 
   static get parameters() {
     return [[ViewController],[NavParams]];
   }
 
-  constructor(public viewCtrl: ViewController, params : NavParams) {
+  constructor(public viewCtrl: ViewController, params : NavParams, public alertCtrl: AlertController) {
     this.allMyData = params.get("allMyData");
     this.locationTracker = params.get("locationTracker");
     this.http = params.get("http");
     this.bar = params.get("bar");
+    this.navCtrl = params.get("navCtrl");
+    this.iAmHostingThisBar = this.amIHostingThisBar();
   }
 
   ionViewWillEnter(){
@@ -45,6 +50,20 @@ export class BarPopover {
 
   close() {
     this.viewCtrl.dismiss();
+  }
+
+  goToClaimBarPage(){
+    this.viewCtrl.dismiss();
+    this.navCtrl.push(ClaimBarPage, {bar:this.bar}, {animate: false});
+  }
+
+  private amIHostingThisBar(){
+    for(let i = 0; i < this.allMyData.barHostFor.length; i++){
+      if(this.bar.barID == this.allMyData.barHostFor[i].barID){
+        return true;
+      }
+    }
+    return false;
   }
 
   private userIsWithinVicinityDistanceOfThisBar(bar : Bar){
@@ -61,7 +80,7 @@ export class BarPopover {
       return;
     }
     this.bar = this.allMyData.barsCloseToMe[indexOfBar];
- }
+  }
 
   rateBar(rating : string){
     this.synchronizeLatestBarData();

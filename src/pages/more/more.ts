@@ -16,6 +16,8 @@ import { Http } from '@angular/http';
 import { FriendsPage } from './friends';
 import { MyStatusPage } from './myStatus';
 import { NotificationsPage } from './notifications';
+import { AppVersion } from '@ionic-native/app-version';
+import { version } from 'punycode';
 
 @Component({
   selector: 'page-more',
@@ -27,11 +29,17 @@ export class MorePage {
   private bugDescription: string;
   private featureRequest: string;
   private currentlyLoadingData: boolean;
+  private versionNumber : string;
 
-  constructor(private app: App, private login : Login, public allMyData : AllMyData, private http:Http, private navCtrl: NavController, public alertCtrl: AlertController) {
+  constructor(private appVersion: AppVersion, private app: App, private login : Login, public allMyData : AllMyData, private http:Http, private navCtrl: NavController, public alertCtrl: AlertController) {
     this.currentlyLoadingData = true;
     this.bugDescription = "";
     this.featureRequest = "";
+    this.versionNumber = "X.X.X";
+    this.appVersion.getVersionNumber()
+    .then((versionNumber : string) => {
+      this.versionNumber = versionNumber;
+    });
   }
 
   ionViewDidEnter(){

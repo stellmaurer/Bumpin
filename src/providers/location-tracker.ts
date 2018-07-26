@@ -175,7 +175,8 @@ export class LocationTracker {
       desiredAccuracy: 0,
       stationaryRadius: 5,
       distanceFilter: 5,
-      debug: false
+      debug: false,
+      startOnBoot: true
     };
 
     this.geolocationSubscription = this.backgroundGeolocation.configure(backgroundConfig).subscribe((location: BackgroundGeolocationResponse) => {

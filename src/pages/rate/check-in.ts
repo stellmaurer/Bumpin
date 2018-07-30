@@ -18,6 +18,7 @@ import { Events } from 'ionic-angular';
 import { LocationTracker } from '../../providers/location-tracker';
 import { CheckIntoPartyPopoverPage } from './checkIntoPartyPopover';
 import { CheckIntoBarPopoverPage } from './checkIntoBarPopover';
+import { Storage } from '@ionic/storage';
 
 
 @Component({
@@ -30,10 +31,48 @@ export class CheckInPage {
     public party : Party;
     public bar : Bar;
     public partyOrBarImAt : string;
+    private numberOfTutorialStepsCompleted : number;
+    private overlayIsActive : boolean;
+    private listExplanationIsActive : boolean;
+    private popoverExplanationIsActive : boolean;
 
-    constructor(public popoverCtrl: PopoverController, private allMyData : AllMyData, public zone: NgZone, public locationTracker: LocationTracker, private events : Events, private http:Http, public navCtrl: NavController) {
+    constructor(private storage: Storage, public popoverCtrl: PopoverController, private allMyData : AllMyData, public zone: NgZone, public locationTracker: LocationTracker, private events : Events, private http:Http, public navCtrl: NavController) {
         this.partiesAndBarsWithinMyVicinity = new Array<any>();
         this.initializePartyAndBarDataFromLocalDataStorage();
+        this.numberOfTutorialStepsCompleted = 0;
+        this.overlayIsActive = false;
+        this.listExplanationIsActive = false;
+        this.popoverExplanationIsActive = false;
+
+        this.numberOfTutorialStepsCompleted = 2;
+
+        this.storage.get("numberOfTutorialStepsCompletedCheckInTab")
+        .then((val : number) => {
+            if((val == null)){
+                this.numberOfTutorialStepsCompleted = 0;
+                this.storage.set("numberOfTutorialStepsCompletedCheckInTab", 0);
+                this.overlayIsNowActive();
+            }else {
+                this.numberOfTutorialStepsCompleted = val;
+                if(this.numberOfTutorialStepsCompleted != 2){
+                    this.overlayIsNowActive();
+                }
+            }
+        });
+    }
+
+    ionViewDidLoad(){
+        
+    }
+
+    ionViewWillEnter(){
+        if(this.numberOfTutorialStepsCompleted != 2){
+            this.overlayIsNowActive();
+        }
+    }
+
+    ionViewWillLeave(){
+        this.overlayIsNowInactive();
     }
 
     ionViewDidEnter(){
@@ -118,4 +157,42 @@ export class CheckInPage {
         let popover = this.popoverCtrl.create(CheckIntoBarPopoverPage, {bar:bar, allMyData:this.allMyData, locationTracker:this.locationTracker, http:this.http}, {cssClass:'checkIntoBarPopover.scss'});
         popover.present();
     }
+
+    overlayIsNowActive(){
+        this.overlayIsActive = true;
+        this.events.publish("overlayIsNowActive");
+        this.determineWhichTutorialStepToShow();
+    }
+
+    overlayIsNowInactive(){
+        this.overlayIsActive = false;
+        this.events.publish("overlayIsNowInactive");
+    }
+
+    determineWhichTutorialStepToShow(){
+        if(this.numberOfTutorialStepsCompleted == 0){
+            this.listExplanationIsActive = true;
+        }
+        if(this.numberOfTutorialStepsCompleted == 1){
+            this.popoverExplanationIsActive = true;
+        }
+    }
+    
+    overlayWasClicked(){
+        this.numberOfTutorialStepsCompleted++;
+        this.storage.set("numberOfTutorialStepsCompletedCheckInTab", this.numberOfTutorialStepsCompleted);
+
+        this.listExplanationIsActive = false;
+        this.popoverExplanationIsActive = false;
+
+        if(this.numberOfTutorialStepsCompleted == 1){
+            this.popoverExplanationIsActive = true;
+        }
+        if(this.numberOfTutorialStepsCompleted == 2){
+            this.listExplanationIsActive = false;
+            this.popoverExplanationIsActive = false;
+            this.overlayIsNowInactive();
+        }
+    }
+    
 }

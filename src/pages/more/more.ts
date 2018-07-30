@@ -9,7 +9,7 @@
  *******************************************************/
 
 import { Component } from '@angular/core';
-import { App, NavController, AlertController } from 'ionic-angular';
+import { App, NavController, AlertController, Events } from 'ionic-angular';
 import { AllMyData } from '../../model/allMyData';
 import { Login } from '../login/login';
 import { Http } from '@angular/http';
@@ -17,7 +17,7 @@ import { FriendsPage } from './friends';
 import { MyStatusPage } from './myStatus';
 import { NotificationsPage } from './notifications';
 import { AppVersion } from '@ionic-native/app-version';
-import { version } from 'punycode';
+import { Storage } from '@ionic/storage';
 
 @Component({
   selector: 'page-more',
@@ -30,8 +30,15 @@ export class MorePage {
   private featureRequest: string;
   private currentlyLoadingData: boolean;
   private versionNumber : string;
+  private numberOfTutorialStepsCompleted : number;
+  private overlayIsActive : boolean;
+  private notificationsButtonExplanationIsActive : boolean;
+  private whosGoingOutButtonExplanationIsActive : boolean;
+  private rUGoingOutButtonExplanationIsActive : boolean;
+  private feedbackExplanationIsActive : boolean;
+  private logoutExplanationIsActive : boolean;
 
-  constructor(private appVersion: AppVersion, private app: App, private login : Login, public allMyData : AllMyData, private http:Http, private navCtrl: NavController, public alertCtrl: AlertController) {
+  constructor(private storage: Storage, private events: Events, private appVersion: AppVersion, private app: App, private login : Login, public allMyData : AllMyData, private http:Http, private navCtrl: NavController, public alertCtrl: AlertController) {
     this.currentlyLoadingData = true;
     this.bugDescription = "";
     this.featureRequest = "";
@@ -39,6 +46,26 @@ export class MorePage {
     this.appVersion.getVersionNumber()
     .then((versionNumber : string) => {
       this.versionNumber = versionNumber;
+    });
+    this.overlayIsActive = false;
+    this.notificationsButtonExplanationIsActive = false;
+    this.whosGoingOutButtonExplanationIsActive = false;
+    this.rUGoingOutButtonExplanationIsActive = false;
+    this.feedbackExplanationIsActive = false;
+    this.logoutExplanationIsActive = false;
+    this.numberOfTutorialStepsCompleted = 5;
+    this.storage.get("numberOfTutorialStepsCompletedMoreTab")
+    .then((val : number) => {
+        if((val == null)){
+            this.numberOfTutorialStepsCompleted = 0;
+            this.storage.set("numberOfTutorialStepsCompletedMoreTab", 0);
+            this.overlayIsNowActive();
+        }else {
+            this.numberOfTutorialStepsCompleted = val;
+            if(this.numberOfTutorialStepsCompleted != 5){
+                this.overlayIsNowActive();
+            }
+        }
     });
   }
 
@@ -54,9 +81,14 @@ export class MorePage {
         this.currentlyLoadingData = false;
         this.allMyData.logError(this.tabName, "server", "refreshPerson or getNotifications query error: Err msg = " + err, this.http);
       });
+      
   }
 
   ionViewWillEnter(){
+    if(this.numberOfTutorialStepsCompleted != 5){
+      this.overlayIsNowActive();
+    }
+    
     this.allMyData.storage.get('goingOutStatusNotification')
     .then((message : any) => {
       if(message != null){
@@ -64,6 +96,10 @@ export class MorePage {
         this.goToFriendStatusPage();
       }
     });
+  }
+
+  ionViewWillLeave(){
+    this.overlayIsNowInactive();
   }
 
   private goToNotificationsPage(){
@@ -169,4 +205,61 @@ export class MorePage {
     });
     alert.present();
   }
+
+  overlayIsNowActive(){
+    this.overlayIsActive = true;
+    this.events.publish("overlayIsNowActive");
+    this.determineWhichTutorialStepToShow();
+  }
+
+  overlayIsNowInactive(){
+    this.overlayIsActive = false;
+    this.events.publish("overlayIsNowInactive");
+  }
+
+  determineWhichTutorialStepToShow(){
+    if(this.numberOfTutorialStepsCompleted == 0){
+      this.notificationsButtonExplanationIsActive = true;
+    }
+    if(this.numberOfTutorialStepsCompleted == 1){
+      this.whosGoingOutButtonExplanationIsActive = true;
+    }
+    if(this.numberOfTutorialStepsCompleted == 2){
+      this.rUGoingOutButtonExplanationIsActive = true;
+    }
+    if(this.numberOfTutorialStepsCompleted == 3){
+      this.feedbackExplanationIsActive = true;
+    }
+    if(this.numberOfTutorialStepsCompleted == 4){
+      this.logoutExplanationIsActive = true;
+    }
+  }
+
+  overlayWasClicked(){
+    this.numberOfTutorialStepsCompleted++;
+    this.storage.set("numberOfTutorialStepsCompletedMoreTab", this.numberOfTutorialStepsCompleted);
+
+    this.notificationsButtonExplanationIsActive = false;
+    this.whosGoingOutButtonExplanationIsActive = false;
+    this.rUGoingOutButtonExplanationIsActive = false;
+    this.feedbackExplanationIsActive = false;
+    this.logoutExplanationIsActive = false;
+
+    if(this.numberOfTutorialStepsCompleted == 1){
+      this.whosGoingOutButtonExplanationIsActive = true;
+    }
+    if(this.numberOfTutorialStepsCompleted == 2){
+      this.rUGoingOutButtonExplanationIsActive = true;
+    }
+    if(this.numberOfTutorialStepsCompleted == 3){
+      this.feedbackExplanationIsActive = true;
+    }
+    if(this.numberOfTutorialStepsCompleted == 4){
+      this.logoutExplanationIsActive = true;
+    }
+    if(this.numberOfTutorialStepsCompleted == 5){
+      this.overlayIsNowInactive();
+    }
+  }
+  
 }

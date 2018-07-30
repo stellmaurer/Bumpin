@@ -64,8 +64,21 @@ export class FindPage {
 
   private currentlyLoadingData : boolean;
   private usersActualCoordinatesHaveBeenSet : boolean;
+  private numberOfTutorialStepsCompleted : number;
+  private overlayIsActive : boolean;
+  private mapExplanationIsActive : boolean;
+  private upperleftButtonExplanationIsActive : boolean;
+  private upperRightButtonExplanationIsActive : boolean;
+  private bottomRightButtonExplanationIsActive : boolean;
+  private tabsExplanationIsActive : boolean;
  
   constructor(private allMyData : AllMyData, private storage: Storage, public alertCtrl: AlertController, public locationTracker: LocationTracker, private events : Events, private http:Http, public navCtrl: NavController, public popoverCtrl: PopoverController) {
+    this.overlayIsActive = false;
+    this.mapExplanationIsActive = false;
+    this.upperleftButtonExplanationIsActive = false;
+    this.upperRightButtonExplanationIsActive = false;
+    this.bottomRightButtonExplanationIsActive = false;
+    this.tabsExplanationIsActive = false;
     this.allMyData.events = events;
     this.partyMarkersOnMap = new Map<string,any>();
     this.barMarkersOnMap = new Map<string,any>();
@@ -83,6 +96,14 @@ export class FindPage {
     this.currentlyLoadingData = false;
 
     this.usersActualCoordinatesHaveBeenSet = false;
+
+    this.events.subscribe("tabBarWasClicked",() => {
+      if(this.numberOfTutorialStepsCompleted == 4){
+        this.overlayWasClicked();
+      }
+    });
+
+    
     this.storage.get("usersActualCoordinatesHaveBeenSet")
     .then((val : boolean) => {
         if((val == null)){
@@ -97,6 +118,22 @@ export class FindPage {
     this.barClusterMarkers = new Array<any>();
 
     this.initializePartyAndBarDataFromLocalDataStorage();
+    
+    this.numberOfTutorialStepsCompleted = 5;
+
+    this.storage.get("numberOfTutorialStepsCompletedFindTab")
+    .then((val : number) => {
+        if((val == null)){
+          this.numberOfTutorialStepsCompleted = 0;
+          this.storage.set("numberOfTutorialStepsCompletedFindTab", 0);
+          this.overlayIsNowActive();
+        }else {
+          this.numberOfTutorialStepsCompleted = val;
+          if(this.numberOfTutorialStepsCompleted != 5){
+            this.overlayIsNowActive();
+          }
+        }
+    });
   }
 
   ionViewDidLoad(){
@@ -104,7 +141,14 @@ export class FindPage {
   }
 
   ionViewWillEnter(){
+    if(this.numberOfTutorialStepsCompleted != 5){
+      this.overlayIsNowActive();
+    }
     this.allMyData.refreshDataAndResetPeriodicDataRetrievalTimer(this.http);
+  }
+
+  ionViewWillLeave(){
+    this.overlayIsNowInactive();
   }
 
   private initializePartyAndBarDataFromLocalDataStorage(){
@@ -791,6 +835,66 @@ export class FindPage {
       }
     }
     return status;
+  }
+
+  overlayIsNowActive(){
+    this.overlayIsActive = true;
+    this.events.publish("overlayIsNowActive");
+    this.determineWhichTutorialStepToShow();
+  }
+
+  overlayIsNowInactive(){
+    this.overlayIsActive = false;
+    this.events.publish("overlayIsNowInactive");
+  }
+
+  determineWhichTutorialStepToShow(){
+    if(this.numberOfTutorialStepsCompleted == 0){
+      this.mapExplanationIsActive = true;
+    }
+    if(this.numberOfTutorialStepsCompleted == 1){
+      this.upperleftButtonExplanationIsActive = true;
+    }
+    if(this.numberOfTutorialStepsCompleted == 2){
+      this.upperRightButtonExplanationIsActive = true;
+    }
+    if(this.numberOfTutorialStepsCompleted == 3){
+      this.bottomRightButtonExplanationIsActive = true;
+    }
+    if(this.numberOfTutorialStepsCompleted == 4){
+      this.tabsExplanationIsActive = true;
+    }
+  }
+
+  overlayWasClicked(){
+    this.numberOfTutorialStepsCompleted++;
+    this.storage.set("numberOfTutorialStepsCompletedFindTab", this.numberOfTutorialStepsCompleted);
+
+    this.mapExplanationIsActive = false;
+    this.upperleftButtonExplanationIsActive = false;
+    this.upperRightButtonExplanationIsActive = false;
+    this.bottomRightButtonExplanationIsActive = false;
+    this.tabsExplanationIsActive = false;
+
+    if(this.numberOfTutorialStepsCompleted == 1){
+      this.upperleftButtonExplanationIsActive = true;
+    }
+    if(this.numberOfTutorialStepsCompleted == 2){
+      this.upperRightButtonExplanationIsActive = true;
+    }
+    if(this.numberOfTutorialStepsCompleted == 3){
+      this.bottomRightButtonExplanationIsActive = true;
+    }
+    if(this.numberOfTutorialStepsCompleted == 4){
+      this.tabsExplanationIsActive = true;
+    }
+    if(this.numberOfTutorialStepsCompleted == 5){
+      this.mapExplanationIsActive = false;
+      this.upperleftButtonExplanationIsActive = false;
+      this.upperRightButtonExplanationIsActive = false;
+      this.bottomRightButtonExplanationIsActive = false;
+      this.overlayIsNowInactive();
+    }
   }
 
 }

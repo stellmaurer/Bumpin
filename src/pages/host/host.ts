@@ -18,6 +18,7 @@ import { EditBarPage } from './editBar';
 import { Http } from '@angular/http';
 import { CreatePartyPage } from './createParty';
 import { CreateBarPage } from './createBar';
+import { Storage } from '@ionic/storage';
 
 @Component({
   selector: 'page-host',
@@ -29,8 +30,13 @@ export class HostPage {
   private partyToCreate : Party;
   private barToCreate : Bar;
   private currentlyLoadingData : boolean;
+  private numberOfTutorialStepsCompleted : number;
+  private overlayIsActive : boolean;
+  private upperLeftButtonExplanationIsActive : boolean;
+  private upperRightButtonExplanationIsActive : boolean;
+  private listExplanationIsActive : boolean;
 
-  constructor(public allMyData : AllMyData, private events:Events, private http:Http, private navCtrl: NavController, public alertCtrl: AlertController) {
+  constructor(private storage: Storage, public allMyData : AllMyData, private events:Events, private http:Http, private navCtrl: NavController, public alertCtrl: AlertController) {
     this.currentlyLoadingData = true;
     this.partyToCreate = new Party();
     this.barToCreate = new Bar();
@@ -38,6 +44,25 @@ export class HostPage {
     this.setMeAsTheMainHostForTheBar();
     this.partyToCreate.setDefaultStartAndEndTimesForParty();
     this.initializePartyAndBarDataFromLocalDataStorage();
+
+    this.overlayIsActive = false;
+    this.upperLeftButtonExplanationIsActive = false;
+    this.upperRightButtonExplanationIsActive = false;
+    this.listExplanationIsActive = false;
+    this.numberOfTutorialStepsCompleted = 3;
+    this.storage.get("numberOfTutorialStepsCompletedHostTab")
+    .then((val : number) => {
+        if((val == null)){
+            this.numberOfTutorialStepsCompleted = 0;
+            this.storage.set("numberOfTutorialStepsCompletedHostTab", 0);
+            this.overlayIsNowActive();
+        }else {
+            this.numberOfTutorialStepsCompleted = val;
+            if(this.numberOfTutorialStepsCompleted != 3){
+                this.overlayIsNowActive();
+            }
+        }
+    });
   }
 
   ionViewDidLoad(){
@@ -50,6 +75,13 @@ export class HostPage {
       this.setMeAsTheMainHostForTheParty();
       this.partyToCreate.setDefaultStartAndEndTimesForParty();
     });
+  }
+
+  ionViewWillEnter(){
+    if(this.numberOfTutorialStepsCompleted != 3){
+      this.overlayIsNowActive();
+    }
+    this.allMyData.refreshDataAndResetPeriodicDataRetrievalTimer(this.http);
   }
 
   ionViewDidEnter(){
@@ -73,6 +105,10 @@ export class HostPage {
       this.allMyData.logError(this.tabName, "server", "refreshPerson query error: Err msg = " + err, this.http);
       this.currentlyLoadingData = false;
     });
+  }
+
+  ionViewWillLeave(){
+    this.overlayIsNowInactive();
   }
 
   private initializePartyAndBarDataFromLocalDataStorage(){
@@ -217,5 +253,47 @@ export class HostPage {
       }
     }
     this.allMyData.barHostFor = newBarHostForArray;
+  }
+
+  overlayIsNowActive(){
+    this.overlayIsActive = true;
+    this.events.publish("overlayIsNowActive");
+    this.determineWhichTutorialStepToShow();
+  }
+
+  overlayIsNowInactive(){
+    this.overlayIsActive = false;
+    this.events.publish("overlayIsNowInactive");
+  }
+
+  determineWhichTutorialStepToShow(){
+    if(this.numberOfTutorialStepsCompleted == 0){
+      this.listExplanationIsActive = true;
+    }
+    if(this.numberOfTutorialStepsCompleted == 1){
+      this.upperLeftButtonExplanationIsActive = true;
+    }
+    if(this.numberOfTutorialStepsCompleted == 2){
+      this.upperRightButtonExplanationIsActive = true;
+    }
+  }
+
+  overlayWasClicked(){
+    this.numberOfTutorialStepsCompleted++;
+    this.storage.set("numberOfTutorialStepsCompletedHostTab", this.numberOfTutorialStepsCompleted);
+
+    this.upperLeftButtonExplanationIsActive = false;
+    this.upperRightButtonExplanationIsActive = false;
+    this.listExplanationIsActive = false;
+
+    if(this.numberOfTutorialStepsCompleted == 1){
+      this.upperLeftButtonExplanationIsActive = true;
+    }
+    if(this.numberOfTutorialStepsCompleted == 2){
+      this.upperRightButtonExplanationIsActive = true;
+    }
+    if(this.numberOfTutorialStepsCompleted == 3){
+      this.overlayIsNowInactive();
+    }
   }
 }

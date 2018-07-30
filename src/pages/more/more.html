@@ -74,7 +74,7 @@
     <ion-row justify-content-center>
       <ion-col col-12 class="oneElement">
         <div class="centerMe">
-          <h1 [style.color]="'#32db64'">Version: 1.0.8</h1>
+          <h1 [style.color]="'#32db64'">Version: {{ versionNumber }}</h1>
         </div>
       </ion-col>
   </ion-row>
@@ -88,3 +88,24 @@
     </ion-row>
   </ion-grid>
 </ion-content>
+
+<div tappable class="overlayMoreTab" (click)='overlayWasClicked();' *ngIf="overlayIsActive">
+    <div class="notificationsButtonExplanationMoreTab" *ngIf="notificationsButtonExplanationIsActive">
+        <ion-icon name="arrow-round-up" style="display: flex; justify-content: center;"></ion-icon>
+        <p style="text-align: center; margin-top: 0px;">If a friend invites you to a party or asks you to host a party or bar with them, you'll see that here.</p>
+    </div>
+    <div class="whosGoingOutButtonExplanationMoreTab" *ngIf="whosGoingOutButtonExplanationIsActive">
+        <ion-icon name="arrow-round-up" style="display: flex; justify-content: center;"></ion-icon>
+        <p style="text-align: center; margin-top: 0px;">Click this to see which of your friends are going out tonight.</p>
+    </div>
+    <div class="rUGoingOutButtonExplanationMoreTab" *ngIf="rUGoingOutButtonExplanationIsActive">
+        <ion-icon name="arrow-round-up" style="display: flex; justify-content: center;"></ion-icon>
+        <p style="text-align: center; margin-top: 0px;">Click this to let your friends know if you are going out tonight.</p>
+    </div>
+    <div class="feedbackExplanationMoreTab" *ngIf="feedbackExplanationIsActive">
+        <p style="text-align: center;">You can give us feedback on this page by submitting issues or feature requests.</p>
+    </div>
+    <div class="logoutExplanationMoreTab" *ngIf="logoutExplanationIsActive">
+        <p style="text-align: center;">If you scroll down, you can logout.</p>
+    </div>
+</div>

@@ -36,3 +36,17 @@
     </button>
   </ion-list>
 </ion-content>
+
+<div tappable class="overlayHostTab" (click)="overlayWasClicked();" *ngIf="overlayIsActive">
+  <div class="upperLeftButtonExplanationHostTab" *ngIf="upperLeftButtonExplanationIsActive">
+      <ion-icon name="arrow-round-up" style="display: flex; justify-content: center; position: relative; right: 50px; transform: rotate(-45deg);"></ion-icon>
+      <p style="text-align: center; margin-top: 0px;">If you own a bar that's not on the map, click this button.</p>
+  </div>
+  <div class="upperRightButtonExplanationHostTab" *ngIf="upperRightButtonExplanationIsActive">
+      <ion-icon name="arrow-round-up" style="display: flex; justify-content: center; transform: rotate(45deg);"></ion-icon>
+      <p style="text-align: center; margin-top: 0px;">If you want to host a party, click this button.</p>
+  </div>
+  <div class="listExplanationHostTab" *ngIf="listExplanationIsActive">
+      <p style="text-align: center;">Any bars or parties you are hosting show up here. Click one of them if you want to make an edit.</p>
+  </div>
+</div>

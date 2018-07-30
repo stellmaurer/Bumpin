@@ -1,4 +1,4 @@
-page-createParty {
+page-claimBar {
     ion-scroll { white-space: nowrap; }
 
     .home {
@@ -8,28 +8,8 @@ page-createParty {
             margin-bottom: 5px;
         }
 
-        .badgeRightMargin{
-            margin-right: 10px;
-        }
-
         .needsPadding {
             padding: 10px;
-        }
-
-        .hosts {
-            padding-left: 10px;
-            padding-right: 10px;
-        }
-
-        .blocksRow {
-            text-align: center;
-            
-            .center-block {
-                text-align: center;
-                margin-left:auto;
-                margin-right:auto;
-                display:block;
-            }
         }
 
         .oneElement {
@@ -77,30 +57,6 @@ page-createParty {
 
         .centerMe {
             text-align: center;
-        }
-
-        .backgroundNotIncluded {
-            border-radius: 5px;
-            background-color: $background-color;
-        }
-
-        .backgroundIncluded {
-            border-radius: 5px;
-            background-color: $background-info-color;
-        }
-
-        .theMap{
-            width: 80vw;
-            height: 40vh;
-            #mapForCreateParty {
-                width: 100%;
-                height: 100%;
-            }
-        }
-
-        #submitButton {
-            text-align: right;
-            margin-right: auto;
         }
     }
 }

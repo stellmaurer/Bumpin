@@ -977,6 +977,23 @@ export class Query{
         return additionsListName + additionsListFacebookID + additionsListIsMale;
     }
 
+    public getBarIDForClaimKey(bar: Bar){
+        return new Promise((resolve, reject) => {
+            var url = "http://bumpin-env.us-west-2.elasticbeanstalk.com:80/getClaimKey";
+            let body = "key=" + bar.key;
+            var headers = new Headers();
+            headers.append('content-type', "application/x-www-form-urlencoded");
+            let options= new RequestOptions({headers: headers});
+            this.http.post(url, body, options).map(res => res.json()).subscribe(data => {
+                if(data.succeeded){
+                    resolve(data);
+                }else{
+                    reject(data.error);
+                }
+            });
+        });
+    }
+
     public getAddressForBarKey(bar: Bar){
         return new Promise((resolve, reject) => {
             var url = "http://bumpin-env.us-west-2.elasticbeanstalk.com:80/getBarKey";
@@ -1046,7 +1063,28 @@ export class Query{
                 if(data.succeeded){
                     bar.barID = data.error; // backend is set up so that data.error contains the barID
                     this.allMyData.barHostFor.push(bar);
-                    this.allMyData.barsCloseToMe.push(bar);
+                    resolve(data);
+                }else{
+                    reject(data.error);
+                }
+            });
+        });
+    }
+
+    // curl http://localhost:5000/claimBar -d "claimKey=FvIUBYWbH6rNd4bt&facebookID=10154326505409816&isMale=true&nameOfCreator=Steve%20Ellmaurer"
+    public claimBar(bar : Bar){
+        return new Promise((resolve, reject) => {
+            var url = "http://bumpin-env.us-west-2.elasticbeanstalk.com:80/claimBar";
+            let body = "claimKey=" + bar.key +
+                       "&facebookID=" + this.allMyData.me.facebookID + 
+                       "&isMale=" + this.allMyData.me.isMale + 
+                       "&nameOfCreator=" + encodeURIComponent(this.allMyData.me.name);
+            var headers = new Headers();
+            headers.append('content-type', "application/x-www-form-urlencoded");
+            let options= new RequestOptions({headers: headers});
+            this.http.post(url, body, options).map(res => res.json()).subscribe(data => {
+                if(data.succeeded){
+                    this.allMyData.barHostFor.push(bar);
                     resolve(data);
                 }else{
                     reject(data.error);

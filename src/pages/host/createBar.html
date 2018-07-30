@@ -34,7 +34,7 @@
 
     <ion-item>
       <ion-label stacked>Bar Key</ion-label>
-      <ion-input type="text" [(ngModel)]="bar.key" (blur)="getAddressForBarKey();" (keyup)="keyUpInBarKeyInput($event);"></ion-input>
+      <ion-input type="text" [(ngModel)]="bar.key" (keyup)="keyUpInBarKeyInput($event);"></ion-input>
     </ion-item>
   
     <ion-item>
@@ -42,9 +42,11 @@
       <ion-input readonly="true" placeholder="Enter a bar key to generate this" type="text" [(ngModel)]="bar.address"></ion-input>
     </ion-item>
   
-    <div class="theMap oneElement">
-        <div #map id="mapForCreateBar"></div>
-    </div>
+    <ion-item>
+      <div class="theMap oneElement">
+          <div #map id="mapForCreateBar"></div>
+      </div>
+    </ion-item>
 
     <ion-item>
       <ion-label stacked>Bar Name</ion-label>

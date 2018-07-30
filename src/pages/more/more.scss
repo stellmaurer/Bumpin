@@ -1,4 +1,5 @@
 page-more {
+
     .home {
         display: flex;
         flex-direction: column;
@@ -8,8 +9,14 @@ page-more {
             height: 100%;
         }
 
+        
+        ion-col {
+            position: initial;
+        }
+        
+
         .text-input {
-            height: 20vh;
+            height: 100px;
             margin: 0px;
             padding: 0px;
             width: 100%;
@@ -45,6 +52,72 @@ page-more {
 
         .needsSpaceOnTop {
             margin-top: 10px;
+        }
+    }
+
+    .overlayMoreTab {
+        position: fixed; /* Sit on top of the page content */
+        width: 100vw; /* Full width (cover the whole page) */
+        height: 100vh; /* Full height (cover the whole page) */
+        top: 0; 
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0,0,0,0.7); /* Black background with opacity */
+        z-index: 10000; /* Specify a stack order in case you're using a different order for other elements */
+
+        ion-icon {
+            font-weight: bold;
+            font-size: 2em;
+        }
+
+        .notificationsButtonExplanationMoreTab {
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 96px;
+        }
+
+        .whosGoingOutButtonExplanationMoreTab {
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            position: fixed;
+            top: 160px;
+            left: 10px;
+            width: 50%;
+        }
+
+        .rUGoingOutButtonExplanationMoreTab {
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            position: fixed;
+            top: 160px;
+            right: 10px;
+            width: 50%;
+        }
+
+        .feedbackExplanationMoreTab{
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            width: 100%;
+            height: 100%;
+        }
+
+        .logoutExplanationMoreTab{
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            width: 100%;
+            height: 100%;
         }
     }
 }

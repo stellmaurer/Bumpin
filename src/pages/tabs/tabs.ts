@@ -8,13 +8,15 @@
  * the express permission of Stephen Ellmaurer.
  *******************************************************/
 
-import { Component } from '@angular/core';
+import { Component, NgZone, ViewChild } from '@angular/core';
 import { FindPage } from '../find/find'
 import { CheckInPage } from '../rate/check-in';
 import { HostPage } from '../host/host';
 import { MorePage } from '../more/more';
+import { Events, Tabs } from '../../../node_modules/ionic-angular';
 
 @Component({
+  selector: 'page-tabs',
   templateUrl: 'tabs.html'
 })
 export class TabsPage {
@@ -25,7 +27,38 @@ export class TabsPage {
   tab3Root: any = HostPage;
   tab4Root: any = MorePage;
 
-  constructor() {
+  @ViewChild('myTabs') tabRef: Tabs;
+
+  constructor(private events: Events, private zone: NgZone) {
     
+  }
+
+  ngOnInit(){
+    this.events.subscribe("overlayIsNowActive",() => {
+      this.increaseTabBarTransparency();
+    });
+    this.events.subscribe("overlayIsNowInactive",() => {
+      this.makeTabBarCompletelyOpaque();
+    });
+    document.getElementsByClassName("tabbar")[0].addEventListener("click", () => {
+      console.log("tabBarWasClicked");
+      if(this.tabRef.getSelected().index == 0){
+        this.events.publish("tabBarWasClicked");
+      }
+    });
+  }
+
+  increaseTabBarTransparency(){
+    let tabBar = document.getElementsByClassName("tabbar");
+    for(let i = 0; i < tabBar.length; i++){
+      tabBar[i].classList.add("opacityWhenOverlayIsActive");
+    }
+  }
+
+  makeTabBarCompletelyOpaque(){
+    let tabBar = document.getElementsByClassName("tabbar");
+    for(let i = 0; i < tabBar.length; i++){
+      tabBar[i].classList.remove("opacityWhenOverlayIsActive");
+    }
   }
 }

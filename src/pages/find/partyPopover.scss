@@ -1,6 +1,21 @@
 
 page-partyPopover {
+
+    .container {
+        position: relative;
+    }
+    
     ion-scroll { white-space: nowrap; }
+
+    #closeButton {
+        z-index: 10000;
+        position: absolute;
+        margin-top: 0px;
+        margin-left: 0px;
+        top: 0px;
+        left: 20px;
+        font-size: 4em;
+    }
 
     .home {
         
@@ -16,6 +31,7 @@ page-partyPopover {
         }
 
         ion-grid {
+            margin-top: 20px;
             height: 100%;
             width: 100%;
         }

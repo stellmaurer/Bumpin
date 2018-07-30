@@ -27,4 +27,13 @@
 
 </ion-content>
   
-  
+<div tappable class="overlayCheckInTab" (click)="overlayWasClicked();" *ngIf="overlayIsActive">
+    <div class="listExplanationCheckInTab" *ngIf="listExplanationIsActive">
+        <p style="text-align: center;">If you are near parties or bars, a list of those will show up here. Let others know where you are by clicking on a specific party or bar in the list.</p>
+    </div>
+    <div class="popoverExplanationCheckInTab" *ngIf="popoverExplanationIsActive">
+        <div id="popoverBorderCheckInTab">
+            <p style="text-align: center; padding-left: 10px; padding-right: 10px;">After clicking on a specific party or bar in the list, a pop-up will appear here which allows you to rate it and say if there was a cover or a line.</p>
+        </div>
+    </div>
+</div>

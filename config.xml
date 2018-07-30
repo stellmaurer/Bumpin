@@ -15,10 +15,7 @@
     <edit-config file="*-Info.plist" mode="merge" target="NSLocationAlwaysAndWhenInUseUsageDescription">
         <string>Your location will only be used to (1) show you what bars are around you, (2) help you navigate to parties and bars, (3) anonymously help crowd source party and bar attendance and men to women ratios, and (4) allow you to rate the party or bar you are at.</string>
     </edit-config>
-    <feature name="CDVWKWebViewEngine">
-        <param name="ios-package" value="CDVWKWebViewEngine" />
-    </feature>
-    <preference name="CordovaWebViewEngine" value="CDVWKWebViewEngine" />
+    <preference name="orientation" value="portrait" />
     <preference name="ScrollEnabled" value="false" />
     <preference name="android-minSdkVersion" value="16" />
     <preference name="BackupWebStorage" value="none" />
@@ -122,6 +119,8 @@
     <plugin name="phonegap-plugin-push" spec="^2.1.3">
         <variable name="FCM_VERSION" value="11.6.2" />
     </plugin>
+    <plugin name="cordova-plugin-app-version" spec="^0.1.9" />
+    <plugin name="cordova-plugin-ionic-webview" spec="^2.0.1" />
     <engine name="browser" spec="^5.0.3" />
     <engine name="ios" spec="4.5.4" />
     <engine name="android" spec="7.0.0" />

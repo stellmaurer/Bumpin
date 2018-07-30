@@ -55,7 +55,7 @@ export class CreateBarPage {
   private getBarKeyButtonClicked(){
     let alert = this.alertCtrl.create();
     alert.setTitle("Email us to get a bar key");
-    alert.setSubTitle("Include a picture which shows that you work at or own the bar at that address - a picture of you working at the bar, or a picture the utility bill or lease agreement with the address showing will do.");
+    alert.setSubTitle("Include a picture which shows that you work at or own the bar at that address - a picture of you working at the bar, or a picture of the utility bill or lease agreement with the address showing will do.");
 
     alert.addButton({
       text: 'Not now',
@@ -84,7 +84,7 @@ export class CreateBarPage {
   }
 
   private keyUpInBarKeyInput(event : any){
-    if(event.keyCode == 13){
+    if((this.bar.key.length == 16) || (event.keyCode == 13)){
       this.getAddressForBarKey();
     }
   }

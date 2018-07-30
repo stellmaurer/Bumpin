@@ -2,7 +2,7 @@
   <ion-navbar>
     
     <ion-buttons left>
-        <button ion-button style="background-color: #222;" [color]="allMyData.me.status.goingOut == 'Yes' ? 'primary' : 'danger'" (click)='changeMyGoingOutStatus();'>
+        <button ion-button [style.color]="allMyData.me.status.goingOut == 'Yes' ? '#32db64' : '#f53d3d'" style="background-color: #222;" (click)='changeMyGoingOutStatus();'>
             {{ allMyData.me.status.goingOut == "Yes" ? "I'm going out" : "I'm not going out"}}
         </button>
     </ion-buttons>
@@ -24,3 +24,30 @@
   <div #map id="map"></div>
   <ion-icon id="locateControl" name="locate"></ion-icon>
 </ion-content>
+
+<div tappable class="overlayFindTab" (click)="overlayWasClicked();" *ngIf="overlayIsActive">
+  
+  <div class="upperLeftButtonExplanationFindTab" *ngIf="upperleftButtonExplanationIsActive">
+      <ion-icon name="arrow-round-up" style="display: flex; justify-content: center;"></ion-icon>
+      <p style="text-align: center; margin-top: 0px;">Click to let your friends know if you are going out.</p>
+  </div>
+  <div class="upperRightButtonExplanationFindTab" *ngIf="upperRightButtonExplanationIsActive">
+      <ion-icon name="arrow-round-up" style="display: flex; justify-content: center; position: relative; left: 50px; transform: rotate(45deg);"></ion-icon>
+      <p style="text-align: center; margin-top: 0px;">Click to narrow down what you see on the map.</p>
+  </div>
+  <div class="mapExplanationFindTab" *ngIf="mapExplanationIsActive">
+      <p style="text-align: center;">The map shows parties you are invited to and bars nearby. Click on a balloon on the map to get more info.</p>
+  </div>
+  <div class="bottomRightButtonExplanationFindTab" *ngIf="bottomRightButtonExplanationIsActive">
+      <p style="text-align: center; margin-right: 10px;">Click to re-center the map to your current location.</p>
+      <ion-icon name="arrow-round-up" style="transform: rotate(90deg);"></ion-icon>
+  </div>
+  <div class="tabsExplanationFindTab" *ngIf="tabsExplanationIsActive">
+      <p style="text-align: center; margin-bottom: 10px;">Click one of these icons to go to another page.</p>
+      <div class="arrowsPointingToTabIcons">
+          <ion-icon name="arrow-round-down"></ion-icon>
+          <ion-icon name="arrow-round-down"></ion-icon>
+          <ion-icon name="arrow-round-down"></ion-icon>
+      </div>
+  </div>
+</div>

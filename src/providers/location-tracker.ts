@@ -150,17 +150,20 @@ export class LocationTracker {
   }
 
   startTrackingUserLocationIfLocationPermissionGranted(){
-    /*this.diagnostic.isLocationAuthorized()
-    .then((isLocationAuthorized : boolean) => {
-      if(isLocationAuthorized == true){
-        this.actuallyStartTracking();
-      }else{
-        this.stopTracking();
-      }
-    }).catch((err) => {
-      this.allMyData.logError(this.analyticsID, "client", "checkLocationPermissions error : Err msg = " + err, this.http);
-    });*/
     this.actuallyStartTracking();
+    let timer = setInterval(() => {
+      this.diagnostic.isLocationAuthorized()
+      .then((isLocationAuthorized : boolean) => {
+        if(isLocationAuthorized == true){
+          clearInterval(timer);
+          this.actuallyStartTracking();
+        }else{
+          this.stopTracking();
+        }
+      }).catch((err) => {
+        this.allMyData.logError(this.analyticsID, "client", "checkLocationPermissions error : Err msg = " + err, this.http);
+      });
+    }, 500);
   }
 
   actuallyStartTracking(){
@@ -172,7 +175,8 @@ export class LocationTracker {
       desiredAccuracy: 0,
       stationaryRadius: 5,
       distanceFilter: 5,
-      debug: false
+      debug: false,
+      startOnBoot: true
     };
 
     this.geolocationSubscription = this.backgroundGeolocation.configure(backgroundConfig).subscribe((location: BackgroundGeolocationResponse) => {
@@ -436,14 +440,22 @@ export class LocationTracker {
             id: -1,
             foreground: true,
             title: 'Location Updated',
-            text: 'Updated at ' + dateOfLocation.getHours() + ":" + dateOfLocation.getMinutes() + ":" + dateOfLocation.getSeconds() + ', closest bar is null'
+            text: 'Updated at ' + dateOfLocation.getHours() + ":" + dateOfLocation.getMinutes() + ":" + dateOfLocation.getSeconds() + ', closest bar is null',
+            channel: "PushPluginChannel",
+            color: '#32db64',
+            icon: 'res://push_notification_icon',
+            smallIcon: 'res://push_notification_icon'
           });
         }else{
           LocalNotifications.getPlugin().schedule({
             id: -1,
             foreground: true,
             title: 'Distance to bar = ' + min,
-            text: 'Updated at ' + dateOfLocation.getHours() + ":" + dateOfLocation.getMinutes() + ":" + dateOfLocation.getSeconds() + ', closest bar is ' + closestBar.name
+            text: 'Updated at ' + dateOfLocation.getHours() + ":" + dateOfLocation.getMinutes() + ":" + dateOfLocation.getSeconds() + ', closest bar is ' + closestBar.name,
+            channel: "PushPluginChannel",
+            color: '#32db64',
+            icon: 'res://push_notification_icon',
+            smallIcon: 'res://push_notification_icon'
           });
         }
       }
@@ -626,7 +638,11 @@ export class LocationTracker {
           actions: [
             { id: 'yes', title: 'Yes', launch: true },
             { id: 'no',  title: 'No' }
-          ]
+          ],
+          channel: "PushPluginChannel",
+          color: '#32db64',
+          icon: 'res://push_notification_icon',
+          smallIcon: 'res://push_notification_icon'
         });
         this.numberOfActiveNotificationTimers--;
         this.lastNotificationWasAt = new Date();

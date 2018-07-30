@@ -1,0 +1,52 @@
+<ion-header>
+    <ion-navbar>
+        <ion-title>
+            Claim Bar
+        </ion-title>
+        <ion-buttons end>
+            <ion-spinner *ngIf="currentlyLoadingData == true" name="ios" id="loadingIndicator"></ion-spinner>
+        </ion-buttons>
+    </ion-navbar>
+</ion-header>
+      
+<ion-content class="home" scrollY="true">
+
+    <ion-item>
+        <ion-label stacked>Bar Name</ion-label>
+        <ion-input type="text" [disabled]="true" [(ngModel)]="bar.name"></ion-input>
+    </ion-item>
+
+    <ion-item>
+        <ion-grid>
+            <ion-row>
+                <ion-col col-12 class="oneElement">
+                    <div class="centerMe">
+                        <button ion-button block [color]="'primary'" [style.color]="'black'" (click)='getClaimKeyButtonClicked();'>
+                            Get Claim Key
+                        </button>
+                    </div>
+                </ion-col>
+            </ion-row>
+        </ion-grid>
+    </ion-item>
+      
+    <ion-item>
+        <ion-label stacked>Claim Key</ion-label>
+        <ion-input type="text" [disabled]="claimKeyAccepted" [(ngModel)]="bar.key" (keyup)="keyUpInClaimKeyInput($event);"></ion-input>
+    </ion-item>
+
+    <ion-item>
+        <ion-grid style="margin-top: 10px;">
+            <ion-row>
+                <ion-col col-12 class="oneElement">
+                    <div class="centerMe">
+                        <button ion-button block [disabled]="claimKeyAccepted == false" [color]="'primary'" [style.color]="'black'" (click)='claimButtonClicked();'>
+                            Claim
+                        </button>
+                    </div>
+                </ion-col>
+            </ion-row>
+        </ion-grid>
+    </ion-item>
+
+</ion-content>

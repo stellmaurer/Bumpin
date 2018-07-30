@@ -1,5 +1,35 @@
 page-check-in {
 
+    .needsPadding {
+        padding: 10px;
+    }
+
+    .oneElement {
+        text-align: center;
+        margin-left:auto;
+        margin-right:auto;
+    }
+
+    .twoElementsSmall {
+        text-align: center;
+        margin-left:auto;
+        margin-right:auto;
+        min-width: 100px;
+    }
+
+    .fourElements {
+        text-align: center;
+        padding-left: 2.5px;
+        padding-right: 2.5px;
+        margin-left:auto;
+        margin-right:auto;
+        min-width: 71px;
+    }
+
+    .centerMe {
+        text-align: center;
+    }
+
     .overlayCheckInTab {
         position: fixed; /* Sit on top of the page content */
         width: 100vw; /* Full width (cover the whole page) */
@@ -46,36 +76,6 @@ page-check-in {
                 margin-right: 10px;
             }
         }
-    }
-
-    .needsPadding {
-        padding: 10px;
-    }
-
-    .oneElement {
-        text-align: center;
-        margin-left:auto;
-        margin-right:auto;
-    }
-
-    .twoElementsSmall {
-        text-align: center;
-        margin-left:auto;
-        margin-right:auto;
-        min-width: 100px;
-    }
-
-    .fourElements {
-        text-align: center;
-        padding-left: 2.5px;
-        padding-right: 2.5px;
-        margin-left:auto;
-        margin-right:auto;
-        min-width: 71px;
-    }
-
-    .centerMe {
-        text-align: center;
     }
 }
 

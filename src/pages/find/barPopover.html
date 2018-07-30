@@ -1,219 +1,226 @@
-<ion-scroll class="home" scrollY="true">
-  <ion-grid>
+<div class="container">
 
-    <ion-row>
-      <ion-col col-12 class="singleElement">
-        <div class="centerMe">
-          <h1 [style.color]="{'Bumpin': '#32db64', 'Heat\\'n-up': 'yellow', 'Decent': 'orange', 'Weak': '#f53d3d'}[bar.averageRating]">{{bar.name}}</h1>
-        </div>
-      </ion-col>
-    </ion-row>
+  <ion-icon id="closeButton" name="close" [color]="'primary'" (click)="close();"></ion-icon>
 
-    <ion-row>
-      <ion-col col-12 class="singleElement">
-        <div class="centerMe">
-          <label>{{bar.numberOfPeopleAtBar}} people are at this bar</label>
-        </div>
-      </ion-col>
-    </ion-row>
+  <ion-scroll class="home" scrollY="true">
 
-    <ion-row>
-      <ion-col col-6 class="twoElementsSmall">
-        <div class="centerMe">
-            <label>{{bar.percentageOfMen}}% Men</label>
-        </div>
-      </ion-col>
-      <ion-col col-6 class="twoElementsSmall">
-        <div class="centerMe">
-            <label>{{bar.percentageOfWomen}}% Women</label>
-        </div>
-      </ion-col>
-    </ion-row>
+    <ion-grid>
 
-    <ion-row>
-      <ion-col col-3 class="fourElements">
-        <div class="centerMe">
-          <label>Bumpin</label>
-        </div>
-        <div class="centerMe">
-          <button ion-button [disabled]="userIsWithinVicinityDistanceOfThisBar(bar) == false ? true : false" [color]="primary" style="color: black;" (click)='rateBar("Bumpin");'>
-            {{bar.bumpinRatings}}
-          </button>
-        </div>
-      </ion-col>
-      <ion-col col-3 class="fourElements">
-        <div class="centerMe">
-          <label style="color: yellow;">Heat'n-up</label>
-        </div>
-        <div class="centerMe">
-          <button ion-button [disabled]="userIsWithinVicinityDistanceOfThisBar(bar) == false ? true : false" [color]="primary" style="color: black;" (click)='rateBar("Heat&#39;n-up");'>
-            {{bar.heatingUpRatings}}
-          </button>
-        </div>
-      </ion-col>
-      <ion-col col-3 class="fourElements">
-        <div class="centerMe">
-          <label style="color: orange;">Decent</label>
-        </div>
-        <div class="centerMe">
-          <button ion-button [disabled]="userIsWithinVicinityDistanceOfThisBar(bar) == false ? true : false" [color]="primary" style="color: black;" (click)='rateBar("Decent");'>
-            {{bar.decentRatings}}
-          </button>
-        </div>
-      </ion-col>
-      <ion-col col-3 class="fourElements">
-        <div class="centerMe">
-          <label style="color: #f53d3d;">Weak</label>
-        </div>
-        <div class="centerMe">
-          <button ion-button [disabled]="userIsWithinVicinityDistanceOfThisBar(bar) == false ? true : false" [color]="primary" style="color: black;" (click)='rateBar("Weak");'>
-            {{bar.weakRatings}}
-          </button>
-        </div>
-      </ion-col>
-    </ion-row>
-
-    <ion-row>
-      <ion-col col-6 class="twoElementsSmall">
-        <div class="centerMe">
-            <label>Your Rating: {{ bar.attendees.has(allMyData.me.facebookID) == false ? "None" : bar.attendees.get(allMyData.me.facebookID).rating}}</label>
-        </div>
-      </ion-col>
-      <ion-col col-6 class="twoElementsSmall">
-        <div class="centerMe">
-            <label>Your Status: {{ bar.attendees.has(allMyData.me.facebookID) == false ? "None" : bar.attendees.get(allMyData.me.facebookID).status}}</label>
-        </div>
-      </ion-col>
-    </ion-row>
-
-    <ion-row>
-        <ion-col col-6 class="twoElements">
-          <div class="centerMe">
-            <label>Going</label>
-          </div>
-          <div class="centerMe">
-            <button ion-button [color]="primary" style="color: black;" (click)='changeAttendanceStatus("Going");'>
-              {{bar.peopleGoing}}
-            </button>
-          </div>
-          <div class="centerMe">
-              <label>{{bar.numberOfMenGoing}} M / {{bar.peopleGoing - bar.numberOfMenGoing}} F</label>
-          </div>
-        </ion-col>
-        <ion-col col-6 class="twoElements">
-          <div class="centerMe">
-            <label>Maybe</label>
-          </div>
-          <div class="centerMe">
-            <button ion-button [color]="primary" style="color: black;" (click)='changeAttendanceStatus("Maybe");'>
-              {{bar.peopleMaybe}}
-            </button>
-          </div>
-          <div class="centerMe">
-            <label>{{bar.numberOfMenMaybe}} M / {{bar.peopleMaybe - bar.numberOfMenMaybe}} F</label>
-          </div>
-        </ion-col>
-    </ion-row>
-
-    <ion-row>
+      <ion-row>
         <ion-col col-12 class="singleElement">
           <div class="centerMe">
-            <label>Details</label>
-          </div>
-          <div class="centerMe backgroundIncluded needsPadding">
-            <label style="white-space: pre-wrap;">{{bar.details == "null" ? "No details provided." : bar.details}}</label>
+            <h1 [style.color]="{'Bumpin': '#32db64', 'Heat\\'n-up': 'yellow', 'Decent': 'orange', 'Weak': '#f53d3d'}[bar.averageRating]">{{bar.name}}</h1>
           </div>
         </ion-col>
-    </ion-row>
+      </ion-row>
 
-    <ion-row id="schedule">
+      <ion-row>
         <ion-col col-12 class="singleElement">
           <div class="centerMe">
-            <label>Schedule</label>
+            <label>{{bar.numberOfPeopleAtBar}} people are at this bar</label>
           </div>
-          <div class="centerMe backgroundIncluded needsPadding">
-            <div>
-              <div class="dayCol">
-                <div class="rowForDay">
-                  <label class="dayLabel">Monday</label>
-                </div>
-                <div class="rowForDay">
-                  <label class="dayLabel">Tuesday</label>
-                </div>
-                <div class="rowForDay">
-                  <label class="dayLabel">Wednesday</label>
-                </div>
-                <div class="rowForDay">
-                  <label class="dayLabel">Thursday</label>
-                </div>
-                <div class="rowForDay">
-                  <label class="dayLabel">Friday</label>
-                </div>
-                <div class="rowForDay">
-                  <label class="dayLabel">Saturday</label>
-                </div>
-                <div class="rowForDay">
-                  <label class="dayLabel">Sunday</label>
-                </div>
-              </div>
+        </ion-col>
+      </ion-row>
 
-              <div class="timeCol">
-                <div class="rowForTime">
-                  <label class="timeLabel">{{bar.schedule.get("Monday").open}}</label>
+      <ion-row>
+        <ion-col col-6 class="twoElementsSmall">
+          <div class="centerMe">
+              <label>{{bar.percentageOfMen}}% Men</label>
+          </div>
+        </ion-col>
+        <ion-col col-6 class="twoElementsSmall">
+          <div class="centerMe">
+              <label>{{bar.percentageOfWomen}}% Women</label>
+          </div>
+        </ion-col>
+      </ion-row>
+
+      <ion-row>
+        <ion-col col-3 class="fourElements">
+          <div class="centerMe">
+            <label>Bumpin</label>
+          </div>
+          <div class="centerMe">
+            <button ion-button [disabled]="userIsWithinVicinityDistanceOfThisBar(bar) == false ? true : false" [color]="primary" style="color: black;" (click)='rateBar("Bumpin");'>
+              {{bar.bumpinRatings}}
+            </button>
+          </div>
+        </ion-col>
+        <ion-col col-3 class="fourElements">
+          <div class="centerMe">
+            <label style="color: yellow;">Heat'n-up</label>
+          </div>
+          <div class="centerMe">
+            <button ion-button [disabled]="userIsWithinVicinityDistanceOfThisBar(bar) == false ? true : false" [color]="primary" style="color: black;" (click)='rateBar("Heat&#39;n-up");'>
+              {{bar.heatingUpRatings}}
+            </button>
+          </div>
+        </ion-col>
+        <ion-col col-3 class="fourElements">
+          <div class="centerMe">
+            <label style="color: orange;">Decent</label>
+          </div>
+          <div class="centerMe">
+            <button ion-button [disabled]="userIsWithinVicinityDistanceOfThisBar(bar) == false ? true : false" [color]="primary" style="color: black;" (click)='rateBar("Decent");'>
+              {{bar.decentRatings}}
+            </button>
+          </div>
+        </ion-col>
+        <ion-col col-3 class="fourElements">
+          <div class="centerMe">
+            <label style="color: #f53d3d;">Weak</label>
+          </div>
+          <div class="centerMe">
+            <button ion-button [disabled]="userIsWithinVicinityDistanceOfThisBar(bar) == false ? true : false" [color]="primary" style="color: black;" (click)='rateBar("Weak");'>
+              {{bar.weakRatings}}
+            </button>
+          </div>
+        </ion-col>
+      </ion-row>
+
+      <ion-row>
+        <ion-col col-6 class="twoElementsSmall">
+          <div class="centerMe">
+              <label>Your Rating: {{ bar.attendees.has(allMyData.me.facebookID) == false ? "None" : bar.attendees.get(allMyData.me.facebookID).rating}}</label>
+          </div>
+        </ion-col>
+        <ion-col col-6 class="twoElementsSmall">
+          <div class="centerMe">
+              <label>Your Status: {{ bar.attendees.has(allMyData.me.facebookID) == false ? "None" : bar.attendees.get(allMyData.me.facebookID).status}}</label>
+          </div>
+        </ion-col>
+      </ion-row>
+
+      <ion-row>
+          <ion-col col-6 class="twoElements">
+            <div class="centerMe">
+              <label>Going</label>
+            </div>
+            <div class="centerMe">
+              <button ion-button [color]="primary" style="color: black;" (click)='changeAttendanceStatus("Going");'>
+                {{bar.peopleGoing}}
+              </button>
+            </div>
+            <div class="centerMe">
+                <label>{{bar.numberOfMenGoing}} M / {{bar.peopleGoing - bar.numberOfMenGoing}} F</label>
+            </div>
+          </ion-col>
+          <ion-col col-6 class="twoElements">
+            <div class="centerMe">
+              <label>Maybe</label>
+            </div>
+            <div class="centerMe">
+              <button ion-button [color]="primary" style="color: black;" (click)='changeAttendanceStatus("Maybe");'>
+                {{bar.peopleMaybe}}
+              </button>
+            </div>
+            <div class="centerMe">
+              <label>{{bar.numberOfMenMaybe}} M / {{bar.peopleMaybe - bar.numberOfMenMaybe}} F</label>
+            </div>
+          </ion-col>
+      </ion-row>
+
+      <ion-row>
+          <ion-col col-12 class="singleElement">
+            <div class="centerMe">
+              <label>Details</label>
+            </div>
+            <div class="centerMe backgroundIncluded needsPadding">
+              <label style="white-space: pre-wrap;">{{bar.details == "null" ? "No details provided." : bar.details}}</label>
+            </div>
+          </ion-col>
+      </ion-row>
+
+      <ion-row id="schedule">
+          <ion-col col-12 class="singleElement">
+            <div class="centerMe">
+              <label>Schedule</label>
+            </div>
+            <div class="centerMe backgroundIncluded needsPadding">
+              <div>
+                <div class="dayCol">
+                  <div class="rowForDay">
+                    <label class="dayLabel">Monday</label>
+                  </div>
+                  <div class="rowForDay">
+                    <label class="dayLabel">Tuesday</label>
+                  </div>
+                  <div class="rowForDay">
+                    <label class="dayLabel">Wednesday</label>
+                  </div>
+                  <div class="rowForDay">
+                    <label class="dayLabel">Thursday</label>
+                  </div>
+                  <div class="rowForDay">
+                    <label class="dayLabel">Friday</label>
+                  </div>
+                  <div class="rowForDay">
+                    <label class="dayLabel">Saturday</label>
+                  </div>
+                  <div class="rowForDay">
+                    <label class="dayLabel">Sunday</label>
+                  </div>
                 </div>
-                <div class="rowForTime">
-                  <label class="timeLabel">{{bar.schedule.get("Tuesday").open}}</label>
-                </div>
-                <div class="rowForTime">
-                  <label class="timeLabel">{{bar.schedule.get("Wednesday").open}}</label>
-                </div>
-                <div class="rowForTime">
-                  <label class="timeLabel">{{bar.schedule.get("Thursday").open}}</label>
-                </div>
-                <div class="rowForTime">
-                  <label class="timeLabel">{{bar.schedule.get("Friday").open}}</label>
-                </div>
-                <div class="rowForTime">
-                  <label class="timeLabel">{{bar.schedule.get("Saturday").open}}</label>
-                </div>
-                <div class="rowForTime">
-                  <label class="timeLabel">{{bar.schedule.get("Sunday").open}}</label>
+
+                <div class="timeCol">
+                  <div class="rowForTime">
+                    <label class="timeLabel">{{bar.schedule.get("Monday").open}}</label>
+                  </div>
+                  <div class="rowForTime">
+                    <label class="timeLabel">{{bar.schedule.get("Tuesday").open}}</label>
+                  </div>
+                  <div class="rowForTime">
+                    <label class="timeLabel">{{bar.schedule.get("Wednesday").open}}</label>
+                  </div>
+                  <div class="rowForTime">
+                    <label class="timeLabel">{{bar.schedule.get("Thursday").open}}</label>
+                  </div>
+                  <div class="rowForTime">
+                    <label class="timeLabel">{{bar.schedule.get("Friday").open}}</label>
+                  </div>
+                  <div class="rowForTime">
+                    <label class="timeLabel">{{bar.schedule.get("Saturday").open}}</label>
+                  </div>
+                  <div class="rowForTime">
+                    <label class="timeLabel">{{bar.schedule.get("Sunday").open}}</label>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
+          </ion-col>
+      </ion-row>
+
+      <ion-row>
+          <ion-col col-12 class="singleElement">
+            <div class="centerMe">
+              <label>Phone Number</label>
+            </div>
+            <div class="centerMe backgroundIncluded needsPadding">
+              <label style="white-space: pre-wrap;">{{bar.phoneNumber}}</label>
+            </div>
+          </ion-col>
+      </ion-row>
+
+      <ion-row>
+          <ion-col col-12 class="singleElement">
+            <div class="centerMe">
+              <label>Address</label>
+            </div>
+            <div class="centerMe backgroundIncluded needsPadding">
+              <label>{{bar.address}}</label>
+            </div>
+          </ion-col>
+      </ion-row>
+
+      <ion-row>
+        <ion-col col-12>
+          <button ion-button block [disabled]="iAmHostingThisBar" [color]="primary" style="color: black;" (click)='goToClaimBarPage();'>
+            Claim This Bar
+          </button>
         </ion-col>
-    </ion-row>
+      </ion-row>
 
-    <ion-row>
-        <ion-col col-12 class="singleElement">
-          <div class="centerMe">
-            <label>Phone Number</label>
-          </div>
-          <div class="centerMe backgroundIncluded needsPadding">
-            <label style="white-space: pre-wrap;">{{bar.phoneNumber}}</label>
-          </div>
-        </ion-col>
-    </ion-row>
+    </ion-grid>
+  </ion-scroll>
 
-    <ion-row>
-        <ion-col col-12 class="singleElement">
-          <div class="centerMe">
-            <label>Address</label>
-          </div>
-          <div class="centerMe backgroundIncluded needsPadding">
-            <label>{{bar.address}}</label>
-          </div>
-        </ion-col>
-    </ion-row>
-
-    <ion-row>
-      <ion-col col-12>
-        <button ion-button block [disabled]="iAmHostingThisBar" [color]="primary" style="color: black;" (click)='goToClaimBarPage();'>
-          Claim This Bar
-        </button>
-      </ion-col>
-    </ion-row>
-
-  </ion-grid>
-</ion-scroll>
+</div>

@@ -9,7 +9,7 @@
       <ion-row>
         <ion-col col-12 class="singleElement">
           <div class="centerMe">
-            <h1 [style.color]="{'Bumpin': '#32db64', 'Heat\\'n-up': 'yellow', 'Decent': 'orange', 'Weak': '#f53d3d'}[party.averageRating]">{{party.title}}</h1>
+            <h1 style="white-space: pre-wrap;" [style.color]="{'Bumpin': '#32db64', 'Heat\\'n-up': 'yellow', 'Decent': 'orange', 'Weak': '#f53d3d'}[party.averageRating]">{{party.title}}</h1>
           </div>
         </ion-col>
       </ion-row>
@@ -196,7 +196,7 @@
               <label>Address</label>
             </div>
             <div class="centerMe backgroundIncluded needsPadding">
-              <label>{{party.address}}</label>
+              <label style="white-space: pre-wrap;">{{party.address}}</label>
             </div>
           </ion-col>
       </ion-row>

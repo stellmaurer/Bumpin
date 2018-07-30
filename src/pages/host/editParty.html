@@ -40,9 +40,11 @@
       <ion-input type="text" [(ngModel)]="party.address" (blur)="updateMapMarker();" (keyup)="keyUpInAddressInput($event);"></ion-input>
     </ion-item>
   
-    <div class="theMap oneElement">
-        <div #map id="mapForEditParty"></div>
-    </div>
+    <ion-item>
+      <div class="theMap oneElement">
+          <div #map id="mapForEditParty"></div>
+      </div>
+    </ion-item>
   
     <ion-item>
       <ion-label>Start Date</ion-label>

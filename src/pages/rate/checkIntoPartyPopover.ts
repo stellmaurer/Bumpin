@@ -80,5 +80,6 @@ export class CheckIntoPartyPopoverPage {
     .catch((err) => {
         this.allMyData.logError(this.tabName, "server", "rateParty query error : Err msg = " + err, this.http);
     });
+    this.locationTracker.checkIn(this.party);
   }
 }

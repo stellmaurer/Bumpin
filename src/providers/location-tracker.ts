@@ -57,7 +57,7 @@ export class LocationTracker {
   private sixtyMinutesInMillis : number;
  
   constructor(private allMyData : AllMyData, private storage: Storage, private localNotifications: LocalNotifications, private diagnostic: Diagnostic, private events : Events, public zone: NgZone, private backgroundGeolocation: BackgroundGeolocation, private geolocation: Geolocation, private http : Http) {
-    this.vicinityDistance = 800;
+    this.vicinityDistance = 200;
     this.thirtyMinutesInMillis = 1800000;
     this.sixtyMinutesInMillis = 3600000;
     this.partiesAndBarsThatAreInMyVicinity = new Map<string,any>();

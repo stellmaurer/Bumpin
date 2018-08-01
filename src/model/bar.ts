@@ -78,8 +78,8 @@ export class Bar {
         this.numberOfPeopleWhoSaidTheresACoverInThePastHour = 0;
         this.numberOfPeopleWhoHaveCheckedInInTheLast10Minutes = 0;
         this.numberOfPeopleWhoSaidTheresALineInThePast10Minutes = 0;
-        this.isThereACover = "Unsure";
-        this.isThereALine = "Unsure";
+        this.isThereACover = "unsure";
+        this.isThereALine = "unsure";
     }
 
     public createShallowCopy() : Bar{
@@ -183,8 +183,8 @@ export class Bar {
         this.numberOfPeopleWhoSaidTheresACoverInThePastHour = 0;
         this.numberOfPeopleWhoHaveCheckedInInTheLast10Minutes = 0;
         this.numberOfPeopleWhoSaidTheresALineInThePast10Minutes = 0;
-        this.isThereACover = "Unsure";
-        this.isThereALine = "Unsure";
+        this.isThereACover = "unsure";
+        this.isThereALine = "unsure";
 
         let numberOfMen = 0;
         this.attendees.forEach((value: Attendee, key: string) => {
@@ -295,23 +295,23 @@ export class Bar {
         if(this.numberOfPeopleWhoHaveCheckedInInThePastHour > 0){
             let percentageOfPeopleInTheLastHourWhoSaidTheresACover = Math.round((this.numberOfPeopleWhoSaidTheresACoverInThePastHour / this.numberOfPeopleWhoHaveCheckedInInThePastHour) * 100);
             if(percentageOfPeopleInTheLastHourWhoSaidTheresACover >= 10){
-                this.isThereACover = "Yes";
+                this.isThereACover = "yes";
             }else{
-                this.isThereACover = "No";
+                this.isThereACover = "no";
             }
         }else{
-            this.isThereACover = "Unsure";
+            this.isThereACover = "unsure";
         }
 
         if(this.numberOfPeopleWhoHaveCheckedInInTheLast10Minutes > 0){
             let percentageOfPeopleInTheLast10MinutesWhoSayTheresALine = Math.round((this.numberOfPeopleWhoSaidTheresALineInThePast10Minutes / this.numberOfPeopleWhoHaveCheckedInInTheLast10Minutes) * 100);
             if(percentageOfPeopleInTheLast10MinutesWhoSayTheresALine >= 5){
-                this.isThereALine = "Yes";
+                this.isThereALine = "yes";
             }else{
-                this.isThereALine = "No";
+                this.isThereALine = "no";
             }
         }else{
-            this.isThereALine = "Unsure";
+            this.isThereALine = "unsure";
         }
     }
 }

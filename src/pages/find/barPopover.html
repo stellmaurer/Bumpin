@@ -25,12 +25,12 @@
       <ion-row>
         <ion-col col-6 class="twoElementsSmall">
           <div class="centerMe">
-              <label>{{bar.percentageOfMen}}% Men</label>
+              <label>{{bar.percentageOfMen}}% men</label>
           </div>
         </ion-col>
         <ion-col col-6 class="twoElementsSmall">
           <div class="centerMe">
-              <label>{{bar.percentageOfWomen}}% Women</label>
+              <label>{{bar.percentageOfWomen}}% women</label>
           </div>
         </ion-col>
       </ion-row>
@@ -41,7 +41,7 @@
               <label>
                 Line:
               </label>
-              <label [style.color]="{'No': '#32db64', 'Unsure': '#32db64', 'Yes': '#f53d3d'}[bar.isThereALine]">
+              <label [style.color]="{'no': '#32db64', 'unsure': '#32db64', 'yes': '#f53d3d'}[bar.isThereALine]">
                 {{bar.isThereALine}}
               </label>
           </span>
@@ -51,7 +51,7 @@
               <label>
                 Cover:
               </label>
-              <label [style.color]="{'No': '#32db64', 'Unsure': '#32db64', 'Yes': '#f53d3d'}[bar.isThereACover]">
+              <label [style.color]="{'no': '#32db64', 'unsure': '#32db64', 'yes': '#f53d3d'}[bar.isThereACover]">
                 {{bar.isThereACover}}
               </label>
           </span>
@@ -108,8 +108,7 @@
           </div>
           <div class="centerMe">
             <button ion-button [disabled]="userIsWithinVicinityDistanceOfThisBar(bar) == false ? true : false"
-                               [color]="bar.attendees.has(allMyData.me.facebookID) == false ? 'primary' : {false: 'primary', true: 'danger'}[bar.attendees.get(allMyData.me.facebookID).saidThereWasALine]"
-                               [style.color]="bar.attendees.has(allMyData.me.facebookID) == false ? 'black' : {false: 'black', true: 'white'}[bar.attendees.get(allMyData.me.facebookID).saidThereWasALine]"
+                               [style.color]="'black'"
                                (click)='toggleLineInfoForBar();'>
               {{bar.attendees.has(allMyData.me.facebookID) == false ? "no" : {false: 'no', true: 'yes'}[bar.attendees.get(allMyData.me.facebookID).saidThereWasALine]}}
             </button>
@@ -121,8 +120,7 @@
           </div>
           <div class="centerMe">
               <button ion-button [disabled]="userIsWithinVicinityDistanceOfThisBar(bar) == false ? true : false"
-                                 [style.color]="bar.attendees.has(allMyData.me.facebookID) == false ? 'black' : {false: 'black', true: 'white'}[bar.attendees.get(allMyData.me.facebookID).saidThereWasACover]"
-                                 [color]="bar.attendees.has(allMyData.me.facebookID) == false ? 'primary' : {false: 'primary', true: 'danger'}[bar.attendees.get(allMyData.me.facebookID).saidThereWasACover]"
+                                 [style.color]="'black'"
                                  (click)='toggleCoverInfoForBar();'>
                 {{bar.attendees.has(allMyData.me.facebookID) == false ? "no" : {false: 'no', true: 'yes'}[bar.attendees.get(allMyData.me.facebookID).saidThereWasACover]}}
               </button>

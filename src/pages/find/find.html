@@ -2,8 +2,8 @@
   <ion-navbar>
     
     <ion-buttons left>
-        <button ion-button [style.color]="allMyData.me.status.goingOut == 'Yes' ? '#32db64' : '#f53d3d'" style="background-color: #222;" (click)='changeMyGoingOutStatus();'>
-            {{ allMyData.me.status.goingOut == "Yes" ? "I'm going out" : "I'm not going out"}}
+        <button ion-button [style.color]="allMyData.me.status.get('goingOut') == 'Yes' ? '#32db64' : '#f53d3d'" style="background-color: #222;" (click)='changeMyGoingOutStatus();'>
+            {{ allMyData.me.status.get("goingOut") == "Yes" ? "I'm going out" : "I'm not going out"}}
         </button>
     </ion-buttons>
 

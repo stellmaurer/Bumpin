@@ -69,7 +69,31 @@ export class MorePage {
     });
   }
 
+  ngOnInit(){
+    this.events.subscribe("aDifferentUserJustLoggedIn",() => {
+      console.log("more.ts: a different user just logged in");
+      this.currentlyLoadingData = true;
+
+      this.allMyData.refreshPerson(this.http)
+      .then(thePromise => {
+        this.allMyData.getNotifications(this.http)
+        .then(thePromise => {
+          this.currentlyLoadingData = false;
+        })
+        .catch((err) => {
+          this.currentlyLoadingData = false;
+          this.allMyData.logError(this.tabName, "server", "getNotifications query error: Err msg = " + err, this.http);
+        });
+      })
+      .catch((err) => {
+        this.currentlyLoadingData = false;
+        this.allMyData.logError(this.tabName, "server", "refreshPerson query error: Err msg = " + err, this.http);
+      });
+    });
+  }
+
   ionViewDidEnter(){
+    console.log("more.ts: in ionViewDidEnter");
     this.currentlyLoadingData = true;
 
     Promise.all([this.allMyData.getNotifications(this.http),

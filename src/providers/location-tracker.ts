@@ -53,10 +53,13 @@ export class LocationTracker {
   public userSaidTheyAreNotAtAPartyOrBar: boolean;
   public numberOfActiveNotificationTimers: number;
   private lastNotificationWasAt: Date;
-  
+  private thirtyMinutesInMillis : number;
+  private sixtyMinutesInMillis : number;
  
   constructor(private allMyData : AllMyData, private storage: Storage, private localNotifications: LocalNotifications, private diagnostic: Diagnostic, private events : Events, public zone: NgZone, private backgroundGeolocation: BackgroundGeolocation, private geolocation: Geolocation, private http : Http) {
-    this.vicinityDistance = 2000;
+    this.vicinityDistance = 200;
+    this.thirtyMinutesInMillis = 1800000;
+    this.sixtyMinutesInMillis = 3600000;
     this.partiesAndBarsThatAreInMyVicinity = new Map<string,any>();
     this.mapOfTimeUserEnteredVicinityDistanceOfPartiesAndBars = new Map<string,Date>();
     this.closestPartyOrBar = null;
@@ -74,6 +77,7 @@ export class LocationTracker {
     this.partyUserIsCheckedInto = null;
     this.barUserIsCheckedInto = null;
     this.lastNotificationWasAt = yesterday;
+    this.geolocationSubscription = null;
 
     this.storage.get("userLastCheckedInAt")
     .then((val : Date) => {
@@ -163,7 +167,7 @@ export class LocationTracker {
       }).catch((err) => {
         this.allMyData.logError(this.analyticsID, "client", "checkLocationPermissions error : Err msg = " + err, this.http);
       });
-    }, 500);
+    }, 1000);
   }
 
   actuallyStartTracking(){
@@ -207,7 +211,7 @@ export class LocationTracker {
 
       /*
       if(user is checked-in){
-        if(user is NOT within 300m of the checked-in bar){
+        if(user is NOT within vicinity distance of the checked-in bar){
           userCheckedIn = false
           update that they aren’t at the bar
           cancel any scheduled notifications
@@ -285,7 +289,7 @@ export class LocationTracker {
       }
 
       /*
-      for each bar within 300 meters of user {
+      for each bar within vicinity distance of user {
         if(bar has a timer for it already){
           If(timer has been active for more than 5 minutes AND closestBar is not null AND user is NOT checked in){
             clear ALL timers
@@ -310,14 +314,14 @@ export class LocationTracker {
                 this.mapOfTimeUserEnteredVicinityDistanceOfPartiesAndBars = new Map<string,Date>();
                 // assume user is at the closest party to them
                 this.attendanceTimer1 = this.createTimerForUpdatingAttendance(0);
-                this.attendanceTimer2 = this.createTimerForUpdatingAttendance(60000); // change to 30 min
-                this.attendanceTimer3 = this.createTimerForUpdatingAttendance(120000); // change to 60 min
+                this.attendanceTimer2 = this.createTimerForUpdatingAttendance(this.thirtyMinutesInMillis); // 30 min
+                this.attendanceTimer3 = this.createTimerForUpdatingAttendance(this.sixtyMinutesInMillis); // 60 min
                 // send a check-in notification to them (asking them if they are at that closest party to them)
                 if(this.lastNotificationWasMoreThan30MinutesAgo){
                   this.notificationTimer1 = this.createTimerForNotification(0);
                 }
-                this.notificationTimer2 = this.createTimerForNotification(60000); // change to 30 min
-                this.notificationTimer3 = this.createTimerForNotification(120000); // change to 60 min
+                this.notificationTimer2 = this.createTimerForNotification(this.thirtyMinutesInMillis); // 30 min
+                this.notificationTimer3 = this.createTimerForNotification(this.sixtyMinutesInMillis); // 60 min
                 notificationHasBeenScheduled = true;
             }
           }else{
@@ -332,14 +336,14 @@ export class LocationTracker {
                 this.mapOfTimeUserEnteredVicinityDistanceOfPartiesAndBars = new Map<string,Date>();
                 // assume user is at the closest bar to them
                 this.attendanceTimer1 = this.createTimerForUpdatingAttendance(0);
-                this.attendanceTimer2 = this.createTimerForUpdatingAttendance(60000); // change to 30 min
-                this.attendanceTimer3 = this.createTimerForUpdatingAttendance(120000); // change to 60 min
+                this.attendanceTimer2 = this.createTimerForUpdatingAttendance(this.thirtyMinutesInMillis); // 30 min
+                this.attendanceTimer3 = this.createTimerForUpdatingAttendance(this.sixtyMinutesInMillis); // 60 min
                 // send a check-in notification to them (asking them if they are at that closest bar to them)
                 if(this.lastNotificationWasMoreThan30MinutesAgo){
                   this.notificationTimer1 = this.createTimerForNotification(0);
                 }
-                this.notificationTimer2 = this.createTimerForNotification(60000); // change to 30 min
-                this.notificationTimer3 = this.createTimerForNotification(120000); // change to 60 min
+                this.notificationTimer2 = this.createTimerForNotification(this.thirtyMinutesInMillis); // 30 min
+                this.notificationTimer3 = this.createTimerForNotification(this.sixtyMinutesInMillis); // 60 min
                 notificationHasBeenScheduled = true;
             }
           }else{
@@ -407,11 +411,11 @@ export class LocationTracker {
      if((this.numberOfActiveNotificationTimers == 0) && (this.userIsCheckedIn == false)){
         let earliestTimeUserEnteredVicinity = this.determineWhenTheFirstNotificationShouldBeTriggered();
         let timeToTriggerFirstNotification = new Date(earliestTimeUserEnteredVicinity);
-        timeToTriggerFirstNotification.setSeconds(earliestTimeUserEnteredVicinity.getSeconds() + 30); // change to 5 min
+        timeToTriggerFirstNotification.setMinutes(earliestTimeUserEnteredVicinity.getMinutes() + 5);
         let timeToTriggerSecondNotification = new Date(earliestTimeUserEnteredVicinity);
-        timeToTriggerSecondNotification.setSeconds(earliestTimeUserEnteredVicinity.getSeconds() + 90)// change to 30 min
+        timeToTriggerSecondNotification.setMinutes(earliestTimeUserEnteredVicinity.getMinutes() + 30);
         let timeToTriggerThirdNotification = new Date(earliestTimeUserEnteredVicinity);
-        timeToTriggerThirdNotification.setMinutes(earliestTimeUserEnteredVicinity.getMinutes() + 2) // change to 60
+        timeToTriggerThirdNotification.setMinutes(earliestTimeUserEnteredVicinity.getMinutes() + 60);
         
         if(this.partyOrBarToSayImAt != null){
           this.attendanceTimer1 = this.createTimerForUpdatingAttendance(timeToTriggerFirstNotification.getTime() - new Date().getTime()); // ~5 min
@@ -425,6 +429,7 @@ export class LocationTracker {
         }
       }
 
+      /*
       if(notificationHasBeenScheduled == false){
         let closestBar : Bar = null;
         let min = Number.MAX_VALUE;
@@ -459,6 +464,7 @@ export class LocationTracker {
           });
         }
       }
+      */
 
       // IMPORTANT:  You must execute the finish method here to inform the native plugin that you're finished,
       // and the background-task may be completed.  You must do this regardless if your HTTP request is successful or not.
@@ -486,14 +492,15 @@ export class LocationTracker {
   }
 
   stopTracking() {
-    if(this.geolocationSubscription !== undefined){
+    if(this.geolocationSubscription != null){
       this.geolocationSubscription.unsubscribe();
+      this.geolocationSubscription = null;
+      this.backgroundGeolocation.stop();
     }
-    this.backgroundGeolocation.stop();
   }
 
   private lastNotificationWasMoreThan30MinutesAgo(){
-    if(((new Date().getTime()) - this.lastNotificationWasAt.getTime()) > 30000){ // change to 30 minutes
+    if(((new Date().getTime()) - this.lastNotificationWasAt.getTime()) > this.thirtyMinutesInMillis){ // change to 30 minutes
       return true;
     }
     return false;
@@ -527,6 +534,10 @@ export class LocationTracker {
         this.updateWhereIAmAt(partyOrBar.partyID);
     }
     if(partyOrBar instanceof Bar){
+        this.allMyData.checkIntoBar(partyOrBar, this.http)
+        .catch((err) => {
+          this.allMyData.logError(this.analyticsID, "server", "Issue checking into bar : Err msg = " + err, this.http);
+        });
         this.userLastCheckedInAt = new Date();
         this.userIsCheckedIn = true;
         this.partyUserIsCheckedInto = null;
@@ -537,8 +548,8 @@ export class LocationTracker {
         this.allMyData.storage.set("barUserIsCheckedInto", partyOrBar.barID);
         this.updateWhereIAmAt(partyOrBar.barID);
     }
-    this.notificationTimer1 = this.createTimerForNotification(60000); // change to 30 min
-    this.attendanceTimer1 = this.createTimerForUpdatingAttendance(60000); // change to 30 min
+    this.notificationTimer1 = this.createTimerForNotification(this.thirtyMinutesInMillis);
+    this.attendanceTimer1 = this.createTimerForUpdatingAttendance(this.thirtyMinutesInMillis);
   }
 
   public updateWhereIAmAt(partyOrBarToSayImAt : string){
@@ -615,7 +626,7 @@ export class LocationTracker {
   }
 
   createTimerForClearingUserSaidTheyAreNotAtAPartyOrBar(){
-    let oneHourFromNow = 90000; // change to 36000000
+    let oneHourFromNow = this.sixtyMinutesInMillis;
     clearTimeout(this.userSaidTheyAreNotAtAPartyOrBarTimer);
     this.userSaidTheyAreNotAtAPartyOrBarTimer = setTimeout(() => {
       this.userSaidTheyAreNotAtAPartyOrBar = false
@@ -774,7 +785,7 @@ export class LocationTracker {
   }
 
   userHasBeenWithinVicinityDistanceOfPartyOrBarForMoreThan5Minutes(partyOrBar : any){
-    let fiveMinInMilli = 30000; // change back to 300000
+    let fiveMinInMilli = 300000;
     if(partyOrBar instanceof Bar){
       if(((new Date().getTime()) - this.mapOfTimeUserEnteredVicinityDistanceOfPartiesAndBars.get(partyOrBar.barID).getTime()) > fiveMinInMilli){
         return true;

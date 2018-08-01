@@ -32,6 +32,8 @@ export class Login {
           // request, and the time the access token 
           // and signed request each expire
           let accessToken = response.authResponse.accessToken;
+          console.log("access_token=" + accessToken);
+          this.allMyData.facebookAccessToken = accessToken;
           this.createOrUpdatePersonWithFacebookInfo(accessToken)
           .then((res) => {
             resolve("Login process completed.");
@@ -50,6 +52,7 @@ export class Login {
           this.fb.login(['public_profile', 'user_friends'])
           .then((response: FacebookLoginResponse) => {
             let accessToken = response.authResponse.accessToken;
+            this.allMyData.facebookAccessToken = accessToken;
             this.createOrUpdatePersonWithFacebookInfo(accessToken)
             .then((res) => {
               resolve("Login process completed.");
@@ -66,6 +69,7 @@ export class Login {
               this.fb.login(['public_profile', 'user_friends'])
               .then((response: FacebookLoginResponse) => {
                 let accessToken = response.authResponse.accessToken;
+                this.allMyData.facebookAccessToken = accessToken;
                 this.createOrUpdatePersonWithFacebookInfo(accessToken)
                 .then((res) => {
                   resolve("Login process completed.");
@@ -96,20 +100,21 @@ export class Login {
 
   public logout(){
     return new Promise((resolve, reject) => {
-      this.fb.logout()
-      .then((response: FacebookLoginResponse) => {
-        this.login()
-        .then((res) => {
-          this.events.publish("aDifferentUserJustLoggedIn");
-          resolve("Logged out and back in successfully.");
+        this.fb.logout()
+        .then((response: FacebookLoginResponse) => {
+          this.login()
+          .then((res) => {
+            this.events.publish("aDifferentUserJustLoggedIn");
+            resolve("Logged out and back in successfully.");
+          })
+          .catch((err) => {
+            reject(err);
+          });
         })
-        .catch((err) => {
-          reject(err);
+        .catch(e => {
+          reject(e);
         });
-      })
-      .catch(e => {
-        reject(e);
-      });
+        resolve("Login process completed.");
     });
   }
 

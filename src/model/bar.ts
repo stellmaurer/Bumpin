@@ -39,10 +39,12 @@ export class Bar {
     public numberOfMenMaybe : number;
     public percentageOfMen : number;
     public percentageOfWomen : number;
-    public percentageOfMenGoing : number;
-    public percentageOfWomenGoing : number;
-    public percentageOfMenMaybe : number;
-    public percentageOfWomenMaybe : number;
+    public numberOfPeopleWhoHaveCheckedInInThePastHour : number;
+    public numberOfPeopleWhoSaidTheresACoverInThePastHour : number;
+    public numberOfPeopleWhoHaveCheckedInInTheLast10Minutes : number;
+    public numberOfPeopleWhoSaidTheresALineInThePast10Minutes : number;
+    public isThereACover : string;
+    public isThereALine : string;
 
     constructor() {
         this.key = "";
@@ -72,10 +74,12 @@ export class Bar {
         this.numberOfMenMaybe = 0;
         this.percentageOfMen = 0;
         this.percentageOfWomen = 0;
-        this.percentageOfMenGoing = 0;
-        this.percentageOfWomenGoing = 0;
-        this.percentageOfMenMaybe = 0;
-        this.percentageOfWomenMaybe = 0;
+        this.numberOfPeopleWhoHaveCheckedInInThePastHour = 0;
+        this.numberOfPeopleWhoSaidTheresACoverInThePastHour = 0;
+        this.numberOfPeopleWhoHaveCheckedInInTheLast10Minutes = 0;
+        this.numberOfPeopleWhoSaidTheresALineInThePast10Minutes = 0;
+        this.isThereACover = "unsure";
+        this.isThereALine = "unsure";
     }
 
     public createShallowCopy() : Bar{
@@ -173,12 +177,14 @@ export class Bar {
         this.numberOfPeopleAtBar = 0;
         this.percentageOfMen = 0;
         this.percentageOfWomen = 0;
-        this.percentageOfMenGoing = 0;
-        this.percentageOfWomenGoing = 0;
-        this.percentageOfMenMaybe = 0;
-        this.percentageOfWomenMaybe = 0;
         this.numberOfMenGoing = 0;
         this.numberOfMenMaybe = 0;
+        this.numberOfPeopleWhoHaveCheckedInInThePastHour = 0;
+        this.numberOfPeopleWhoSaidTheresACoverInThePastHour = 0;
+        this.numberOfPeopleWhoHaveCheckedInInTheLast10Minutes = 0;
+        this.numberOfPeopleWhoSaidTheresALineInThePast10Minutes = 0;
+        this.isThereACover = "unsure";
+        this.isThereALine = "unsure";
 
         let numberOfMen = 0;
         this.attendees.forEach((value: Attendee, key: string) => {
@@ -239,21 +245,21 @@ export class Bar {
                     break;
                 }
             }
+
+            if(Utility.isCheckInTimeOfAttendeeWithinAnHourOfNow(attendee.timeOfCheckIn) == true){
+                this.numberOfPeopleWhoHaveCheckedInInThePastHour++;
+                if(attendee.saidThereWasACover){
+                    this.numberOfPeopleWhoSaidTheresACoverInThePastHour++;
+                }
+            }
+            if(Utility.isCheckInTimeOfAttendeeWithin10MinutesFromNow(attendee.timeOfCheckIn) == true){
+                this.numberOfPeopleWhoHaveCheckedInInTheLast10Minutes++;
+                if(attendee.saidThereWasALine){
+                    this.numberOfPeopleWhoSaidTheresALineInThePast10Minutes++;
+                }
+            }
         });
-        if(this.peopleGoing > 0){
-            this.percentageOfMenGoing = Math.round((this.numberOfMenGoing / this.peopleGoing) * 100);
-            this.percentageOfWomenGoing = 100 - this.percentageOfMenGoing;
-        }else{
-            this.percentageOfMenGoing = 0;
-            this.percentageOfWomenGoing = 0;
-        }
-        if(this.peopleMaybe > 0){
-            this.percentageOfMenMaybe = Math.round((this.numberOfMenMaybe / this.peopleMaybe) * 100);
-            this.percentageOfWomenMaybe = 100 - this.percentageOfMenMaybe;
-        }else{
-            this.percentageOfMenMaybe = 0;
-            this.percentageOfWomenMaybe = 0;
-        }
+        
         if(this.numberOfPeopleAtBar > 0){
             this.percentageOfMen = Math.round((numberOfMen / this.numberOfPeopleAtBar) * 100);
             this.percentageOfWomen = 100 - this.percentageOfMen;
@@ -285,6 +291,28 @@ export class Bar {
             this.averageRatingNumber = 0;
             this.averageRating = "Weak";
         }
+
+        if(this.numberOfPeopleWhoHaveCheckedInInThePastHour > 0){
+            let percentageOfPeopleInTheLastHourWhoSaidTheresACover = Math.round((this.numberOfPeopleWhoSaidTheresACoverInThePastHour / this.numberOfPeopleWhoHaveCheckedInInThePastHour) * 100);
+            if(percentageOfPeopleInTheLastHourWhoSaidTheresACover >= 10){
+                this.isThereACover = "yes";
+            }else{
+                this.isThereACover = "no";
+            }
+        }else{
+            this.isThereACover = "unsure";
+        }
+
+        if(this.numberOfPeopleWhoHaveCheckedInInTheLast10Minutes > 0){
+            let percentageOfPeopleInTheLast10MinutesWhoSayTheresALine = Math.round((this.numberOfPeopleWhoSaidTheresALineInThePast10Minutes / this.numberOfPeopleWhoHaveCheckedInInTheLast10Minutes) * 100);
+            if(percentageOfPeopleInTheLast10MinutesWhoSayTheresALine >= 5){
+                this.isThereALine = "yes";
+            }else{
+                this.isThereALine = "no";
+            }
+        }else{
+            this.isThereALine = "unsure";
+        }
     }
 }
 
@@ -296,6 +324,9 @@ export class Attendee {
     public status : string;
     public timeLastRated : string;
     public timeOfLastKnownLocation : string;
+    public timeOfCheckIn : string;
+    public saidThereWasACover : boolean;
+    public saidThereWasALine : boolean;
     constructor() {}
 }
 

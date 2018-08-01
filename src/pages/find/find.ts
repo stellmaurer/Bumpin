@@ -24,6 +24,7 @@ import { AlertController } from 'ionic-angular';
 import * as MarkerClusterer from 'node-js-marker-clusterer';
 import { Storage } from '@ionic/storage';
 import { BackgroundGeolocationResponse } from '@ionic-native/background-geolocation';
+import { Diagnostic } from '@ionic-native/diagnostic';
  
 declare var google;
 
@@ -72,7 +73,7 @@ export class FindPage {
   private bottomRightButtonExplanationIsActive : boolean;
   private tabsExplanationIsActive : boolean;
  
-  constructor(private allMyData : AllMyData, private storage: Storage, public alertCtrl: AlertController, public locationTracker: LocationTracker, private events : Events, private http:Http, public navCtrl: NavController, public popoverCtrl: PopoverController) {
+  constructor(private diagnostic: Diagnostic, private allMyData : AllMyData, private storage: Storage, public alertCtrl: AlertController, public locationTracker: LocationTracker, private events : Events, private http:Http, public navCtrl: NavController, public popoverCtrl: PopoverController) {
     this.overlayIsActive = false;
     this.mapExplanationIsActive = false;
     this.upperleftButtonExplanationIsActive = false;
@@ -172,10 +173,6 @@ export class FindPage {
     });
 
     this.events.subscribe("timeToRefreshPartyAndBarData",() => {
-      this.refreshPartyAndBarDataOnceFacebookIDAndLocationAreSet();
-    });
-
-    this.events.subscribe("aDifferentUserJustLoggedIn",() => {
       this.refreshPartyAndBarDataOnceFacebookIDAndLocationAreSet();
     });
 
@@ -282,7 +279,7 @@ export class FindPage {
 
   private changeMyGoingOutStatus(){
     let newStatus = "Unknown";
-    if(this.allMyData.me.status["goingOut"] == "Yes"){
+    if(this.allMyData.me.status.get("goingOut") == "Yes"){
       newStatus = "No";
     }else{
       newStatus = "Yes";
@@ -298,54 +295,73 @@ export class FindPage {
  
   private loadMap(){
     return new Promise((resolve, reject) => {
-      Geolocation.getCurrentPosition().then((position) => {
-        this.myCoordinates = {lat: position.coords.latitude, lng: position.coords.longitude};
-        let latLng = {lat: position.coords.latitude, lng: position.coords.longitude};
-  
-        let mapOptions = {
-          center: latLng,
-          zoom: 15,
-          mapTypeId: google.maps.MapTypeId.ROADMAP,
-          zoomControl: false,
-          mapTypeControl: false,
-          streetViewControl: false,
+      this.diagnostic.isLocationAuthorized()
+      .then((isLocationAuthorized : boolean) => {
+        if(isLocationAuthorized == true){
+          Geolocation.getCurrentPosition().then((position) => {
+            this.myCoordinates = {lat: position.coords.latitude, lng: position.coords.longitude};
+            this.setUpMapWithMyCoordinates(this.myCoordinates);
+            resolve("the google map has loaded");
+          }, (err) => {
+            this.myCoordinates = {lat: 40.082064, lng: -97.390820};
+            this.setUpMapWithGenericCoordinates(this.myCoordinates);
+            resolve("the google map has loaded after an error: " + err + 
+            ". This probably was caused by the user not allowing the app to use their location.");
+          });
+        }else{
+          this.myCoordinates = {lat: 40.082064, lng: -97.390820};
+          this.setUpMapWithGenericCoordinates(this.myCoordinates);
+          resolve("the google map has loaded");
         }
-        
-        this.map = new google.maps.Map(this.mapElement.nativeElement, mapOptions);
-        let image = 'assets/greencircle.png';
-        this.userLocationMarker = new google.maps.Marker({
-          map: this.map,
-          position: {lat: position.coords.latitude, lng: position.coords.longitude},
-          icon: image
-        });
-        this.markerCluster = new MarkerClusterer(this.map, [], {imagePath: 'assets/m', maxZoom: 14});
-        resolve("the google map has loaded");
-      }, (err) => {
-        // User probably didn't allow the app permission to access their location
+      }).catch((err) => {
         this.myCoordinates = {lat: 40.082064, lng: -97.390820};
-        let latLng = {lat: 40.082064, lng: -97.390820};
-
-        let mapOptions = {
-          center: latLng,
-          zoom: 3,
-          mapTypeId: google.maps.MapTypeId.ROADMAP,
-          zoomControl: false,
-          mapTypeControl: false,
-          streetViewControl: false,
-        }
-        
-        this.map = new google.maps.Map(this.mapElement.nativeElement, mapOptions);
-        let image = 'assets/greencircle.png';
-        this.userLocationMarker = new google.maps.Marker({
-          map: this.map,
-          position: {lat: 40.082064, lng: -97.390820},
-          icon: image
-        });
-        this.markerCluster = new MarkerClusterer(this.map, [], {imagePath: 'assets/m', maxZoom: 14});
-        resolve("the google map has loaded after an error: " + err + 
-        ". This probably was caused by the user not allowing the app to use their location.");
+        this.setUpMapWithGenericCoordinates(this.myCoordinates);
+        this.allMyData.logError(this.tabName, "client", "checkLocationPermissions error : Err msg = " + err, this.http);
+        resolve("the google map has loaded");
       });
+      
     });
+  }
+
+  private setUpMapWithMyCoordinates(coordinates : any){
+
+      let mapOptions = {
+        center: coordinates,
+        zoom: 15,
+        mapTypeId: google.maps.MapTypeId.ROADMAP,
+        zoomControl: false,
+        mapTypeControl: false,
+        streetViewControl: false,
+      }
+      
+      this.map = new google.maps.Map(this.mapElement.nativeElement, mapOptions);
+      let image = 'assets/greencircle.png';
+      this.userLocationMarker = new google.maps.Marker({
+        map: this.map,
+        position: coordinates,
+        icon: image
+      });
+      this.markerCluster = new MarkerClusterer(this.map, [], {imagePath: 'assets/m', maxZoom: 14});
+  }
+
+  private setUpMapWithGenericCoordinates(coordinates : any){
+    let mapOptions = {
+      center: coordinates,
+      zoom: 3,
+      mapTypeId: google.maps.MapTypeId.ROADMAP,
+      zoomControl: false,
+      mapTypeControl: false,
+      streetViewControl: false,
+    }
+    
+    this.map = new google.maps.Map(this.mapElement.nativeElement, mapOptions);
+    let image = 'assets/greencircle.png';
+    this.userLocationMarker = new google.maps.Marker({
+      map: this.map,
+      position: coordinates,
+      icon: image
+    });
+    this.markerCluster = new MarkerClusterer(this.map, [], {imagePath: 'assets/m', maxZoom: 14});
   }
 
   private addCenterControlToMap() {
@@ -726,7 +742,7 @@ export class FindPage {
 
   private updateMyGoingOutStatusIfNeeded(){
     let overallStatusNumber = 0;
-    if(this.allMyData.me.status["manuallySet"] == "No"){
+    if(this.allMyData.me.status.get("manuallySet") == "No"){
       for(let i = 0; i < this.allMyData.barsCloseToMe.length; i++){
         if(this.allMyData.barsCloseToMe[i].attendees.has(this.allMyData.me.facebookID)){
           let myAttendeeInfo = this.allMyData.barsCloseToMe[i].attendees.get(this.allMyData.me.facebookID);
@@ -757,7 +773,7 @@ export class FindPage {
         }
       }
 
-      let oldStatusNumber = this.getStatusNumber(this.allMyData.me.status["goingOut"]);
+      let oldStatusNumber = this.getStatusNumber(this.allMyData.me.status.get("goingOut"));
       let newStatusNumber = overallStatusNumber;
       if(newStatusNumber > oldStatusNumber){
         let newStatus = this.getStatusFromStatusNumber(newStatusNumber);

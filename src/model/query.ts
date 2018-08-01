@@ -13,7 +13,7 @@ import { Party, Invitee, Host } from './party';
 import { Person } from './person';
 import { Friend } from './friend';
 import { AllMyData } from './allMyData';
-import { Http, Headers, RequestOptions } from '@angular/http';
+import { Http, Headers, RequestOptions, RequestMethod } from '@angular/http';
 import { deserialize } from "serializer.ts/Serializer";
 import { Utility } from "./utility";
 import { PushNotification } from "./pushNotification";
@@ -21,6 +21,26 @@ import { PushNotification } from "./pushNotification";
 export class Query{
     constructor(private allMyData : AllMyData, private http : Http){
       
+    }
+    // curl -X "POST" https://graph.facebook.com/10154326505409816/permissions -d "method=delete&access_token=EAAGqhN2UkfwBAMJU7mVOr16nWCGOvSZAP1YEX88A68pnW3HnXUckMsfolSqSm8ZCKLukabk0Cwvt0OULXvBHHJY69axPX7EWeHs1TUqfALGeuVI5bdAn5guB1ckkBwnGdwmtfZCUoUXBYJXIX2gYu42gQtXxDLJpyv0JXcoeUGQNZCZAnMGvm8WnHAWxhb8VyUQDHhyjHefCijBZA7fHXt"
+    // curl -X "POST" https://graph.facebook.com/107808443432866/permissions -d "method=delete&access_token=EAAGqhN2UkfwBAI3lvmVNhdzxZCbUxZBsr1XPFR05ZARbQGYx8R2iVbD6W3LgqPOlfy5poItCKPueLsbQAyBzbQpLtmnPJU3mHkU0I2pxohgPE5YtEBDImBzEZAbVCYu9jKIJUXOesyZAwE8ZBl2uqveVMMgJKhLdRznt5iGeWIHL39lvPZCa1LbAqeng1x6yby2fUHvZCUEi82xC0Gp4J43s7PhWYScaxt4ZD"
+    public revokeAppFacebookPermissions(){
+        console.log("query.ts: in revokeAppFacebookPermissions");
+        return new Promise((resolve, reject) => {
+            var url = "https://graph.facebook.com/" + this.allMyData.me.facebookID + "/permissions";
+            let body = "method=delete" + "&access_token=" + this.allMyData.facebookAccessToken;
+            var headers = new Headers();
+            headers.append('content-type', "application/x-www-form-urlencoded");
+            let options= new RequestOptions({headers: headers});
+            this.http.post(url, body, options).map(res => res.json()).subscribe(data => {
+                if(data.success){
+                    console.log("successfully revoked app facebook permissions");
+                    resolve(data);
+                }else{
+                    reject(data.error);
+                }
+            });
+        });
     }
 
     // curl "https://graph.facebook.com/me?fields=id,name,gender,friends&access_token=EAAGqhN2UkfwBACXGfqebyJ9LxCVXOBuPSyR9eVExRD0PZA3TBIOHJtXUjLXRaL2TPsGrFr5BXPkJw8ttKP3aejbdfPVoxCSmyMzjmlTD4BNn6Y7Gxz0cfig3aJZC6HOnLGQcId0MwFOWEjmQYnt5r01hVjpUiNSrpDEzZAODYVyzS0NEHKNZC5BKU0xh6yVa8ioQcT0rTmEYqxJ61WsX"
@@ -325,10 +345,14 @@ export class Query{
     }
 
     // curl http://bumpin-env.us-west-2.elasticbeanstalk.com:80/rateBar -d "barID=5272501342297530080&facebookID=370&isMale=true&name=Steve&rating=Heating%20Up&status=Going&timeLastRated=2017-03-04T01:25:00Z&timeOfLastKnownLocation=2017-03-04T01:25:00Z"
-    public rateBar(barID : string, facebookID : string, isMale : boolean, name : string, rating : string, status : string, timeLastRated : string, timeOfLastKnownLocation : string){
+    public rateBar(barID : string, facebookID : string, isMale : boolean, name : string, rating : string, status : string, timeLastRated : string, timeOfLastKnownLocation : string, timeOfCheckIn : string, saidThereWasACover : boolean, saidThereWasALine : boolean){
         return new Promise((resolve, reject) => {
             var url = "http://bumpin-env.us-west-2.elasticbeanstalk.com:80/rateBar";
-            let body = "barID=" + barID + "&facebookID=" + facebookID + "&isMale=" + isMale + "&name=" + name + "&rating=" + encodeURIComponent(rating) + "&status=" + status + "&timeLastRated=" + timeLastRated + "&timeOfLastKnownLocation=" + timeOfLastKnownLocation;
+            let body = "barID=" + barID + "&facebookID=" + facebookID + "&isMale=" + isMale + 
+            "&name=" + name + "&rating=" + encodeURIComponent(rating) + "&status=" + status + 
+            "&timeLastRated=" + timeLastRated + "&timeOfLastKnownLocation=" + timeOfLastKnownLocation + 
+            "&timeOfCheckIn=" + timeOfCheckIn + "&saidThereWasACover=" + saidThereWasACover + 
+            "&saidThereWasALine=" + saidThereWasALine;;
             var headers = new Headers();
             headers.append('content-type', "application/x-www-form-urlencoded");
             let options= new RequestOptions({headers: headers});
@@ -361,10 +385,14 @@ export class Query{
     }
 
     // curl http://bumpin-env.us-west-2.elasticbeanstalk.com:80/clearRatingForBar -d "barID=5272501342297530080&facebookID=370&isMale=true&name=Steve&status=Going&timeLastRated=2017-03-04T01:25:00Z&timeOfLastKnownLocation=2017-03-04T01:25:00Z"
-    public clearRatingForBar(barID : string, facebookID : string, isMale : boolean, name : string, status : string, timeLastRated : string, timeOfLastKnownLocation : string){
+    public clearRatingForBar(barID : string, facebookID : string, isMale : boolean, name : string, status : string, timeLastRated : string, timeOfLastKnownLocation : string, timeOfCheckIn : string, saidThereWasACover : boolean, saidThereWasALine : boolean){
         return new Promise((resolve, reject) => {
             var url = "http://bumpin-env.us-west-2.elasticbeanstalk.com:80/clearRatingForBar";
-            let body = "barID=" + barID + "&facebookID=" + facebookID + "&isMale=" + isMale + "&name=" + name + "&status=" + status + "&timeLastRated=" + timeLastRated + "&timeOfLastKnownLocation=" + timeOfLastKnownLocation;
+            let body = "barID=" + barID + "&facebookID=" + facebookID + "&isMale=" + isMale + 
+                       "&name=" + name + "&status=" + status + "&timeLastRated=" + timeLastRated + 
+                       "&timeOfLastKnownLocation=" + timeOfLastKnownLocation + 
+                       "&timeOfCheckIn=" + timeOfCheckIn + "&saidThereWasACover=" + saidThereWasACover + 
+                       "&saidThereWasALine=" + saidThereWasALine;
             var headers = new Headers();
             headers.append('content-type', "application/x-www-form-urlencoded");
             let options= new RequestOptions({headers: headers});
@@ -397,10 +425,14 @@ export class Query{
     }
 
     // curl http://bumpin-env.us-west-2.elasticbeanstalk.com:80/changeAttendanceStatusToBar -d "barID=5272501342297530080&facebookID=9321&atBar=false&isMale=false&name=Emily%20Blunt&rating=None&status=Maybe&timeLastRated=2001-01-01T00:00:00Z&timeOfLastKnownLocation=2001-01-01T00:00:00Z"
-    public changeAttendanceStatusToBar(barID : string, facebookID : string, atBar : boolean, isMale : boolean, name : string, rating : string, status : string, timeLastRated : string, timeOfLastKnownLocation : string){
+    public changeAttendanceStatusToBar(barID : string, facebookID : string, atBar : boolean, isMale : boolean, name : string, rating : string, status : string, timeLastRated : string, timeOfLastKnownLocation : string, timeOfCheckIn : string, saidThereWasACover : boolean, saidThereWasALine : boolean){
         return new Promise((resolve, reject) => {
             var url = "http://bumpin-env.us-west-2.elasticbeanstalk.com:80/changeAttendanceStatusToBar";
-            let body = "barID=" + barID + "&facebookID=" + facebookID + "&atBar=" + atBar + "&isMale=" + isMale + "&name=" + name + "&rating=" + rating + "&status=" + status + "&timeLastRated=" + timeLastRated + "&timeOfLastKnownLocation=" + timeOfLastKnownLocation;
+            let body = "barID=" + barID + "&facebookID=" + facebookID + "&atBar=" + atBar + "&isMale=" + isMale + "&name=" + name + 
+                       "&rating=" + rating + "&status=" + status + "&timeLastRated=" + timeLastRated + 
+                       "&timeOfLastKnownLocation=" + timeOfLastKnownLocation + 
+                       "&timeOfCheckIn=" + timeOfCheckIn + "&saidThereWasACover=" + saidThereWasACover + 
+                       "&saidThereWasALine=" + saidThereWasALine;
             var headers = new Headers();
             headers.append('content-type', "application/x-www-form-urlencoded");
             let options= new RequestOptions({headers: headers});
@@ -451,10 +483,14 @@ export class Query{
     }
 
     // curl http://bumpin-env.us-west-2.elasticbeanstalk.com:80/changeAtBarStatus -d "barID=3269697223881195499&facebookID=010101&atBar=true&isMale=true&name=Gerrard%20Holler&rating=None&status=Maybe&timeLastRated=2000-01-01T00:00:00Z&timeOfLastKnownLocation=2017-09-04T00:00:00Z"
-    public changeAtBarStatus(barID : string, facebookID : string, atBar : boolean, isMale : boolean, name : string, rating : string, status : string, timeLastRated : string, timeOfLastKnownLocation : string){
+    public changeAtBarStatus(barID : string, facebookID : string, atBar : boolean, isMale : boolean, name : string, rating : string, status : string, timeLastRated : string, timeOfLastKnownLocation : string, timeOfCheckIn : string, saidThereWasACover : boolean, saidThereWasALine : boolean){
         return new Promise((resolve, reject) => {
             var url = "http://bumpin-env.us-west-2.elasticbeanstalk.com:80/changeAtBarStatus";
-            let body = "barID=" + barID + "&facebookID=" + facebookID + "&atBar=" + atBar + "&isMale=" + isMale + "&name=" + name + "&rating=" + rating + "&status=" + status + "&timeLastRated=" + timeLastRated + "&timeOfLastKnownLocation=" + timeOfLastKnownLocation;
+            let body = "barID=" + barID + "&facebookID=" + facebookID + "&atBar=" + atBar + 
+            "&isMale=" + isMale + "&name=" + name + "&rating=" + rating + "&status=" + status + 
+            "&timeLastRated=" + timeLastRated + "&timeOfLastKnownLocation=" + timeOfLastKnownLocation + 
+            "&timeOfCheckIn=" + timeOfCheckIn + "&saidThereWasACover=" + saidThereWasACover + 
+            "&saidThereWasALine=" + saidThereWasALine;;
             var headers = new Headers();
             headers.append('content-type', "application/x-www-form-urlencoded");
             let options= new RequestOptions({headers: headers});

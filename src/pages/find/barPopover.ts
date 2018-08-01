@@ -85,24 +85,58 @@ export class BarPopover {
   rateBar(rating : string){
     this.synchronizeLatestBarData();
     this.allMyData.rateBar(this.bar, rating, this.http)
-    .then((res) => {
-    
-    })
     .catch((err) => {
       this.allMyData.logError(this.tabName, "server", "rateBar query error : Err msg = " + err, this.http);
     });
     this.locationTracker.checkIn(this.bar);
   }
 
+  toggleCoverInfoForBar(){
+    this.synchronizeLatestBarData();
+    let saidThereWasACover = true;
+    if(this.bar.attendees.has(this.allMyData.me.facebookID)){
+      saidThereWasACover = !this.bar.attendees.get(this.allMyData.me.facebookID).saidThereWasACover;
+    }
+    
+    this.allMyData.updateCoverInfoForBar(this.bar, saidThereWasACover, this.http)
+    .catch((err) => {
+      this.allMyData.logError(this.tabName, "server", "updateCoverInfoForBar query error : Err msg = " + err, this.http);
+    });
+    this.locationTracker.checkIn(this.bar);
+  }
+
+  toggleLineInfoForBar(){
+    this.synchronizeLatestBarData();
+    let saidThereWasALine = true;
+    if(this.bar.attendees.has(this.allMyData.me.facebookID)){
+      saidThereWasALine = !this.bar.attendees.get(this.allMyData.me.facebookID).saidThereWasALine;
+    }
+    
+    this.allMyData.updateLineInfoForBar(this.bar, saidThereWasALine, this.http)
+    .catch((err) => {
+      this.allMyData.logError(this.tabName, "server", "updateLineInfoForBar query error : Err msg = " + err, this.http);
+    });
+    this.locationTracker.checkIn(this.bar);
+  }
 
   changeAttendanceStatus(status : string){
     this.synchronizeLatestBarData();
     this.allMyData.changeAttendanceStatusToBar(this.bar, status, this.http)
-    .then((res) => {
-      
-    })
     .catch((err) => {
       this.allMyData.logError(this.tabName, "server", "changeAttendanceStatusToBar query error : Err msg = " + err, this.http);
     });
+    if((this.allMyData.me.status.get("goingOut") != "Yes") && (this.allMyData.me.status.get("goingOut") != "Convince Me")){
+      let myNewGoingOutStatus = "Unknown";
+      if(status == "Going"){
+        myNewGoingOutStatus = "Yes";
+      }else{
+        myNewGoingOutStatus = "Maybe";
+      }
+      this.allMyData.changeMyGoingOutStatus(myNewGoingOutStatus, "No", this.http)
+      .catch((err) => {
+        this.allMyData.logError(this.tabName, "server", "changeMyGoingOutStatus query error : Err msg = " + err, this.http);
+      });
+    }
   }
+
 }

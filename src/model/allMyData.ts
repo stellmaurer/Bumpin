@@ -30,6 +30,7 @@ import { deserialize } from "serializer.ts/Serializer";
 //          the actual Party and Bar objects, not just the keys to them.
 @Injectable()
 export class AllMyData{
+    public facebookAccessToken : string;
     public me : Person;
     public partyHostFor : Party[];
     public barHostFor : Bar[];
@@ -45,6 +46,7 @@ export class AllMyData{
     public dataRetrievalTimer : NodeJS.Timer;
 
     constructor(public zone: NgZone, public storage: Storage) {
+        this.facebookAccessToken = null;
         this.me = new Person();
         this.partyHostFor = new Array<Party>();
         this.barHostFor = new Array<Bar>();
@@ -63,6 +65,20 @@ export class AllMyData{
         this.dataRetrievalTimer = setInterval(() => {
             this.events.publish("timeToRefreshPartyAndBarData");
         }, 60000);
+    }
+
+    public revokeAppFacebookPermissions(http : Http){
+        console.log("allMyData.ts: in revokeAppFacebookPermissions function");
+        return new Promise((resolve, reject) => {
+            var query = new Query(this, http);
+            query.revokeAppFacebookPermissions()
+            .then((res) => {
+                resolve("AllMyData class: revokeAppFacebookPermissions query succeeded.");
+            })
+            .catch((err) => {
+                reject(err);
+            });
+        });
     }
 
     public refreshMyDataFromFacebook(accessToken : string, http : Http){
@@ -176,9 +192,9 @@ export class AllMyData{
     }
 
     private changeMyGoingOutStatusToUnknownIfStatusIsExpired(){
-        var goingOutStatusIsExpired = Utility.isGoingOutStatusExpired(this.me.status["timeGoingOutStatusWasSet"]);
+        var goingOutStatusIsExpired = Utility.isGoingOutStatusExpired(this.me.status.get("timeGoingOutStatusWasSet"));
         if(goingOutStatusIsExpired){
-            this.me.status["goingOut"] = "Unknown";
+            this.me.status.set("goingOut", "Unknown");
         }
     }
 
@@ -206,6 +222,10 @@ export class AllMyData{
     }
 
     public rateBar(bar : Bar, rating : string, http : Http){
+        let timeLastRated = Utility.convertDateTimeToISOFormat(new Date());
+        let timeOfLastKnownLocation = timeLastRated;
+        let timeOfCheckIn = timeLastRated;
+
         // If you're not an attendee of the bar, make yourself an attendee
         if(bar.attendees.get(this.me.facebookID) == null){
             var newAttendee = new Attendee();
@@ -215,24 +235,175 @@ export class AllMyData{
             newAttendee.rating = "None";
             newAttendee.status = "None";
             newAttendee.timeLastRated = "2001-01-01T00:00:00Z";
+            newAttendee.timeOfCheckIn = "2001-01-01T00:00:00Z";
+            newAttendee.saidThereWasACover = false;
+            newAttendee.saidThereWasALine = false;
             bar.attendees.set(this.me.facebookID, newAttendee);
         }
-        
-        let timeLastRated = Utility.convertDateTimeToISOFormat(new Date());
-        let timeOfLastKnownLocation = timeLastRated;
+
         this.zone.run(() => {
             bar.attendees.get(this.me.facebookID).atBar = true;
             bar.attendees.get(this.me.facebookID).rating = rating;
             bar.attendees.get(this.me.facebookID).timeLastRated = timeLastRated;
             bar.attendees.get(this.me.facebookID).timeOfLastKnownLocation = timeOfLastKnownLocation;
+            bar.attendees.get(this.me.facebookID).timeOfCheckIn = timeOfCheckIn;
             bar.refreshBarStats();
         });
+        
         this.events.publish("timeToUpdateUI");
         return new Promise((resolve, reject) => {
             var query = new Query(this, http);
-            query.rateBar(bar.barID, this.me.facebookID, this.me.isMale, this.me.name, rating, bar.attendees.get(this.me.facebookID).status, timeLastRated, timeOfLastKnownLocation)
+            query.rateBar(bar.barID, this.me.facebookID, this.me.isMale, this.me.name, rating, 
+                          bar.attendees.get(this.me.facebookID).status, timeLastRated, timeOfLastKnownLocation,
+                          bar.attendees.get(this.me.facebookID).timeOfCheckIn, 
+                          bar.attendees.get(this.me.facebookID).saidThereWasACover,
+                          bar.attendees.get(this.me.facebookID).saidThereWasALine
+                        )
             .then((res) => {
                 resolve("rateBar query succeeded.");
+            })
+            .catch((err) => {
+                reject(err);
+            });
+        });
+    }
+
+    public checkIntoBar(bar : Bar, http : Http){
+        let timeOfLastKnownLocation = Utility.convertDateTimeToISOFormat(new Date());
+        let timeOfCheckIn = timeOfLastKnownLocation;
+
+        // If you're not an attendee of the bar, make yourself an attendee
+        if(bar.attendees.get(this.me.facebookID) == null){
+            var newAttendee = new Attendee();
+            newAttendee.atBar = true;
+            newAttendee.isMale = this.me.isMale;
+            newAttendee.name = this.me.name;
+            newAttendee.rating = "None";
+            newAttendee.status = "None";
+            newAttendee.timeLastRated = "2001-01-01T00:00:00Z";
+            newAttendee.timeOfCheckIn = "2001-01-01T00:00:00Z";
+            newAttendee.saidThereWasACover = false;
+            newAttendee.saidThereWasALine = false;
+            bar.attendees.set(this.me.facebookID, newAttendee);
+        }
+
+        this.zone.run(() => {
+            bar.attendees.get(this.me.facebookID).atBar = true;
+            bar.attendees.get(this.me.facebookID).timeOfLastKnownLocation = timeOfLastKnownLocation;
+            bar.attendees.get(this.me.facebookID).timeOfCheckIn = timeOfCheckIn;
+            bar.refreshBarStats();
+        });
+        
+        this.events.publish("timeToUpdateUI");
+        return new Promise((resolve, reject) => {
+            var query = new Query(this, http);
+            query.rateBar(bar.barID, this.me.facebookID, this.me.isMale, this.me.name,
+                          bar.attendees.get(this.me.facebookID).rating, 
+                          bar.attendees.get(this.me.facebookID).status, 
+                          bar.attendees.get(this.me.facebookID).timeLastRated,
+                          bar.attendees.get(this.me.facebookID).timeOfLastKnownLocation,
+                          bar.attendees.get(this.me.facebookID).timeOfCheckIn, 
+                          bar.attendees.get(this.me.facebookID).saidThereWasACover,
+                          bar.attendees.get(this.me.facebookID).saidThereWasALine
+                        )
+            .then((res) => {
+                resolve("checkIntoBar query succeeded.");
+            })
+            .catch((err) => {
+                reject(err);
+            });
+        });
+    }
+
+    public updateCoverInfoForBar(bar : Bar, saidThereWasACover : boolean, http : Http){
+        let timeOfLastKnownLocation = Utility.convertDateTimeToISOFormat(new Date());
+        let timeOfCheckIn = timeOfLastKnownLocation;
+
+        // If you're not an attendee of the bar, make yourself an attendee
+        if(bar.attendees.get(this.me.facebookID) == null){
+            var newAttendee = new Attendee();
+            newAttendee.atBar = true;
+            newAttendee.isMale = this.me.isMale;
+            newAttendee.name = this.me.name;
+            newAttendee.rating = "None";
+            newAttendee.status = "None";
+            newAttendee.timeLastRated = "2001-01-01T00:00:00Z";
+            newAttendee.timeOfCheckIn = "2001-01-01T00:00:00Z";
+            newAttendee.saidThereWasACover = false;
+            newAttendee.saidThereWasALine = false;
+            bar.attendees.set(this.me.facebookID, newAttendee);
+        }
+
+        this.zone.run(() => {
+            bar.attendees.get(this.me.facebookID).atBar = true;
+            bar.attendees.get(this.me.facebookID).timeOfLastKnownLocation = timeOfLastKnownLocation;
+            bar.attendees.get(this.me.facebookID).timeOfCheckIn = timeOfCheckIn;
+            bar.attendees.get(this.me.facebookID).saidThereWasACover = saidThereWasACover;
+            bar.refreshBarStats();
+        });
+        
+        this.events.publish("timeToUpdateUI");
+        return new Promise((resolve, reject) => {
+            var query = new Query(this, http);
+            query.rateBar(bar.barID, this.me.facebookID, this.me.isMale, this.me.name,
+                          bar.attendees.get(this.me.facebookID).rating, 
+                          bar.attendees.get(this.me.facebookID).status, 
+                          bar.attendees.get(this.me.facebookID).timeLastRated,
+                          bar.attendees.get(this.me.facebookID).timeOfLastKnownLocation,
+                          bar.attendees.get(this.me.facebookID).timeOfCheckIn, 
+                          bar.attendees.get(this.me.facebookID).saidThereWasACover,
+                          bar.attendees.get(this.me.facebookID).saidThereWasALine
+                        )
+            .then((res) => {
+                resolve("updateCoverInfoForBar query succeeded.");
+            })
+            .catch((err) => {
+                reject(err);
+            });
+        });
+    }
+
+    public updateLineInfoForBar(bar : Bar, saidThereWasALine : boolean, http : Http){
+        let timeOfLastKnownLocation = Utility.convertDateTimeToISOFormat(new Date());
+        let timeOfCheckIn = timeOfLastKnownLocation;
+
+        // If you're not an attendee of the bar, make yourself an attendee
+        if(bar.attendees.get(this.me.facebookID) == null){
+            var newAttendee = new Attendee();
+            newAttendee.atBar = true;
+            newAttendee.isMale = this.me.isMale;
+            newAttendee.name = this.me.name;
+            newAttendee.rating = "None";
+            newAttendee.status = "None";
+            newAttendee.timeLastRated = "2001-01-01T00:00:00Z";
+            newAttendee.timeOfCheckIn = "2001-01-01T00:00:00Z";
+            newAttendee.saidThereWasACover = false;
+            newAttendee.saidThereWasALine = false;
+            bar.attendees.set(this.me.facebookID, newAttendee);
+        }
+
+        this.zone.run(() => {
+            bar.attendees.get(this.me.facebookID).atBar = true;
+            bar.attendees.get(this.me.facebookID).timeOfLastKnownLocation = timeOfLastKnownLocation;
+            bar.attendees.get(this.me.facebookID).timeOfCheckIn = timeOfCheckIn;
+            bar.attendees.get(this.me.facebookID).saidThereWasALine = saidThereWasALine;
+            bar.refreshBarStats();
+        });
+        
+        this.events.publish("timeToUpdateUI");
+        return new Promise((resolve, reject) => {
+            var query = new Query(this, http);
+            query.rateBar(bar.barID, this.me.facebookID, this.me.isMale, this.me.name,
+                          bar.attendees.get(this.me.facebookID).rating, 
+                          bar.attendees.get(this.me.facebookID).status, 
+                          bar.attendees.get(this.me.facebookID).timeLastRated,
+                          bar.attendees.get(this.me.facebookID).timeOfLastKnownLocation,
+                          bar.attendees.get(this.me.facebookID).timeOfCheckIn, 
+                          bar.attendees.get(this.me.facebookID).saidThereWasACover,
+                          bar.attendees.get(this.me.facebookID).saidThereWasALine
+                        )
+            .then((res) => {
+                resolve("updateLineInfoForBar query succeeded.");
             })
             .catch((err) => {
                 reject(err);
@@ -274,11 +445,15 @@ export class AllMyData{
             newAttendee.rating = "None";
             newAttendee.status = "None";
             newAttendee.timeLastRated = "2001-01-01T00:00:00Z";
+            newAttendee.timeOfCheckIn = "2001-01-01T00:00:00Z";
+            newAttendee.saidThereWasACover = false;
+            newAttendee.saidThereWasALine = false;
             bar.attendees.set(this.me.facebookID, newAttendee);
         }
         
         let timeLastRated = Utility.convertDateTimeToISOFormat(new Date());
         let timeOfLastKnownLocation = timeLastRated;
+        let timeOfCheckIn = timeLastRated;
         this.zone.run(() => {
             bar.attendees.get(this.me.facebookID).atBar = false;
             bar.attendees.get(this.me.facebookID).rating = "None";
@@ -289,7 +464,11 @@ export class AllMyData{
         this.events.publish("timeToUpdateUI");
         return new Promise((resolve, reject) => {
             var query = new Query(this, http);
-            query.clearRatingForBar(bar.barID, this.me.facebookID, this.me.isMale, this.me.name, bar.attendees.get(this.me.facebookID).status, timeLastRated, timeOfLastKnownLocation)
+            query.clearRatingForBar(bar.barID, this.me.facebookID, this.me.isMale, this.me.name, 
+                                    bar.attendees.get(this.me.facebookID).status, timeLastRated, 
+                                    timeOfLastKnownLocation, bar.attendees.get(this.me.facebookID).timeOfCheckIn,
+                                    bar.attendees.get(this.me.facebookID).saidThereWasACover,
+                                    bar.attendees.get(this.me.facebookID).saidThereWasALine)
             .then((res) => {
                 resolve("clearRatingForBar query succeeded.");
             })
@@ -333,6 +512,9 @@ export class AllMyData{
                 newAttendee.status = status;
                 newAttendee.timeLastRated = "2001-01-01T00:00:00Z";
                 newAttendee.timeOfLastKnownLocation = "2001-01-01T00:00:00Z";
+                newAttendee.timeOfCheckIn = "2001-01-01T00:00:00Z";
+                newAttendee.saidThereWasACover = false;
+                newAttendee.saidThereWasALine = false;
                 bar.attendees.set(this.me.facebookID, newAttendee);
             }
             bar.refreshBarStats();
@@ -340,7 +522,7 @@ export class AllMyData{
         let me = bar.attendees.get(this.me.facebookID);
         return new Promise((resolve, reject) => {
             var query = new Query(this, http);
-            query.changeAttendanceStatusToBar(bar.barID, this.me.facebookID, me.atBar, me.isMale, me.name, me.rating, me.status, me.timeLastRated, me.timeOfLastKnownLocation)
+            query.changeAttendanceStatusToBar(bar.barID, this.me.facebookID, me.atBar, me.isMale, me.name, me.rating, me.status, me.timeLastRated, me.timeOfLastKnownLocation, me.timeOfCheckIn, me.saidThereWasACover, me.saidThereWasALine)
             .then((res) => {
                 resolve("changeAttendanceStatusToBar query succeeded.");
             })
@@ -379,11 +561,19 @@ export class AllMyData{
         let status : string = "None";
         let timeLastRated : string = Utility.convertDateTimeToISOFormat(new Date());
         let timeOfLastKnownLocation = timeLastRated;
+        let timeOfCheckIn = timeLastRated;
+        let saidThereWasACover = false;
+        let saidThereWasALine = false;
+
         let attendee : Attendee = bar.attendees.get(this.me.facebookID);
+        
         if(attendee != null){
             rating = attendee.rating;
             status = attendee.status;
             timeLastRated = attendee.timeLastRated;
+            timeOfCheckIn = bar.attendees.get(this.me.facebookID).timeOfCheckIn;
+            saidThereWasACover = bar.attendees.get(this.me.facebookID).saidThereWasACover;
+            saidThereWasALine = bar.attendees.get(this.me.facebookID).saidThereWasALine;
             // update internal data
             this.zone.run(() => {
                 attendee.atBar = atBar;
@@ -400,6 +590,9 @@ export class AllMyData{
             newAttendee.status = status;
             newAttendee.timeLastRated = timeLastRated;
             newAttendee.timeOfLastKnownLocation = timeLastRated;
+            newAttendee.timeOfCheckIn = timeOfCheckIn;
+            newAttendee.saidThereWasACover = saidThereWasACover;
+            newAttendee.saidThereWasALine = saidThereWasALine;
             this.zone.run(() => {
                 bar.attendees.set(facebookID, newAttendee);
                 bar.refreshBarStats();
@@ -408,7 +601,7 @@ export class AllMyData{
         // update external data
         return new Promise((resolve, reject) => {
             var query = new Query(this, http);
-            query.changeAtBarStatus(bar.barID,facebookID,atBar,isMale,name,rating,status,timeLastRated,timeOfLastKnownLocation)
+            query.changeAtBarStatus(bar.barID,facebookID,atBar,isMale,name,rating,status,timeLastRated,timeOfLastKnownLocation, timeOfCheckIn, saidThereWasACover, saidThereWasALine)
             .then((res) => {
                 resolve("changeAtBarStatus query succeeded.");
             })
@@ -557,13 +750,13 @@ export class AllMyData{
     }
 
     public changeMyGoingOutStatus(status : string, manuallySet : string, http : Http){
-        let lastTimeGoingOutStatusWasSet = new Date(this.me.status["timeGoingOutStatusWasSet"]);
-        let lastGoingOutStatus = this.me.status["goingOut"];
+        let lastTimeGoingOutStatusWasSet = new Date(this.me.status.get("timeGoingOutStatusWasSet"));
+        let lastGoingOutStatus = this.me.status.get("goingOut");
         let timeGoingOutStatusWasSet = Utility.convertDateTimeToISOFormat(new Date());
         this.zone.run(() => {
-            this.me.status["goingOut"] = status;
-            this.me.status["timeGoingOutStatusWasSet"] = timeGoingOutStatusWasSet;
-            this.me.status["manuallySet"] = manuallySet;
+            this.me.status.set("goingOut", status);
+            this.me.status.set("timeGoingOutStatusWasSet", timeGoingOutStatusWasSet);
+            this.me.status.set("manuallySet", manuallySet);
         });
         return new Promise((resolve, reject) => {
             var query = new Query(this, http);

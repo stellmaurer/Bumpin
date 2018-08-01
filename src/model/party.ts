@@ -41,12 +41,6 @@ export class Party {
     public numberOfMenInvited : number;
     public percentageOfMen : number;
     public percentageOfWomen : number;
-    public percentageOfMenGoing : number;
-    public percentageOfWomenGoing : number;
-    public percentageOfMenMaybe : number;
-    public percentageOfWomenMaybe : number;
-    public percentageOfMenInvited : number;
-    public percentageOfWomenInvited : number;
 
     public startDateOnly : string;
     public endDateOnly : string;
@@ -88,12 +82,6 @@ export class Party {
         this.numberOfMenInvited = 0;
         this.percentageOfMen = 0;
         this.percentageOfWomen = 0;
-        this.percentageOfMenGoing = 0;
-        this.percentageOfWomenGoing = 0;
-        this.percentageOfMenMaybe = 0;
-        this.percentageOfWomenMaybe = 0;
-        this.percentageOfMenInvited = 0;
-        this.percentageOfWomenInvited = 0;
     }
 
     public createShallowCopy() : Party{
@@ -171,12 +159,6 @@ export class Party {
         this.numberOfPeopleAtParty = 0;
         this.percentageOfMen = 0;
         this.percentageOfWomen = 0;
-        this.percentageOfMenGoing = 0;
-        this.percentageOfWomenGoing = 0;
-        this.percentageOfMenMaybe = 0;
-        this.percentageOfWomenMaybe = 0;
-        this.percentageOfMenInvited = 0;
-        this.percentageOfWomenInvited = 0;
         this.numberOfMenGoing = 0;
         this.numberOfMenMaybe = 0;
         this.numberOfMenInvited = 0;
@@ -249,27 +231,6 @@ export class Party {
             }
         });
 
-        if(this.peopleGoing > 0){
-            this.percentageOfMenGoing = Math.round((this.numberOfMenGoing / this.peopleGoing) * 100);
-            this.percentageOfWomenGoing = 100 - this.percentageOfMenGoing;
-        }else{
-            this.percentageOfMenGoing = 0;
-            this.percentageOfWomenGoing = 0;
-        }
-        if(this.peopleMaybe > 0){
-            this.percentageOfMenMaybe = Math.round((this.numberOfMenMaybe / this.peopleMaybe) * 100);
-            this.percentageOfWomenMaybe = 100 - this.percentageOfMenMaybe;
-        }else{
-            this.percentageOfMenMaybe = 0;
-            this.percentageOfWomenMaybe = 0;
-        }
-        if(this.peopleInvited > 0){
-            this.percentageOfMenInvited = Math.round((this.numberOfMenInvited / this.peopleInvited) * 100);
-            this.percentageOfWomenInvited = 100 - this.percentageOfMenInvited;
-        }else{
-            this.percentageOfMenInvited = 0;
-            this.percentageOfWomenInvited = 0;
-        }
         if(this.numberOfPeopleAtParty > 0){
             this.percentageOfMen = Math.round((numberOfMen / this.numberOfPeopleAtParty) * 100);
             this.percentageOfWomen = 100 - this.percentageOfMen;

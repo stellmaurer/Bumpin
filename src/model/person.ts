@@ -41,9 +41,23 @@ export class Person {
     }
 
     fixMaps(){
+        this.fixStatusMap();
         this.fixPartyHostForMap();
         this.fixBarHostForMap();
         this.fixInvitedToMap();
+    }
+
+    private fixStatusMap(){
+        if(this.status == null){
+            this.status = new Map<string,string>();
+        }else{
+            let fixedStatusMap = new Map<string,string>();
+            let status = this.status;
+            Object.keys(status).forEach(function (key) {
+                fixedStatusMap.set(key, status[key]);
+            });
+            this.status = fixedStatusMap;
+        }
     }
 
     private fixPartyHostForMap(){

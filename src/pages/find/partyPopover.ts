@@ -94,12 +94,24 @@ export class PartyPopover {
   changeAttendanceStatus(status : string){
     this.synchronizeLatestPartyData();
     this.allMyData.changeAttendanceStatusToParty(this.party, status, this.http)
-    .then((res) => {
-        
-    })
     .catch((err) => {
       this.allMyData.logError(this.tabName, "server", "changeAttendanceStatusToParty query error : Err msg = " + err, this.http);
     });
+
+    if(Utility.isPartyToday(this.party)){
+      if((this.allMyData.me.status.get("goingOut") != "Yes") && (this.allMyData.me.status.get("goingOut") != "Convince Me")){
+        let myNewGoingOutStatus = "Unknown";
+        if(status == "Going"){
+          myNewGoingOutStatus = "Yes";
+        }else{
+          myNewGoingOutStatus = "Maybe";
+        }
+        this.allMyData.changeMyGoingOutStatus(myNewGoingOutStatus, "No", this.http)
+        .catch((err) => {
+          this.allMyData.logError(this.tabName, "server", "changeMyGoingOutStatus query error : Err msg = " + err, this.http);
+        });
+      }
+    }
   }
 
   inviteFriendsButtonClicked(){

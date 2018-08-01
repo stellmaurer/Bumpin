@@ -13,6 +13,30 @@ import {Bar} from "./bar";
 
 export class Utility {
 
+    public static isCheckInTimeOfAttendeeWithinAnHourOfNow(timeOfCheckIn : string){
+        if(timeOfCheckIn == null){
+            return false;
+        }
+        var currentTimeInMilliseconds = new Date().getTime();
+        var timeOfCheckInInMilliseconds = Date.parse(timeOfCheckIn);
+        if((currentTimeInMilliseconds - timeOfCheckInInMilliseconds) > 3600000){ // 3,600,000 milliseconds is 1 hour
+            return false;
+        }
+        return true;
+    }
+
+    public static isCheckInTimeOfAttendeeWithin10MinutesFromNow(timeOfCheckIn : string){
+        if(timeOfCheckIn == null){
+            return false;
+        }
+        var currentTimeInMilliseconds = new Date().getTime();
+        var timeOfCheckInInMilliseconds = Date.parse(timeOfCheckIn);
+        if((currentTimeInMilliseconds - timeOfCheckInInMilliseconds) > 600000){ // 600,000 milliseconds is 10 minutes
+            return false;
+        }
+        return true;
+    }
+
     public static partyIsCurrentlyInProgress(party : Party){
         let partyStartTime = new Date(party.startTime).getTime();
         let partyEndTime = new Date(party.endTime).getTime();

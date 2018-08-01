@@ -81,20 +81,28 @@ export class CheckIntoBarPopoverPage {
 
     toggleCoverInfoForBar(){
         this.synchronizeLatestBarData();
-        this.bar.attendees.get(this.allMyData.me.facebookID).saidThereWasACover = !this.bar.attendees.get(this.allMyData.me.facebookID).saidThereWasACover;
-        this.allMyData.updateCoverInfoForBar(this.bar, this.bar.attendees.get(this.allMyData.me.facebookID).saidThereWasACover, this.http)
+        let saidThereWasACover = true;
+        if(this.bar.attendees.has(this.allMyData.me.facebookID)){
+          saidThereWasACover = !this.bar.attendees.get(this.allMyData.me.facebookID).saidThereWasACover;
+        }
+        
+        this.allMyData.updateCoverInfoForBar(this.bar, saidThereWasACover, this.http)
         .catch((err) => {
           this.allMyData.logError(this.tabName, "server", "updateCoverInfoForBar query error : Err msg = " + err, this.http);
         });
         this.locationTracker.checkIn(this.bar);
-    }
+      }
     
     toggleLineInfoForBar(){
         this.synchronizeLatestBarData();
-        this.bar.attendees.get(this.allMyData.me.facebookID).saidThereWasALine = !this.bar.attendees.get(this.allMyData.me.facebookID).saidThereWasALine;
-        this.allMyData.updateLineInfoForBar(this.bar, this.bar.attendees.get(this.allMyData.me.facebookID).saidThereWasALine, this.http)
+        let saidThereWasALine = true;
+        if(this.bar.attendees.has(this.allMyData.me.facebookID)){
+          saidThereWasALine = !this.bar.attendees.get(this.allMyData.me.facebookID).saidThereWasALine;
+        }
+        
+        this.allMyData.updateLineInfoForBar(this.bar, saidThereWasALine, this.http)
         .catch((err) => {
-            this.allMyData.logError(this.tabName, "server", "updateLineInfoForBar query error : Err msg = " + err, this.http);
+          this.allMyData.logError(this.tabName, "server", "updateLineInfoForBar query error : Err msg = " + err, this.http);
         });
         this.locationTracker.checkIn(this.bar);
     }

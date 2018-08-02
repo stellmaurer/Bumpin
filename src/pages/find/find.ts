@@ -97,7 +97,7 @@ export class FindPage {
     this.currentlyLoadingData = false;
 
     this.usersActualCoordinatesHaveBeenSet = false;
-
+    
     this.events.subscribe("tabBarWasClicked",() => {
       if(this.numberOfTutorialStepsCompleted == 4){
         this.overlayWasClicked();

@@ -32,11 +32,15 @@ export class MyApp {
   constructor(public app: App, private login : Login, private allMyData: AllMyData, private http: Http, public platform: Platform, private statusBar: StatusBar, private splashScreen: SplashScreen, private badge: Badge, public push: Push, private locationTracker: LocationTracker, public alertCtrl: AlertController, private backgroundGeolocation: BackgroundGeolocation, private events : Events, private storage: Storage) {
     this.platform.ready().then(() => {
 
+      this.statusBar.overlaysWebView(false);
+      this.statusBar.backgroundColorByHexString('#32db64');
+      this.statusBar.styleDefault();
+
       this.locationTracker.startTracking();
 
       this.rootPage = TabsPage;
 
-      this.statusBar.hide();
+      //this.statusBar.hide();
 
       this.badge.clear();
       this.platform.resume.subscribe((result)=>{//Foreground
@@ -49,10 +53,6 @@ export class MyApp {
       this.setUpLocalNotificationHandlers();
 
       this.loginToFacebook();
-
-      /*this.statusBar.styleDefault();
-      this.statusBar.overlaysWebView(false);
-      this.statusBar.backgroundColorByHexString('#32db64');*/
     });
   }
 

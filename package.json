@@ -101,7 +101,6 @@
         "APP_NAME": "Bumpin"
       },
       "cordova-plugin-nativestorage": {},
-      "cordova-plugin-statusbar": {},
       "cordova-plugin-whitelist": {},
       "cordova-sqlite-storage": {},
       "cordova-plugin-geolocation": {
@@ -127,7 +126,8 @@
         "FCM_VERSION": "11.6.2"
       },
       "cordova-plugin-app-version": {},
-      "cordova-plugin-ionic-webview": {}
+      "cordova-plugin-ionic-webview": {},
+      "cordova-plugin-statusbar": {}
     }
   }
 }

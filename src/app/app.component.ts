@@ -37,10 +37,7 @@ export class MyApp {
       this.statusBar.styleDefault();
 
       this.locationTracker.startTracking();
-
       this.rootPage = TabsPage;
-
-      //this.statusBar.hide();
 
       this.badge.clear();
       this.platform.resume.subscribe((result)=>{//Foreground

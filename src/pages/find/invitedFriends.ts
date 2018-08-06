@@ -26,6 +26,7 @@ export class InvitedFriendsPage {
     private going : Invitee[];
     private maybe : Invitee[];
     private invited : Invitee[];
+    private no : Invitee[];
 
     constructor(public allMyData : AllMyData, private navCtrl: NavController, params : NavParams) {
         this.party = params.get("party");
@@ -33,6 +34,7 @@ export class InvitedFriendsPage {
         this.going = new Array<Invitee>();
         this.maybe = new Array<Invitee>();
         this.invited = new Array<Invitee>();
+        this.no = new Array<Invitee>();
         this.determineWhichFriendsAreInvitedToTheParty();
     }
 
@@ -41,6 +43,7 @@ export class InvitedFriendsPage {
         this.going = new Array<Invitee>();
         this.maybe = new Array<Invitee>();
         this.invited = new Array<Invitee>();
+        this.no = new Array<Invitee>();
         for(let i = 0; i < this.allMyData.friends.length; i++){
             if(this.party.invitees.has(this.allMyData.friends[i].facebookID) == true){
                 let invitee = this.party.invitees.get(this.allMyData.friends[i].facebookID);
@@ -49,8 +52,10 @@ export class InvitedFriendsPage {
                     this.going.push(invitee);
                 }else if(invitee.status == "Maybe"){
                     this.maybe.push(invitee);
-                }else{
+                }else if(invitee.status == "Invited"){
                     this.invited.push(invitee);
+                }else {
+                    this.no.push(invitee);
                 }
             }
         }

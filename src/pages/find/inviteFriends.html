@@ -22,8 +22,8 @@
 
     <ion-list *ngIf="this.allMyData.friends.length != 0">
         <ion-item *ngFor="let friend of this.allMyData.friends">
-            <ion-label [color]="party.invitees.has(friend.facebookID) == true ? {'Going': 'primary', 'Maybe': 'yellow', 'Invited': 'secondary'}[party.invitees.get(friend.facebookID).status] : 'white'">{{ friend.name }}</ion-label>
-            <ion-checkbox [disabled]="party.hosts.has(friend.facebookID) == true ? party.hosts.get(friend.facebookID).status == 'Accepted' : originalParty.invitees.has(friend.facebookID) || (party.invitees.get(this.allMyData.me.facebookID).numberOfInvitationsLeft <= 0 && party.invitees.has(friend.facebookID) == false)" [color]="party.invitees.has(friend.facebookID) == true ? {'Going': 'primary', 'Maybe': 'yellow', 'Invited': 'secondary'}[party.invitees.get(friend.facebookID).status] : 'white'" [checked]="party.invitees.has(friend.facebookID)" (click)="friendSelected(friend)"></ion-checkbox>
+            <ion-label [color]="party.invitees.has(friend.facebookID) == true ? {'Going': 'primary', 'Maybe': 'yellow', 'Invited': 'secondary', 'No': 'danger'}[party.invitees.get(friend.facebookID).status] : 'white'">{{ friend.name }}</ion-label>
+            <ion-checkbox [disabled]="party.hosts.has(friend.facebookID) == true ? party.hosts.get(friend.facebookID).status == 'Accepted' : originalParty.invitees.has(friend.facebookID) || (party.invitees.get(this.allMyData.me.facebookID).numberOfInvitationsLeft <= 0 && party.invitees.has(friend.facebookID) == false)" [color]="party.invitees.has(friend.facebookID) == true ? {'Going': 'primary', 'Maybe': 'yellow', 'Invited': 'secondary', 'No': 'danger'}[party.invitees.get(friend.facebookID).status] : 'white'" [checked]="party.invitees.has(friend.facebookID)" (click)="friendSelected(friend)"></ion-checkbox>
         </ion-item>
     </ion-list>
 

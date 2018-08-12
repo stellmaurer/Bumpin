@@ -1,6 +1,8 @@
 <div class="container">
 
   <ion-icon id="closeButton" name="close" [color]="'primary'" (click)="close();"></ion-icon>
+  <ion-icon *ngIf="allMyData.favoriteBars.indexOf(this.bar.barID) == -1" class="favorite" name="star-outline" [color]="'primary'" (click)="addBarToFavorites();"></ion-icon>
+  <ion-icon *ngIf="allMyData.favoriteBars.indexOf(this.bar.barID) != -1" class="favorite" name="star" [color]="'primary'" (click)="removeBarFromFavorites();"></ion-icon>
 
   <ion-scroll class="home" scrollY="true">
 

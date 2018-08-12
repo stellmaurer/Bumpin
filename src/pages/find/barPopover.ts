@@ -30,6 +30,7 @@ export class BarPopover {
   private http : Http;
   private navCtrl : NavController;
   private iAmHostingThisBar : boolean;
+  private barWasInitiallyAFavorite : boolean;
 
   static get parameters() {
     return [[ViewController],[NavParams]];
@@ -42,10 +43,43 @@ export class BarPopover {
     this.bar = params.get("bar");
     this.navCtrl = params.get("navCtrl");
     this.iAmHostingThisBar = this.amIHostingThisBar();
+    if(this.allMyData.favoriteBars.indexOf(this.bar.barID) >= 0){
+      this.barWasInitiallyAFavorite = true;
+    }else{
+      this.barWasInitiallyAFavorite = false;
+    }
   }
 
   ionViewWillEnter(){
     this.synchronizeLatestBarData();
+  }
+
+  ionViewWillLeave(){
+    let barIsNotAFavoriteAnymore = false;
+    if(this.allMyData.favoriteBars.indexOf(this.bar.barID) == -1){
+      barIsNotAFavoriteAnymore = true;
+    }
+    
+    if(this.barWasInitiallyAFavorite && barIsNotAFavoriteAnymore){
+      this.allMyData.events.publish("timeToUpdateBarMarkersVisibility");
+    }
+  }
+
+  addBarToFavorites(){
+    this.allMyData.zone.run(() => {
+      this.allMyData.favoriteBars.push(this.bar.barID);
+    });
+    this.allMyData.storage.set("favoriteBars", this.allMyData.favoriteBars);
+  }
+
+  removeBarFromFavorites(){
+    this.allMyData.zone.run(() => {
+      let indexToRemove = this.allMyData.favoriteBars.indexOf(this.bar.barID);
+      if(indexToRemove >= 0){
+        this.allMyData.favoriteBars.splice(indexToRemove, 1);
+      }
+    });
+    this.allMyData.storage.set("favoriteBars", this.allMyData.favoriteBars);
   }
 
   close() {

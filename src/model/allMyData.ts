@@ -41,6 +41,7 @@ export class AllMyData{
     public friends : Friend[];
     public notifications : PushNotification[];
     public numberOfUnseenNotifications : number;
+    public favoriteBars : Array<string>;
     
     public events : Events;
     public dataRetrievalTimer : NodeJS.Timer;
@@ -57,6 +58,13 @@ export class AllMyData{
         this.friends = new Array<Friend>();
         this.notifications = new Array<PushNotification>();
         this.numberOfUnseenNotifications = 0;
+        this.favoriteBars = new Array<string>();
+        this.storage.get("favoriteBars")
+        .then((val : string[]) => {
+            if((val != null)){
+                this.favoriteBars = val;
+            }
+        });
     }
 
     public refreshDataAndResetPeriodicDataRetrievalTimer(http : Http){

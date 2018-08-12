@@ -54,6 +54,20 @@ export class MyApp {
   }
 
   private loginToFacebook(){
+    // this is done to ensure quick app start-up times for the user - it takes the last known Facebook info
+    //    the user had and uses that until Facebook login completes.
+    this.login.populateFacebookInfoFromLocalStorage()
+    .then((res) => {
+      this.splashScreen.hide();
+      this.actuallyLoginToFacebook();
+    })
+    .catch((err) => {
+        console.log(err);
+        this.actuallyLoginToFacebook();
+    });
+  }
+
+  private actuallyLoginToFacebook(){
     this.login.login()
     .then((res) => {
       this.splashScreen.hide();

@@ -53,10 +53,23 @@ export class Query{
                 this.allMyData.me.facebookID = data.id;
                 if(data.gender == "male"){
                     this.allMyData.me.isMale = true;
-                }else{
+                }else if(data.gender == "female"){
                     this.allMyData.me.isMale = false;
+                }else{
+                    // if user didn't set their Facebook gender, randomly select a gender
+                    let zeroOrOne = Math.random();
+                    if(zeroOrOne >= 0.50001){
+                        this.allMyData.me.isMale = true;
+                    }else{
+                        this.allMyData.me.isMale = false;
+                    }
                 }
                 this.allMyData.me.name = data.name;
+
+                this.allMyData.storage.set("myFacebookID", this.allMyData.me.facebookID);
+                this.allMyData.storage.set("myGenderIsMale", this.allMyData.me.isMale);
+                this.allMyData.storage.set("myName", this.allMyData.me.name);
+
                 resolve(data);
             });
         });

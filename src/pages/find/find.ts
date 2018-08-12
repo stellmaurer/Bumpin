@@ -324,7 +324,6 @@ export class FindPage {
   }
 
   private setUpMapWithMyCoordinates(coordinates : any){
-
       let mapOptions = {
         center: coordinates,
         zoom: 15,

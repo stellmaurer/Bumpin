@@ -13,6 +13,7 @@ import { Events } from 'ionic-angular';
 import {Http} from '@angular/http';
 import {AllMyData} from "../../model/allMyData"
 import { Injectable } from '@angular/core';
+import { Friend } from '../../model/friend';
 
 @Injectable()
 export class Login {
@@ -21,8 +22,13 @@ export class Login {
 
   constructor(private allMyData : AllMyData, private http:Http, private events : Events, private fb : Facebook) {}
 
+  // use this by making function that uses it async, and then:
+  //          await this.sleep(10000);
+  private sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
   public login(){
-    console.log("login.ts: in login()");
     return new Promise((resolve, reject) => {
       this.fb.getLoginStatus()
       .then((response: FacebookLoginResponse) => {
@@ -97,8 +103,12 @@ export class Login {
   }
 
   public logout(){
-    console.log("login.ts: in logout()");
     return new Promise((resolve, reject) => {
+      this.allMyData.storage.set("myFriends", null);
+      this.allMyData.storage.set("myFacebookID", null);
+      this.allMyData.storage.set("myGenderIsMale", null);
+      this.allMyData.storage.set("myName", null);
+
       this.fb.logout()
       .then((response: FacebookLoginResponse) => {
         this.login()
@@ -135,5 +145,37 @@ export class Login {
     });
   }
 
-  
+  public populateFacebookInfoFromLocalStorage(){
+    return new Promise((resolve, reject) => {
+        Promise.all([this.allMyData.storage.get("myFacebookID"), this.allMyData.storage.get("myGenderIsMale"),
+                     this.allMyData.storage.get("myName"), this.allMyData.storage.get("friends")])
+        .then(data => {
+            let myFacebookID : string = data[0];
+            let myGenderIsMale : boolean = data[1];
+            let myName : string = data[2];
+            let friends : Friend[] = data[3];
+            if(myFacebookID != null && myGenderIsMale != null && myName != null && friends != null){
+                this.allMyData.me.facebookID = myFacebookID;
+                this.allMyData.me.isMale = myGenderIsMale;
+                this.allMyData.me.name  = myName;
+                this.allMyData.friends = friends;
+                this.allMyData.friends.sort(function(a, b){
+                  if(b.name < a.name){
+                      return 1;
+                  }
+                  if(b.name > a.name){
+                      return -1;
+                  }
+                  return 0;
+                });
+                resolve("successfully got Facebook info from local storage");
+            }else{
+                reject("facebook info not in local storage yet");
+            }
+        })
+        .catch((err) => {
+            reject(err);
+        });
+    });
+  }
 }

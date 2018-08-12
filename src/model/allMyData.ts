@@ -82,6 +82,7 @@ export class AllMyData{
     }
 
     public refreshMyDataFromFacebook(accessToken : string, http : Http){
+        
         return new Promise((resolve, reject) => {
             var query = new Query(this, http);
             query.refreshMyDataFromFacebook(accessToken)
@@ -709,7 +710,7 @@ export class AllMyData{
         });
     }
 
-    public async refreshParties(http : Http){
+    public refreshParties(http : Http){
         return new Promise((resolve, reject) => {
             var query = new Query(this, http);
             query.getPartiesImInvitedTo()
@@ -723,7 +724,7 @@ export class AllMyData{
         });
     }
 
-    public async refreshFriends(http : Http){
+    public refreshFriends(http : Http){
         return new Promise((resolve, reject) => {
             var query = new Query(this, http);
             query.getFriends()
@@ -872,7 +873,7 @@ export class AllMyData{
         });
     }
 
-    public async refreshPartiesImHosting(http : Http){
+    public refreshPartiesImHosting(http : Http){
         return new Promise((resolve, reject) => {
             var query = new Query(this, http);
             this.zone.run(() => {
@@ -887,7 +888,7 @@ export class AllMyData{
         });
     }
 
-    public async refreshBarsImHosting(http : Http){
+    public refreshBarsImHosting(http : Http){
         return new Promise((resolve, reject) => {
             var query = new Query(this, http);
             this.zone.run(() => {

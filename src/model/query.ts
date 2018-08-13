@@ -290,6 +290,25 @@ export class Query{
         });
     }
 
+    // curl http://localhost:5000/updateWhatGotPersonToDownload -d "facebookID=10154326505409816&whatGotThemToDownload=I%20dont%20know"
+    public updateWhatGotPersonToDownload(whatGotThemToDownload : string){
+        return new Promise((resolve, reject) => {
+            var url = "http://bumpin-env.us-west-2.elasticbeanstalk.com:80/updateWhatGotPersonToDownload";
+            let body = "facebookID=" + this.allMyData.me.facebookID + 
+                       "&whatGotThemToDownload=" + encodeURIComponent(whatGotThemToDownload);
+            var headers = new Headers();
+            headers.append('content-type', "application/x-www-form-urlencoded");
+            let options= new RequestOptions({headers: headers});
+            this.http.post(url, body, options).map(res => res.json()).subscribe(data => {
+                if(data.succeeded){
+                    resolve(data);
+                }else{
+                    reject(data.error);
+                }
+            });
+        });
+    }
+
     private getFriendFacebookIDsAsQueryParameter() : string{
         var facebookIDs : string = "";
         if(this.allMyData.friends != null){

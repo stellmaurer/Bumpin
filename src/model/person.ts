@@ -23,6 +23,7 @@ export class Person {
     public deviceToken : string;
     public numberOfFriendsThatMightGoOut : number;
     public sevenPMLocalHourInZulu : number;
+    public whatGotThemToDownload : string;
 
     constructor() {
         this.facebookID = "Not yet set.";
@@ -38,6 +39,7 @@ export class Person {
         this.status = new Map<string,string>();
         this.numberOfFriendsThatMightGoOut = 0;
         this.sevenPMLocalHourInZulu = 0;
+        this.whatGotThemToDownload = "Not yet set.";
     }
 
     fixMaps(){

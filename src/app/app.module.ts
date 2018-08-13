@@ -39,6 +39,7 @@ import { Diagnostic } from '@ionic-native/diagnostic';
 import { LocalNotifications } from '@ionic-native/local-notifications';
 import { ClaimBarPage } from '../pages/find/claimBar';
 import { AppVersion } from '@ionic-native/app-version';
+import { HowDidYouHearPopover } from '../pages/login/howDidYouHearPopover';
 
 
 const cloudSettings: CloudSettings = {
@@ -76,7 +77,8 @@ const cloudSettings: CloudSettings = {
     EditInviteeListPage,
     PartyPopover,
     BarPopover,
-    TabsPage
+    TabsPage,
+    HowDidYouHearPopover
   ],
   imports: [
     BrowserModule,
@@ -108,7 +110,8 @@ const cloudSettings: CloudSettings = {
     EditInviteeListPage,
     PartyPopover,
     BarPopover,
-    TabsPage
+    TabsPage,
+    HowDidYouHearPopover
   ],
   providers: [
     LocationTracker,

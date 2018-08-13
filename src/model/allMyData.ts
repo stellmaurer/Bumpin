@@ -119,6 +119,19 @@ export class AllMyData{
         });
     }
 
+    public updateWhatGotPersonToDownload(whatGotThemToDownload : string, http : Http){
+        return new Promise((resolve, reject) => {
+            var query = new Query(this, http);
+            query.updateWhatGotPersonToDownload(whatGotThemToDownload)
+            .then((res) => {
+                resolve("updateWhatGotPersonToDownload query succeeded.");
+            })
+            .catch((err) => {
+                reject(err);
+            });
+        });
+    }
+
     public refreshPerson(http : Http){
         return new Promise((resolve, reject) => {
             var query = new Query(this, http);

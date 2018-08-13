@@ -18,7 +18,7 @@ import { Friend } from '../../model/friend';
 @Injectable()
 export class Login {
 
-  private tabName : string = "More Tab";
+  private tabName : string = "Login";
 
   constructor(private allMyData : AllMyData, private http:Http, private events : Events, private fb : Facebook) {}
 
@@ -54,7 +54,7 @@ export class Login {
           console.log("response.status = not authorized");
           // the user is logged in to Facebook, 
           // but has not authenticated your app
-          this.allMyData.logError(this.tabName, "login", "The user is logged in to Facebook, but has not authenticated your app.", this.http);
+          this.allMyData.logError(this.tabName, "client", "The user is logged in to Facebook, but has not authenticated your app.", this.http);
           this.fb.login(['public_profile', 'user_friends'])
           .then((response: FacebookLoginResponse) => {
             let accessToken = response.authResponse.accessToken;
@@ -69,7 +69,7 @@ export class Login {
             });
           })
           .catch(err => {
-            this.allMyData.logError(this.tabName, "login", "Error logging into Facebook : Err msg = " + err, this.http);
+            this.allMyData.logError(this.tabName, "client", "Error logging into Facebook : Err msg = " + err, this.http);
             reject(err);
           });
           //reject("User hasn't authenticated app - whatever that means...");
@@ -90,13 +90,13 @@ export class Login {
             });
           })
           .catch(err => {
-            this.allMyData.logError(this.tabName, "login", "Error logging into Facebook : Err msg = " + err, this.http);
+            this.allMyData.logError(this.tabName, "client", "Error logging into Facebook : Err msg = " + err, this.http);
             reject(err);
           });
         }
       })
       .catch(err => {
-        this.allMyData.logError(this.tabName, "login", "Error checking status of login : Err msg = " + err, this.http);
+        this.allMyData.logError(this.tabName, "client", "Error checking status of login : Err msg = " + err, this.http);
         reject(err);
       });
     });

@@ -25,6 +25,7 @@ import * as MarkerClusterer from 'node-js-marker-clusterer';
 import { Storage } from '@ionic/storage';
 import { BackgroundGeolocationResponse } from '@ionic-native/background-geolocation';
 import { Diagnostic } from '@ionic-native/diagnostic';
+import { HowDidYouHearPopover } from '../login/howDidYouHearPopover';
  
 declare var google;
 
@@ -142,9 +143,16 @@ export class FindPage {
           }
         }
     });
+
+    this.events.subscribe("howDidYouHearPopoverDismissed",() => {
+      if(this.numberOfTutorialStepsCompleted >= 5){
+        this.overlayIsNowInactive();
+      }
+    });
   }
 
   ionViewDidLoad(){
+    this.presentHowDidYouHearPopover();
     this.setupThePage();
   }
 
@@ -540,6 +548,13 @@ export class FindPage {
       labelOrigin: new google.maps.Point(10,11)
     };
     return markerIcon;
+  }
+
+  private presentHowDidYouHearPopover() {
+    this.overlayIsActive = true;
+    this.events.publish("overlayIsNowActive");
+    let popover = this.popoverCtrl.create(HowDidYouHearPopover, {allMyData:this.allMyData, http:this.http, navCtrl:this.navCtrl, alertCtrl:this.alertCtrl}, {cssClass:'howDidYouHear.scss', enableBackdropDismiss: false});
+    popover.present();
   }
 
   private presentPartyPopover(party : Party) {

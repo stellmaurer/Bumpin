@@ -45,6 +45,23 @@ export class CheckIntoBarPopoverPage {
         this.navCtrl = params.get("navCtrl");
     }
 
+    addBarToFavorites(){
+        this.allMyData.zone.run(() => {
+            this.allMyData.favoriteBars.push(this.bar.barID);
+        });
+        this.allMyData.storage.set("favoriteBars", this.allMyData.favoriteBars);
+    }
+
+    removeBarFromFavorites(){
+        this.allMyData.zone.run(() => {
+            let indexToRemove = this.allMyData.favoriteBars.indexOf(this.bar.barID);
+            if(indexToRemove >= 0){
+                this.allMyData.favoriteBars.splice(indexToRemove, 1);
+            }
+        });
+        this.allMyData.storage.set("favoriteBars", this.allMyData.favoriteBars);
+    }
+
     close() {
         this.viewCtrl.dismiss();
     }

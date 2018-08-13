@@ -152,7 +152,13 @@ export class FindPage {
   }
 
   ionViewDidLoad(){
-    this.presentHowDidYouHearPopover();
+    this.allMyData.storage.get("whatGotPersonToDownload")
+    .then((val : string) => {
+      if((val == null)){
+        this.presentHowDidYouHearPopover();
+      }
+    });
+
     this.setupThePage();
   }
 
@@ -225,7 +231,6 @@ export class FindPage {
       let timer = setInterval(() => {
         if((this.allMyData.me.facebookID != "Not yet set.") && (this.myCoordinates !== undefined)){
           clearInterval(timer);
-          console.log("reloading data");
           this.refreshPartyAndBarData()
           .then((res) => {
             this.currentlyLoadingData = false;
@@ -236,7 +241,6 @@ export class FindPage {
         }
       }, 250);
     }else{
-      console.log("reloading data");
       this.refreshPartyAndBarData()
       .then((res) => {
         this.currentlyLoadingData = false;

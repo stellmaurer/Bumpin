@@ -152,14 +152,18 @@ export class HowDidYouHearPopover {
         this.validateInput();
         if(this.inputError == ""){
             this.createHowDidYouHearString();
-            
-            this.allMyData.updateWhatGotPersonToDownload(this.howDidYouHear, this.http)
-            .then((res) => {
-                
-            })
-            .catch((err) => {
-                this.allMyData.logError(this.tabName, "server", "update howDidYouHearInfo query error: Err msg = " + err, this.http);
-            });
+
+            let timer = setInterval(() => {
+                if(this.allMyData.me.facebookID != "Not yet set."){
+                    clearInterval(timer);
+                    this.allMyData.updateWhatGotPersonToDownload(this.howDidYouHear, this.http)
+                    .catch((err) => {
+                        this.allMyData.logError(this.tabName, "server", "update howDidYouHearInfo query error: Err msg = " + err, this.http);
+                    });
+                }
+            }, 250);
+
+            this.allMyData.storage.set("whatGotPersonToDownload", this.howDidYouHear);
 
             this.allMyData.events.publish("howDidYouHearPopoverDismissed");
             this.close();

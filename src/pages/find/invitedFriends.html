@@ -41,6 +41,10 @@
         <ion-item *ngFor="let invitee of invited">
             <ion-label color="secondary">{{ invitee.name }}</ion-label>
         </ion-item>
+        <ion-list-header color="background-info-color" *ngIf="no.length != 0">Can't Go</ion-list-header>
+        <ion-item *ngFor="let invitee of no">
+            <ion-label color="danger">{{ invitee.name }}</ion-label>
+        </ion-item>
     </ion-list>
 
 </ion-content>

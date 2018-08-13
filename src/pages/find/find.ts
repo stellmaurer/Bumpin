@@ -25,6 +25,7 @@ import * as MarkerClusterer from 'node-js-marker-clusterer';
 import { Storage } from '@ionic/storage';
 import { BackgroundGeolocationResponse } from '@ionic-native/background-geolocation';
 import { Diagnostic } from '@ionic-native/diagnostic';
+import { HowDidYouHearPopover } from '../login/howDidYouHearPopover';
  
 declare var google;
 
@@ -54,10 +55,12 @@ export class FindPage {
   geocoder : any;
 
   private filterDontShowBars : boolean;
+  private filterFavorites : boolean;
   private filterAttendance : boolean;
   private filterFriendsPresent : boolean;
 
   private filterDontShowBarsTemp : boolean;
+  private filterFavoritesTemp : boolean;
   private filterAttendanceTemp : boolean;
   private filterFriendsPresentTemp : boolean;
 
@@ -72,6 +75,8 @@ export class FindPage {
   private upperRightButtonExplanationIsActive : boolean;
   private bottomRightButtonExplanationIsActive : boolean;
   private tabsExplanationIsActive : boolean;
+
+  private numberOfBarsCurrentlyBeingShownOnMap : number;
  
   constructor(private diagnostic: Diagnostic, private allMyData : AllMyData, private storage: Storage, public alertCtrl: AlertController, public locationTracker: LocationTracker, private events : Events, private http:Http, public navCtrl: NavController, public popoverCtrl: PopoverController) {
     this.overlayIsActive = false;
@@ -83,12 +88,15 @@ export class FindPage {
     this.allMyData.events = events;
     this.partyMarkersOnMap = new Map<string,any>();
     this.barMarkersOnMap = new Map<string,any>();
+    this.numberOfBarsCurrentlyBeingShownOnMap = 0;
 
     this.filterDontShowBars = false;
+    this.filterFavorites = false;
     this.filterAttendance = false;
     this.filterFriendsPresent = false;
 
     this.filterDontShowBarsTemp = false;
+    this.filterFavorites = false;
     this.filterAttendanceTemp = false;
     this.filterFriendsPresentTemp = false;
 
@@ -97,7 +105,7 @@ export class FindPage {
     this.currentlyLoadingData = false;
 
     this.usersActualCoordinatesHaveBeenSet = false;
-
+    
     this.events.subscribe("tabBarWasClicked",() => {
       if(this.numberOfTutorialStepsCompleted == 4){
         this.overlayWasClicked();
@@ -135,9 +143,22 @@ export class FindPage {
           }
         }
     });
+
+    this.events.subscribe("howDidYouHearPopoverDismissed",() => {
+      if(this.numberOfTutorialStepsCompleted >= 5){
+        this.overlayIsNowInactive();
+      }
+    });
   }
 
   ionViewDidLoad(){
+    this.allMyData.storage.get("whatGotPersonToDownload")
+    .then((val : string) => {
+      if((val == null)){
+        this.presentHowDidYouHearPopover();
+      }
+    });
+
     this.setupThePage();
   }
 
@@ -198,6 +219,10 @@ export class FindPage {
     this.events.subscribe("timeToRefreshMapMarkers",() => {
       this.refreshMapMarkers();
     });
+
+    this.events.subscribe("timeToUpdateBarMarkersVisibility",() => {
+      this.updateBarMarkersVisibility();
+    });
   }
 
   private refreshPartyAndBarDataOnceFacebookIDAndLocationAreSet(){
@@ -206,7 +231,6 @@ export class FindPage {
       let timer = setInterval(() => {
         if((this.allMyData.me.facebookID != "Not yet set.") && (this.myCoordinates !== undefined)){
           clearInterval(timer);
-          console.log("reloading data");
           this.refreshPartyAndBarData()
           .then((res) => {
             this.currentlyLoadingData = false;
@@ -217,7 +241,6 @@ export class FindPage {
         }
       }, 250);
     }else{
-      console.log("reloading data");
       this.refreshPartyAndBarData()
       .then((res) => {
         this.currentlyLoadingData = false;
@@ -324,7 +347,6 @@ export class FindPage {
   }
 
   private setUpMapWithMyCoordinates(coordinates : any){
-
       let mapOptions = {
         center: coordinates,
         zoom: 15,
@@ -532,6 +554,13 @@ export class FindPage {
     return markerIcon;
   }
 
+  private presentHowDidYouHearPopover() {
+    this.overlayIsActive = true;
+    this.events.publish("overlayIsNowActive");
+    let popover = this.popoverCtrl.create(HowDidYouHearPopover, {allMyData:this.allMyData, http:this.http, navCtrl:this.navCtrl, alertCtrl:this.alertCtrl}, {cssClass:'howDidYouHear.scss', enableBackdropDismiss: false});
+    popover.present();
+  }
+
   private presentPartyPopover(party : Party) {
     let popover = this.popoverCtrl.create(PartyPopover, {party:party, allMyData:this.allMyData, locationTracker:this.locationTracker, http:this.http, navCtrl:this.navCtrl}, {cssClass:'partyPopover.scss'});
     popover.present();
@@ -548,9 +577,15 @@ export class FindPage {
 
     alert.addInput({
       type: 'checkbox',
-      label: "Don't show any bars",
+      label: "No bars",
       checked: this.filterDontShowBars,
       handler: data =>  { this.filterDontShowBarsTemp = !this.filterDontShowBarsTemp;}
+    });
+    alert.addInput({
+      type: 'checkbox',
+      label: "Favorites",
+      checked: this.filterFavorites,
+      handler: data =>  { this.filterFavoritesTemp = !this.filterFavoritesTemp;}
     });
     alert.addInput({
       type: 'checkbox',
@@ -569,6 +604,7 @@ export class FindPage {
       text: 'Cancel',
       handler: data => {
         this.filterDontShowBarsTemp = this.filterDontShowBars;
+        this.filterFavoritesTemp = this.filterFavorites;
         this.filterAttendanceTemp = this.filterAttendance;
         this.filterFriendsPresentTemp = this.filterFriendsPresent;
       }
@@ -577,6 +613,7 @@ export class FindPage {
       text: 'Okay',
       handler: data => {
         this.filterDontShowBars = this.filterDontShowBarsTemp;
+        this.filterFavorites = this.filterFavoritesTemp;
         this.filterAttendance = this.filterAttendanceTemp;
         this.filterFriendsPresent = this.filterFriendsPresentTemp;
         this.updateNumberOfActiveFilters();
@@ -587,9 +624,20 @@ export class FindPage {
     alert.present();
   }
 
+  private updateMarkerClusterZoomLevel(){
+    if(this.numberOfBarsCurrentlyBeingShownOnMap <= 50){
+      this.markerCluster.setMaxZoom(9);
+    }else{
+      this.markerCluster.setMaxZoom(14);
+    }
+  }
+
   private updateNumberOfActiveFilters(){
     this.numberOfActiveFilters = 0;
     if(this.filterDontShowBars){
+      this.numberOfActiveFilters++;
+    }
+    if(this.filterFavorites){
       this.numberOfActiveFilters++;
     }
     if(this.filterAttendance){
@@ -602,6 +650,7 @@ export class FindPage {
 
   private storeFiltersInLocalDataStorage(){
     this.storage.set('filterDontShowBars', this.filterDontShowBars);
+    this.storage.set('filterFavorites', this.filterFavorites);
     this.storage.set('filterAttendance', this.filterAttendance);
     this.storage.set('filterFriendsPresent', this.filterFriendsPresent);
   }
@@ -609,16 +658,19 @@ export class FindPage {
   private populateFiltersFromLocalDataStorage(){
     return new Promise((resolve, reject) => {
       Promise.all([this.getFilterFromLocalDataStorage('filterDontShowBars'),
+                  this.getFilterFromLocalDataStorage('filterFavorites'),
                   this.getFilterFromLocalDataStorage('filterAttendance'),
                   this.getFilterFromLocalDataStorage('filterFriendsPresent')
                   ]).then(filters => {
         this.filterDontShowBars = filters[0];
-        this.filterAttendance = filters[1];
-        this.filterFriendsPresent = filters[2];
+        this.filterFavorites = filters[1];
+        this.filterAttendance = filters[2];
+        this.filterFriendsPresent = filters[3];
 
         this.filterDontShowBarsTemp = filters[0];
-        this.filterAttendanceTemp = filters[1];
-        this.filterFriendsPresentTemp = filters[2];
+        this.filterFavoritesTemp = filters[1];
+        this.filterAttendanceTemp = filters[2];
+        this.filterFriendsPresentTemp = filters[3];
 
         this.updateNumberOfActiveFilters();
 
@@ -644,14 +696,6 @@ export class FindPage {
     });
   }
 
-  private stringToBool(theString : string){
-    if(theString == "true"){
-      return true;
-    }else{
-      return false;
-    }
-  }
-
   updateMapMarkersVisibility(){
     this.updateBarMarkersVisibility();
     this.updatePartyMarkersVisibility();
@@ -661,6 +705,7 @@ export class FindPage {
     this.markerCluster.clearMarkers();
 
     let barMarkersToShow = new Array<any>();
+    this.numberOfBarsCurrentlyBeingShownOnMap = 0;
 
     this.barMarkersOnMap.forEach((value: any, key: string) => {
       let barMarker = this.barMarkersOnMap.get(key);
@@ -669,6 +714,11 @@ export class FindPage {
       let barShouldBeShown = true;
       if(this.filterDontShowBars == true){
         barShouldBeShown = false;
+      }
+      if(this.filterFavorites == true){
+        if(this.allMyData.favoriteBars.indexOf(bar.barID) == -1){
+          barShouldBeShown = false;
+        }
       }
       if(this.filterAttendance == true){
         if(bar.numberOfPeopleAtBar < 1){
@@ -683,8 +733,11 @@ export class FindPage {
 
       if(barShouldBeShown == true){
         barMarkersToShow.push(barMarker);
+        this.numberOfBarsCurrentlyBeingShownOnMap++;
       }
     });
+
+    this.updateMarkerClusterZoomLevel();
 
     this.markerCluster.addMarkers(barMarkersToShow);
   }

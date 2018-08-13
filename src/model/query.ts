@@ -53,10 +53,23 @@ export class Query{
                 this.allMyData.me.facebookID = data.id;
                 if(data.gender == "male"){
                     this.allMyData.me.isMale = true;
-                }else{
+                }else if(data.gender == "female"){
                     this.allMyData.me.isMale = false;
+                }else{
+                    // if user didn't set their Facebook gender, randomly select a gender
+                    let zeroOrOne = Math.random();
+                    if(zeroOrOne >= 0.50001){
+                        this.allMyData.me.isMale = true;
+                    }else{
+                        this.allMyData.me.isMale = false;
+                    }
                 }
                 this.allMyData.me.name = data.name;
+
+                this.allMyData.storage.set("myFacebookID", this.allMyData.me.facebookID);
+                this.allMyData.storage.set("myGenderIsMale", this.allMyData.me.isMale);
+                this.allMyData.storage.set("myName", this.allMyData.me.name);
+
                 resolve(data);
             });
         });
@@ -274,6 +287,25 @@ export class Query{
               .catch((err) => {
                 reject(err);
               });
+        });
+    }
+
+    // curl http://localhost:5000/updateWhatGotPersonToDownload -d "facebookID=10154326505409816&whatGotThemToDownload=I%20dont%20know"
+    public updateWhatGotPersonToDownload(whatGotThemToDownload : string){
+        return new Promise((resolve, reject) => {
+            var url = "http://bumpin-env.us-west-2.elasticbeanstalk.com:80/updateWhatGotPersonToDownload";
+            let body = "facebookID=" + this.allMyData.me.facebookID + 
+                       "&whatGotThemToDownload=" + encodeURIComponent(whatGotThemToDownload);
+            var headers = new Headers();
+            headers.append('content-type', "application/x-www-form-urlencoded");
+            let options= new RequestOptions({headers: headers});
+            this.http.post(url, body, options).map(res => res.json()).subscribe(data => {
+                if(data.succeeded){
+                    resolve(data);
+                }else{
+                    reject(data.error);
+                }
+            });
         });
     }
 

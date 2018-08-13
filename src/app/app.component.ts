@@ -19,6 +19,7 @@ import { Geolocation } from '@ionic-native/geolocation';
 import { FriendsPage } from '../pages/more/friends';
 import { LocationTracker } from '../providers/location-tracker';
 import { LocalNotifications } from '@ionic-native/local-notifications';
+import { HowDidYouHearPage } from '../pages/login/howDidYouHear';
 
 @Component({
   templateUrl: 'app.html',
@@ -33,15 +34,17 @@ export class MyApp {
     this.platform.ready().then(() => {
 
       this.locationTracker.startTracking();
-
-      this.rootPage = TabsPage;
-
-      this.statusBar.hide();
+      
+      this.statusBar.overlaysWebView(false);
+      this.statusBar.backgroundColorByHexString('#32db64');
+      this.statusBar.styleDefault();
 
       this.badge.clear();
       this.platform.resume.subscribe((result)=>{//Foreground
         this.badge.clear();
       });
+
+      this.rootPage = TabsPage;
 
       this.storePlatform();
       this.initPushNotification();
@@ -49,19 +52,31 @@ export class MyApp {
       this.setUpLocalNotificationHandlers();
 
       this.loginToFacebook();
-
-      /*this.statusBar.styleDefault();
-      this.statusBar.overlaysWebView(false);
-      this.statusBar.backgroundColorByHexString('#32db64');*/
+      
     });
   }
 
   private loginToFacebook(){
+    // this is done to ensure quick app start-up times for the user - it takes the last known Facebook info
+    //    the user had and uses that until Facebook login completes.
+    this.login.populateFacebookInfoFromLocalStorage()
+    .then((res) => {
+      this.splashScreen.hide();
+      this.actuallyLoginToFacebook();
+    })
+    .catch((err) => {
+        console.log(err);
+        this.actuallyLoginToFacebook();
+    });
+  }
+
+  private actuallyLoginToFacebook(){
     this.login.login()
     .then((res) => {
       this.splashScreen.hide();
     })
     .catch((err) => {
+        console.log("Facebook login error: " + err);
         // error logging is already done in the Login file
         this.loginToFacebook(); // try again until logging in works
     });

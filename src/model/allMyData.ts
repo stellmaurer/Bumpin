@@ -41,6 +41,7 @@ export class AllMyData{
     public friends : Friend[];
     public notifications : PushNotification[];
     public numberOfUnseenNotifications : number;
+    public favoriteBars : Array<string>;
     
     public events : Events;
     public dataRetrievalTimer : NodeJS.Timer;
@@ -57,6 +58,13 @@ export class AllMyData{
         this.friends = new Array<Friend>();
         this.notifications = new Array<PushNotification>();
         this.numberOfUnseenNotifications = 0;
+        this.favoriteBars = new Array<string>();
+        this.storage.get("favoriteBars")
+        .then((val : string[]) => {
+            if((val != null)){
+                this.favoriteBars = val;
+            }
+        });
     }
 
     public refreshDataAndResetPeriodicDataRetrievalTimer(http : Http){
@@ -82,6 +90,7 @@ export class AllMyData{
     }
 
     public refreshMyDataFromFacebook(accessToken : string, http : Http){
+        
         return new Promise((resolve, reject) => {
             var query = new Query(this, http);
             query.refreshMyDataFromFacebook(accessToken)
@@ -103,6 +112,19 @@ export class AllMyData{
             })
             .then((res) => {
                 resolve("createOrUpdatePerson query succeeded.");
+            })
+            .catch((err) => {
+                reject(err);
+            });
+        });
+    }
+
+    public updateWhatGotPersonToDownload(whatGotThemToDownload : string, http : Http){
+        return new Promise((resolve, reject) => {
+            var query = new Query(this, http);
+            query.updateWhatGotPersonToDownload(whatGotThemToDownload)
+            .then((res) => {
+                resolve("updateWhatGotPersonToDownload query succeeded.");
             })
             .catch((err) => {
                 reject(err);
@@ -709,7 +731,7 @@ export class AllMyData{
         });
     }
 
-    public async refreshParties(http : Http){
+    public refreshParties(http : Http){
         return new Promise((resolve, reject) => {
             var query = new Query(this, http);
             query.getPartiesImInvitedTo()
@@ -723,7 +745,7 @@ export class AllMyData{
         });
     }
 
-    public async refreshFriends(http : Http){
+    public refreshFriends(http : Http){
         return new Promise((resolve, reject) => {
             var query = new Query(this, http);
             query.getFriends()
@@ -872,7 +894,7 @@ export class AllMyData{
         });
     }
 
-    public async refreshPartiesImHosting(http : Http){
+    public refreshPartiesImHosting(http : Http){
         return new Promise((resolve, reject) => {
             var query = new Query(this, http);
             this.zone.run(() => {
@@ -887,7 +909,7 @@ export class AllMyData{
         });
     }
 
-    public async refreshBarsImHosting(http : Http){
+    public refreshBarsImHosting(http : Http){
         return new Promise((resolve, reject) => {
             var query = new Query(this, http);
             this.zone.run(() => {

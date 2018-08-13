@@ -35,10 +35,12 @@ export class Party {
     public peopleGoing : number;
     public peopleMaybe : number;
     public peopleInvited : number;
+    public peopleNo : number;
     public numberOfPeopleAtParty : number;
     public numberOfMenGoing : number;
     public numberOfMenMaybe : number;
     public numberOfMenInvited : number;
+    public numberOfMenNo : number;
     public percentageOfMen : number;
     public percentageOfWomen : number;
 
@@ -76,10 +78,12 @@ export class Party {
         this.peopleGoing = 0;
         this.peopleMaybe = 0;
         this.peopleInvited = 0;
+        this.peopleNo = 0;
         this.numberOfPeopleAtParty = 0;
         this.numberOfMenGoing = 0;
         this.numberOfMenMaybe = 0;
         this.numberOfMenInvited = 0;
+        this.numberOfMenNo = 0;
         this.percentageOfMen = 0;
         this.percentageOfWomen = 0;
     }
@@ -156,12 +160,14 @@ export class Party {
         this.peopleGoing = 0;
         this.peopleMaybe = 0;
         this.peopleInvited = 0;
+        this.peopleNo = 0;
         this.numberOfPeopleAtParty = 0;
         this.percentageOfMen = 0;
         this.percentageOfWomen = 0;
         this.numberOfMenGoing = 0;
         this.numberOfMenMaybe = 0;
         this.numberOfMenInvited = 0;
+        this.numberOfMenNo = 0;
 
         let numberOfMen = 0;
         this.invitees.forEach((value: Invitee, key: string) => {
@@ -225,6 +231,13 @@ export class Party {
                     this.peopleInvited++;
                     if(invitee.isMale){
                         this.numberOfMenInvited++;
+                    }
+                    break;
+                }
+                case "No": {
+                    this.peopleNo++;
+                    if(invitee.isMale){
+                        this.numberOfMenNo++;
                     }
                     break;
                 }

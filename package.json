@@ -44,7 +44,7 @@
     "cordova-plugin-device": "^1.1.7",
     "cordova-plugin-facebook4": "^1.10.1",
     "cordova-plugin-geolocation": "^2.4.3",
-    "cordova-plugin-ionic-keyboard": "^2.0.5",
+    "cordova-plugin-ionic-keyboard": "^2.1.2",
     "cordova-plugin-ionic-webview": "^2.0.1",
     "cordova-plugin-local-notification": "^0.9.0-beta.2",
     "cordova-plugin-mauron85-background-geolocation": "^2.3.5",
@@ -101,13 +101,11 @@
         "APP_NAME": "Bumpin"
       },
       "cordova-plugin-nativestorage": {},
-      "cordova-plugin-statusbar": {},
       "cordova-plugin-whitelist": {},
       "cordova-sqlite-storage": {},
       "cordova-plugin-geolocation": {
         "GEOLOCATION_USAGE_DESCRIPTION": " "
       },
-      "cordova-plugin-ionic-keyboard": {},
       "cordova-plugin-splashscreen": {},
       "cordova-plugin-badge": {},
       "cordova.plugins.diagnostic": {},
@@ -127,7 +125,9 @@
         "FCM_VERSION": "11.6.2"
       },
       "cordova-plugin-app-version": {},
-      "cordova-plugin-ionic-webview": {}
+      "cordova-plugin-ionic-webview": {},
+      "cordova-plugin-statusbar": {},
+      "cordova-plugin-ionic-keyboard": {}
     }
   }
 }

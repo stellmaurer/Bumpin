@@ -79,7 +79,7 @@
       </ion-row>
 
       <ion-row>
-          <ion-col col-4 class="threeElements">
+          <ion-col col-3 class="fourElements">
             <div class="centerMe">
               <label>Going</label>
             </div>
@@ -92,7 +92,7 @@
               <label>{{party.numberOfMenGoing}} M / {{party.peopleGoing - party.numberOfMenGoing}} F</label>
             </div>
           </ion-col>
-          <ion-col col-4 class="threeElements">
+          <ion-col col-3 class="fourElements">
             <div class="centerMe">
               <label>Maybe</label>
             </div>
@@ -105,7 +105,7 @@
               <label>{{party.numberOfMenMaybe}} M / {{party.peopleMaybe - party.numberOfMenMaybe}} F</label>
             </div>
           </ion-col>
-          <ion-col col-4 class="threeElements">
+          <ion-col col-3 class="fourElements">
             <div class="centerMe">
               <label>Invited</label>
             </div>
@@ -116,6 +116,19 @@
             </div>
             <div class="centerMe">
               <label>{{party.numberOfMenInvited}} M / {{party.peopleInvited - party.numberOfMenInvited}} F</label>
+            </div>
+          </ion-col>
+          <ion-col col-3 class="fourElements">
+            <div class="centerMe">
+              <label>Can't Go</label>
+            </div>
+            <div class="centerMe">
+              <button ion-button [color]="primary" style="color: black;" (click)='changeAttendanceStatus("No");'>
+                {{party.peopleNo}}
+              </button>
+            </div>
+            <div class="centerMe">
+              <label>{{party.numberOfMenNo}} M / {{party.peopleNo - party.numberOfMenNo}} F</label>
             </div>
           </ion-col>
       </ion-row>

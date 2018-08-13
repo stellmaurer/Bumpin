@@ -14,5 +14,7 @@ export class Friend {
     public name : string;
     public status : Map<string,string>;
 
-    constructor() {}
+    constructor() {
+        this.status = new Map<string,string>();
+    }
 }

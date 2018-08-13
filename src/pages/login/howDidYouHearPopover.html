@@ -1,0 +1,41 @@
+<ion-content>
+    <ion-list>
+        <ion-list-header style="color: #32db64 !important;">
+            What got you to download the app?
+        </ion-list-header>
+        <ion-item>
+            <ion-label [color]="'primary'">Facebook or Instagram Ad</ion-label>
+            <ion-checkbox [color]="'primary'" [checked]="facebook" (click)="itemSelected('facebook')"></ion-checkbox>
+        </ion-item>
+        <ion-item>
+            <ion-label [color]="'primary'">Sidewalk in-person marketing</ion-label>
+            <ion-checkbox [color]="'primary'" [checked]="sidewalk" (click)="itemSelected('sidewalk')"></ion-checkbox>
+        </ion-item>
+        <ion-item>
+            <ion-label [color]="'primary'">Classroom talk</ion-label>
+            <ion-checkbox [color]="'primary'" [checked]="classroom" (click)="itemSelected('classroom')"></ion-checkbox>
+        </ion-item>
+        <ion-item>
+            <ion-label [color]="'primary'">A friend</ion-label>
+            <ion-checkbox [color]="'primary'" [checked]="friend" (click)="itemSelected('friend')"></ion-checkbox>
+        </ion-item>
+        <ion-item>
+            <ion-label [color]="'primary'">Other</ion-label>
+            <ion-checkbox [color]="'primary'" [checked]="other" (click)="itemSelected('other')"></ion-checkbox>
+        </ion-item>
+        <ion-item>
+            <ion-grid>
+                <ion-row>
+                    <ion-col col-12>
+                        <div id="submitButton">
+                            <button ion-button block [color]="'primary'" [style.color]="'black'" (click)='submitButtonClicked();'>
+                                Submit
+                            </button>
+                        </div>
+                    </ion-col>
+                </ion-row>
+            </ion-grid>
+        </ion-item>
+    </ion-list>
+</ion-content>
+      

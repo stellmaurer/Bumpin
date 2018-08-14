@@ -152,13 +152,14 @@ export class FindPage {
   }
 
   ionViewDidLoad(){
+    
     this.allMyData.storage.get("whatGotPersonToDownload")
     .then((val : string) => {
       if((val == null)){
         this.presentHowDidYouHearPopover();
       }
     });
-
+    
     this.setupThePage();
   }
 
@@ -354,6 +355,8 @@ export class FindPage {
         zoomControl: false,
         mapTypeControl: false,
         streetViewControl: false,
+        fullscreenControl: false,
+        scaleControl: false
       }
       
       this.map = new google.maps.Map(this.mapElement.nativeElement, mapOptions);
@@ -374,6 +377,8 @@ export class FindPage {
       zoomControl: false,
       mapTypeControl: false,
       streetViewControl: false,
+      fullscreenControl: false,
+      scaleControl: false
     }
     
     this.map = new google.maps.Map(this.mapElement.nativeElement, mapOptions);

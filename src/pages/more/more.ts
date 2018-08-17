@@ -33,8 +33,7 @@ export class MorePage {
   private numberOfTutorialStepsCompleted : number;
   private overlayIsActive : boolean;
   private notificationsButtonExplanationIsActive : boolean;
-  private whosGoingOutButtonExplanationIsActive : boolean;
-  private rUGoingOutButtonExplanationIsActive : boolean;
+  private friendsButtonExplanationIsActive : boolean;
   private feedbackExplanationIsActive : boolean;
   private logoutExplanationIsActive : boolean;
 
@@ -49,11 +48,10 @@ export class MorePage {
     });
     this.overlayIsActive = false;
     this.notificationsButtonExplanationIsActive = false;
-    this.whosGoingOutButtonExplanationIsActive = false;
-    this.rUGoingOutButtonExplanationIsActive = false;
+    this.friendsButtonExplanationIsActive = false;
     this.feedbackExplanationIsActive = false;
     this.logoutExplanationIsActive = false;
-    this.numberOfTutorialStepsCompleted = 5;
+    this.numberOfTutorialStepsCompleted = 4;
     this.storage.get("numberOfTutorialStepsCompletedMoreTab")
     .then((val : number) => {
         if((val == null)){
@@ -62,7 +60,7 @@ export class MorePage {
             this.overlayIsNowActive();
         }else {
             this.numberOfTutorialStepsCompleted = val;
-            if(this.numberOfTutorialStepsCompleted != 5){
+            if(this.numberOfTutorialStepsCompleted != 4){
                 this.overlayIsNowActive();
             }
         }
@@ -93,23 +91,22 @@ export class MorePage {
   }
 
   ionViewDidEnter(){
-    console.log("more.ts: in ionViewDidEnter");
     this.currentlyLoadingData = true;
 
     Promise.all([this.allMyData.getNotifications(this.http),
-                 this.allMyData.refreshPerson(this.http)])
+                 this.allMyData.refreshFriends(this.http)])
       .then(thePromise => {
         this.currentlyLoadingData = false;
       })
       .catch((err) => {
         this.currentlyLoadingData = false;
-        this.allMyData.logError(this.tabName, "server", "refreshPerson or getNotifications query error: Err msg = " + err, this.http);
+        this.allMyData.logError(this.tabName, "server", "refreshFriends or getNotifications query error: Err msg = " + err, this.http);
       });
       
   }
 
   ionViewWillEnter(){
-    if(this.numberOfTutorialStepsCompleted != 5){
+    if(this.numberOfTutorialStepsCompleted != 4){
       this.overlayIsNowActive();
     }
     
@@ -246,15 +243,12 @@ export class MorePage {
       this.notificationsButtonExplanationIsActive = true;
     }
     if(this.numberOfTutorialStepsCompleted == 1){
-      this.whosGoingOutButtonExplanationIsActive = true;
+      this.friendsButtonExplanationIsActive = true;
     }
     if(this.numberOfTutorialStepsCompleted == 2){
-      this.rUGoingOutButtonExplanationIsActive = true;
-    }
-    if(this.numberOfTutorialStepsCompleted == 3){
       this.feedbackExplanationIsActive = true;
     }
-    if(this.numberOfTutorialStepsCompleted == 4){
+    if(this.numberOfTutorialStepsCompleted == 3){
       this.logoutExplanationIsActive = true;
     }
   }
@@ -264,24 +258,20 @@ export class MorePage {
     this.storage.set("numberOfTutorialStepsCompletedMoreTab", this.numberOfTutorialStepsCompleted);
 
     this.notificationsButtonExplanationIsActive = false;
-    this.whosGoingOutButtonExplanationIsActive = false;
-    this.rUGoingOutButtonExplanationIsActive = false;
+    this.friendsButtonExplanationIsActive = false;
     this.feedbackExplanationIsActive = false;
     this.logoutExplanationIsActive = false;
 
     if(this.numberOfTutorialStepsCompleted == 1){
-      this.whosGoingOutButtonExplanationIsActive = true;
+      this.friendsButtonExplanationIsActive = true;
     }
     if(this.numberOfTutorialStepsCompleted == 2){
-      this.rUGoingOutButtonExplanationIsActive = true;
-    }
-    if(this.numberOfTutorialStepsCompleted == 3){
       this.feedbackExplanationIsActive = true;
     }
-    if(this.numberOfTutorialStepsCompleted == 4){
+    if(this.numberOfTutorialStepsCompleted == 3){
       this.logoutExplanationIsActive = true;
     }
-    if(this.numberOfTutorialStepsCompleted == 5){
+    if(this.numberOfTutorialStepsCompleted == 4){
       this.overlayIsNowInactive();
     }
   }

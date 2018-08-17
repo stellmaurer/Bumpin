@@ -45,7 +45,7 @@ export class MyApp {
       });
 
       this.rootPage = TabsPage;
-
+      
       this.storePlatform();
       this.initPushNotification();
 
@@ -53,6 +53,9 @@ export class MyApp {
 
       this.loginToFacebook();
       
+    })
+    .catch((err) => {
+      console.log("platform.ready error: " + err);
     });
   }
 

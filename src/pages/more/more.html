@@ -11,25 +11,17 @@
 
 <ion-content>
   <ion-grid class="home">
-
-    <ion-row>
-      <ion-col col-12>
-          <button ion-button block [color]="primary" style="color: black;" (click)='goToNotificationsPage();'>
-            {{allMyData.numberOfUnseenNotifications}} New Notifications
-          </button>
-      </ion-col>
-    </ion-row>
-
+    
     <ion-row>
       <ion-col col-6 class="twoElements">
-          <button ion-button [color]="primary" style="color: black;" (click)='goToFriendStatusPage();'>
-            Who's Going Out?
+          <button full ion-button [color]="primary" style="color: black; border-radius: 5px;" (click)='goToNotificationsPage();'>
+            Notifications ({{allMyData.numberOfUnseenNotifications}})
           </button>
       </ion-col>
       <ion-col col-6 class="twoElements">
-        <button ion-button [color]="primary" style="color: black;" (click)='goToMyStatusPage();'>
-          R U Going Out?
-        </button>
+          <button full ion-button [color]="primary" style="color: black; border-radius: 5px;" (click)='goToFriendStatusPage();'>
+            Friends ({{allMyData.numberOfFriendsGoingOut}} fun)
+          </button>
       </ion-col>
     </ion-row>
 
@@ -94,13 +86,9 @@
         <ion-icon name="arrow-round-up" style="display: flex; justify-content: center;"></ion-icon>
         <p style="text-align: center; margin-top: 0px;">If a friend invites you to a party or asks you to host a party or bar with them, you'll see that here.</p>
     </div>
-    <div class="whosGoingOutButtonExplanationMoreTab" *ngIf="whosGoingOutButtonExplanationIsActive">
+    <div class="friendsButtonExplanationMoreTab" *ngIf="friendsButtonExplanationIsActive">
         <ion-icon name="arrow-round-up" style="display: flex; justify-content: center;"></ion-icon>
         <p style="text-align: center; margin-top: 0px;">Click this to see which of your friends are going out tonight.</p>
-    </div>
-    <div class="rUGoingOutButtonExplanationMoreTab" *ngIf="rUGoingOutButtonExplanationIsActive">
-        <ion-icon name="arrow-round-up" style="display: flex; justify-content: center;"></ion-icon>
-        <p style="text-align: center; margin-top: 0px;">Click this to let your friends know if you are going out tonight.</p>
     </div>
     <div class="feedbackExplanationMoreTab" *ngIf="feedbackExplanationIsActive">
         <p style="text-align: center;">You can give us feedback on this page by submitting issues or feature requests.</p>

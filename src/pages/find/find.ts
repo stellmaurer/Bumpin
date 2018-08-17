@@ -149,10 +149,10 @@ export class FindPage {
         this.overlayIsNowInactive();
       }
     });
+    
   }
 
   ionViewDidLoad(){
-    
     this.allMyData.storage.get("whatGotPersonToDownload")
     .then((val : string) => {
       if((val == null)){
@@ -578,7 +578,7 @@ export class FindPage {
 
   presentFilterAlert() {
     let alert = this.alertCtrl.create();
-    alert.setTitle('Filter parties or bars on the map with these options.');
+    alert.setCssClass("filterAlert");
 
     alert.addInput({
       type: 'checkbox',

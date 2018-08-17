@@ -21,3 +21,12 @@
 .toolbar-title, .bar-button-default {
   color: $background-color;
 }
+
+.filterAlert {
+  .alert-head {
+      display: none;
+  }
+  .alert-message {
+      display: none;
+  }
+}

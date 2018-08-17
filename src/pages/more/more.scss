@@ -75,29 +75,22 @@ page-more {
             color: white;
             font-size: 18px;
             font-weight: bold;
-            margin-top: 96px;
-        }
-
-        .whosGoingOutButtonExplanationMoreTab {
-            color: white;
-            font-size: 18px;
-            font-weight: bold;
             position: fixed;
-            top: 160px;
+            top: 96px;
             left: 10px;
             width: 50%;
         }
 
-        .rUGoingOutButtonExplanationMoreTab {
+        .friendsButtonExplanationMoreTab {
             color: white;
             font-size: 18px;
             font-weight: bold;
             position: fixed;
-            top: 160px;
+            top: 96px;
             right: 10px;
             width: 50%;
         }
-
+        
         .feedbackExplanationMoreTab{
             display: flex;
             align-items: center;

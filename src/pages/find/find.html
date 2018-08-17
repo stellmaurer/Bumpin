@@ -2,17 +2,18 @@
   <ion-navbar>
     
     <ion-buttons left>
-        <button ion-button [style.color]="allMyData.me.status.get('goingOut') == 'Yes' ? '#32db64' : '#f53d3d'" style="background-color: #222;" (click)='changeMyGoingOutStatus();'>
-            {{ allMyData.me.status.get("goingOut") == "Yes" ? "I'm going out" : "I'm not going out"}}
+        <button ion-button style="background-color: #222;" (click)='changeMyGoingOutStatus();'>
+            <label [style.color]="'#32db64'" style="margin-right: 5px;">Going out?</label>
+            <ion-toggle [class.toggleUnchecked]="allMyData.me.status.get('goingOut') != 'Yes'" [checked]="allMyData.me.status.get('goingOut') == 'Yes'"></ion-toggle>
         </button>
     </ion-buttons>
 
     <ion-buttons end>
       <button ion-button *ngIf="numberOfActiveFilters == 0" style="color: #32db64; background-color: #222" (click)='presentFilterAlert();'>
-        Filters
+        Filter
       </button>
       <button ion-button *ngIf="numberOfActiveFilters > 0" style="color: #32db64; background-color: #222" (click)='presentFilterAlert();'>
-        Filters ({{numberOfActiveFilters}})
+        Filter ({{numberOfActiveFilters}})
       </button>
     </ion-buttons>
 

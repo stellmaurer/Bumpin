@@ -308,7 +308,7 @@ export class LocationTracker {
         if(val instanceof Party){
           party = val;
           if(this.mapOfTimeUserEnteredVicinityDistanceOfPartiesAndBars.has(party.partyID) == true){
-            if(this.userHasBeenWithinVicinityDistanceOfPartyOrBarForMoreThan5Minutes(party) == true && 
+            if(this.userHasBeenWithinVicinityDistanceOfPartyOrBarForMoreThanTenMinutes(party) == true && 
                this.closestPartyOrBar != null && this.userIsCheckedIn == false){
                 // Clear timers
                 this.mapOfTimeUserEnteredVicinityDistanceOfPartiesAndBars = new Map<string,Date>();
@@ -330,7 +330,7 @@ export class LocationTracker {
         }else{
           bar = val;
           if(this.mapOfTimeUserEnteredVicinityDistanceOfPartiesAndBars.has(bar.barID) == true){
-            if(this.userHasBeenWithinVicinityDistanceOfPartyOrBarForMoreThan5Minutes(bar) == true && 
+            if(this.userHasBeenWithinVicinityDistanceOfPartyOrBarForMoreThanTenMinutes(bar) == true && 
                this.closestPartyOrBar != null && this.userIsCheckedIn == false){
                 // Clear timers
                 this.mapOfTimeUserEnteredVicinityDistanceOfPartiesAndBars = new Map<string,Date>();
@@ -411,18 +411,18 @@ export class LocationTracker {
      if((this.numberOfActiveNotificationTimers == 0) && (this.userIsCheckedIn == false)){
         let earliestTimeUserEnteredVicinity = this.determineWhenTheFirstNotificationShouldBeTriggered();
         let timeToTriggerFirstNotification = new Date(earliestTimeUserEnteredVicinity);
-        timeToTriggerFirstNotification.setMinutes(earliestTimeUserEnteredVicinity.getMinutes() + 5);
+        timeToTriggerFirstNotification.setMinutes(earliestTimeUserEnteredVicinity.getMinutes() + 10);
         let timeToTriggerSecondNotification = new Date(earliestTimeUserEnteredVicinity);
         timeToTriggerSecondNotification.setMinutes(earliestTimeUserEnteredVicinity.getMinutes() + 30);
         let timeToTriggerThirdNotification = new Date(earliestTimeUserEnteredVicinity);
         timeToTriggerThirdNotification.setMinutes(earliestTimeUserEnteredVicinity.getMinutes() + 60);
         
         if(this.partyOrBarToSayImAt != null){
-          this.attendanceTimer1 = this.createTimerForUpdatingAttendance(timeToTriggerFirstNotification.getTime() - new Date().getTime()); // ~5 min
+          this.attendanceTimer1 = this.createTimerForUpdatingAttendance(timeToTriggerFirstNotification.getTime() - new Date().getTime()); // ~10 min
           this.attendanceTimer2 = this.createTimerForUpdatingAttendance(timeToTriggerSecondNotification.getTime() - new Date().getTime()); // ~30 min
           this.attendanceTimer3 = this.createTimerForUpdatingAttendance(timeToTriggerThirdNotification.getTime() - new Date().getTime()); // ~60 min
           if(this.lastNotificationWasMoreThan30MinutesAgo){
-            this.notificationTimer1 = this.createTimerForNotification(timeToTriggerFirstNotification.getTime() - new Date().getTime()); // ~5 min
+            this.notificationTimer1 = this.createTimerForNotification(timeToTriggerFirstNotification.getTime() - new Date().getTime()); // ~10 min
           }
           this.notificationTimer2 = this.createTimerForNotification(timeToTriggerSecondNotification.getTime() - new Date().getTime()); // ~30 min
           this.notificationTimer3 = this.createTimerForNotification(timeToTriggerThirdNotification.getTime() - new Date().getTime()); // ~60 min
@@ -463,8 +463,8 @@ export class LocationTracker {
             smallIcon: 'res://push_notification_icon'
           });
         }
-      }
-      */
+      }*/
+      
 
       // IMPORTANT:  You must execute the finish method here to inform the native plugin that you're finished,
       // and the background-task may be completed.  You must do this regardless if your HTTP request is successful or not.
@@ -784,15 +784,15 @@ export class LocationTracker {
     return earliestTimeEntered;
   }
 
-  userHasBeenWithinVicinityDistanceOfPartyOrBarForMoreThan5Minutes(partyOrBar : any){
-    let fiveMinInMilli = 300000;
+  userHasBeenWithinVicinityDistanceOfPartyOrBarForMoreThanTenMinutes(partyOrBar : any){
+    let tenMinInMilli = 600000; // 600000 is 10 minutes
     if(partyOrBar instanceof Bar){
-      if(((new Date().getTime()) - this.mapOfTimeUserEnteredVicinityDistanceOfPartiesAndBars.get(partyOrBar.barID).getTime()) > fiveMinInMilli){
+      if(((new Date().getTime()) - this.mapOfTimeUserEnteredVicinityDistanceOfPartiesAndBars.get(partyOrBar.barID).getTime()) > tenMinInMilli){
         return true;
       }
     }
     if(partyOrBar instanceof Party){
-      if(((new Date().getTime()) - this.mapOfTimeUserEnteredVicinityDistanceOfPartiesAndBars.get(partyOrBar.partyID).getTime()) > fiveMinInMilli){
+      if(((new Date().getTime()) - this.mapOfTimeUserEnteredVicinityDistanceOfPartiesAndBars.get(partyOrBar.partyID).getTime()) > tenMinInMilli){
         return true;
       }
     }

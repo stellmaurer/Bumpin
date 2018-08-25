@@ -10,6 +10,16 @@
     page-find {
         ion-toggle {
             zoom: 0.8;
+            padding-left: 0px;
+            padding-right: 0px;
+            button {
+                padding-left: 0px;
+                padding-right: 0px;
+                width: inherit;
+                .button-inner {
+                    width: inherit;
+                }
+            }
         }
     }
 }

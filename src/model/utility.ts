@@ -115,7 +115,7 @@ export class Utility {
         var currentTimeInMilliseconds = new Date().getTime();
         var timeLastRatedInMilliseconds = Date.parse(timeLastRated);
         var ratingIsExpired = false;
-        if((currentTimeInMilliseconds - timeLastRatedInMilliseconds) > 1800000){ // 1,800,000 milliseconds is 30 minutes
+        if((currentTimeInMilliseconds - timeLastRatedInMilliseconds) > 3600000){ // 3,600,000 milliseconds is 60 minutes
             ratingIsExpired = true;
         }
         return ratingIsExpired;
@@ -128,7 +128,7 @@ export class Utility {
         var currentTimeInMilliseconds = new Date().getTime();
         var timeOfLastKnownLocationInMilliseconds = Date.parse(timeOfLastKnownLocation);
         var attendanceIsExpired = false;
-        if((currentTimeInMilliseconds - timeOfLastKnownLocationInMilliseconds) > 1800000){ // 1,800,000 milliseconds is 30 minutes
+        if((currentTimeInMilliseconds - timeOfLastKnownLocationInMilliseconds) > 3600000){ // 3,600,000 milliseconds is 60 minutes
             attendanceIsExpired = true;
         }
         return attendanceIsExpired;

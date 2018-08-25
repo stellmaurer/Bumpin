@@ -224,6 +224,10 @@ export class FindPage {
     this.events.subscribe("timeToUpdateBarMarkersVisibility",() => {
       this.updateBarMarkersVisibility();
     });
+
+    this.events.subscribe("updateMapZoomAndPosition",() => {
+      this.updateMapZoomAndPosition();
+    });
   }
 
   private refreshPartyAndBarDataOnceFacebookIDAndLocationAreSet(){
@@ -358,7 +362,7 @@ export class FindPage {
         fullscreenControl: false,
         scaleControl: false
       }
-      
+      this.allMyData.logError("Location Tracker", "client", "test: find.ts: setUpMapWithMyCoordinates: lat = " + coordinates.lat + ", lon = " + coordinates.lng, this.http);
       this.map = new google.maps.Map(this.mapElement.nativeElement, mapOptions);
       let image = 'assets/greencircle.png';
       this.userLocationMarker = new google.maps.Marker({
@@ -380,7 +384,7 @@ export class FindPage {
       fullscreenControl: false,
       scaleControl: false
     }
-    
+    this.allMyData.logError("Location Tracker", "client", "test: find.ts: setUpMapWithGenericCoordinates: lat = " + coordinates.lat + ", lon = " + coordinates.lng, this.http);
     this.map = new google.maps.Map(this.mapElement.nativeElement, mapOptions);
     let image = 'assets/greencircle.png';
     this.userLocationMarker = new google.maps.Marker({
@@ -399,6 +403,15 @@ export class FindPage {
       tempThis.map.setZoom(15);
     });
     this.map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(controlDiv);
+  }
+
+  private updateMapZoomAndPosition(){
+    if(this.map != null && this.map !== undefined && 
+       this.myCoordinates != null && this.myCoordinates !== undefined &&
+       this.usersActualCoordinatesHaveBeenSet){
+      this.map.setCenter(this.myCoordinates);
+      this.map.setZoom(15);
+    }
   }
 
   /*

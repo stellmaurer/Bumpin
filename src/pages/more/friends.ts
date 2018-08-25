@@ -30,9 +30,8 @@ export class FriendsPage {
     private currentlyLoadingData : boolean;
 
     constructor(private http:Http, public allMyData : AllMyData) {
-        this.currentlyLoadingData = true;
+        this.currentlyLoadingData = false;
         this.clearStatusGroups();
-        // friends get initialized upon login, so there's no need to store to retrieve them in local data storage
         this.sortFriendsIntoStatusGroups();
     }
 
@@ -45,17 +44,8 @@ export class FriendsPage {
     }
 
     ionViewWillEnter(){
-        this.currentlyLoadingData = true;
-        this.allMyData.refreshFriends(this.http)
-        .then((res) => {
-            this.currentlyLoadingData = false;
-            this.clearStatusGroups();
-            this.sortFriendsIntoStatusGroups();
-        })
-        .catch((err) => {
-            this.currentlyLoadingData = false;
-            this.allMyData.logError(this.tabName, "server", "refreshFriends query error : Err msg = " + err, this.http);
-        });
+        this.clearStatusGroups();
+        this.sortFriendsIntoStatusGroups();
     }
 
     private sortFriendsIntoStatusGroups(){

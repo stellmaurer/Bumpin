@@ -149,12 +149,12 @@ export class CheckInPage {
     }
 
     private presentPartyPopover(party : Party) {
-        let popover = this.popoverCtrl.create(CheckIntoPartyPopoverPage, {party:party, allMyData:this.allMyData, locationTracker:this.locationTracker, http:this.http, navCtrl:this.navCtrl}, {cssClass:'checkIntoPartyPopover.scss'});
+        let popover = this.popoverCtrl.create(CheckIntoPartyPopoverPage, {party:party, allMyData:this.allMyData, locationTracker:this.locationTracker, http:this.http, navCtrl:this.navCtrl}, {cssClass:'checkIntoPartyPopover.scss checkInPopovers'});
         popover.present();
     }
     
     private presentBarPopover(bar : Bar) {
-        let popover = this.popoverCtrl.create(CheckIntoBarPopoverPage, {bar:bar, allMyData:this.allMyData, locationTracker:this.locationTracker, http:this.http}, {cssClass:'checkIntoBarPopover.scss'});
+        let popover = this.popoverCtrl.create(CheckIntoBarPopoverPage, {bar:bar, allMyData:this.allMyData, locationTracker:this.locationTracker, http:this.http}, {cssClass:'checkIntoBarPopover.scss checkInPopovers'});
         popover.present();
     }
 

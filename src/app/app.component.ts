@@ -15,11 +15,8 @@ import { NavController } from 'ionic-angular';
 import { Http } from '@angular/http';
 import { AllMyData } from '../model/allMyData';
 import { Login } from '../pages/login/login';
-import { Geolocation } from '@ionic-native/geolocation';
-import { FriendsPage } from '../pages/more/friends';
 import { LocationTracker } from '../providers/location-tracker';
 import { LocalNotifications } from '@ionic-native/local-notifications';
-import { HowDidYouHearPage } from '../pages/login/howDidYouHear';
 
 @Component({
   templateUrl: 'app.html',
@@ -31,8 +28,8 @@ export class MyApp {
   private rootPage:any;
 
   constructor(public app: App, private login : Login, private allMyData: AllMyData, private http: Http, public platform: Platform, private statusBar: StatusBar, private splashScreen: SplashScreen, private badge: Badge, public push: Push, private locationTracker: LocationTracker, public alertCtrl: AlertController, private backgroundGeolocation: BackgroundGeolocation, private events : Events, private storage: Storage) {
+    
     this.platform.ready().then(() => {
-
       this.locationTracker.startTracking();
       
       this.statusBar.overlaysWebView(false);
@@ -41,11 +38,12 @@ export class MyApp {
 
       this.badge.clear();
       this.platform.resume.subscribe((result)=>{//Foreground
+        this.events.publish("updateMapZoomAndPosition");
         this.badge.clear();
       });
 
       this.rootPage = TabsPage;
-
+      
       this.storePlatform();
       this.initPushNotification();
 
@@ -53,6 +51,9 @@ export class MyApp {
 
       this.loginToFacebook();
       
+    })
+    .catch((err) => {
+      console.log("platform.ready error: " + err);
     });
   }
 
@@ -126,8 +127,7 @@ export class MyApp {
         alert: 'true',
         badge: true,
         sound: 'true'
-      },
-      windows: {}
+      }
     };
 
     // Changing the default Android channel's importance level (need to do before push.init)
@@ -143,6 +143,8 @@ export class MyApp {
     pushObject.on('registration').subscribe((data: any) => {
       this.storage.set('deviceToken', data.registrationId);
     });
+
+    console.log("subscribing to push notifications now");
 
     pushObject.on('notification').subscribe((data: any) => {
       // On android push notifications, the library I'm using sets title to the app
@@ -203,6 +205,9 @@ export class MyApp {
       }
     });
 
-    pushObject.on('error').subscribe(error => console.error('Error with Push plugin' + error));
+    pushObject.on('error').subscribe((error) => {
+      console.log("notification had an error");
+      console.error('Error with Push plugin' + error);
+    });
   }
 }

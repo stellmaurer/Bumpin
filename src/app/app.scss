@@ -21,3 +21,25 @@
 .toolbar-title, .bar-button-default {
   color: $background-color;
 }
+
+.filterAlert {
+  .alert-head {
+      display: none;
+  }
+  .alert-message {
+      display: none;
+  }
+}
+
+.popover-content {
+    left: 0 !important;
+    right: 0 !important;
+    top: 0 !important;
+    bottom: 0 !important;
+    padding: 0 !important;
+    margin: auto !important;
+}
+
+.checkInPopovers .popover-content{
+    background-color: $background-info-color !important;
+}

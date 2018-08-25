@@ -100,7 +100,9 @@ export class CreateBarPage {
           mapTypeId: google.maps.MapTypeId.ROADMAP,
           zoomControl: false,
           mapTypeControl: false,
-          streetViewControl: true,
+          streetViewControl: false,
+          fullscreenControl: false,
+          scaleControl: false
         }
         this.map = new google.maps.Map(this.mapElement.nativeElement, mapOptions);
 
@@ -128,7 +130,9 @@ export class CreateBarPage {
           mapTypeId: google.maps.MapTypeId.ROADMAP,
           zoomControl: false,
           mapTypeControl: false,
-          streetViewControl: true,
+          streetViewControl: false,
+          fullscreenControl: false,
+          scaleControl: false
         }
         
         this.map = new google.maps.Map(this.mapElement.nativeElement, mapOptions);

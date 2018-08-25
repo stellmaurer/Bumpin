@@ -41,6 +41,7 @@ export class AllMyData{
     public friends : Friend[];
     public notifications : PushNotification[];
     public numberOfUnseenNotifications : number;
+    public numberOfFriendsGoingOut : number;
     public favoriteBars : Array<string>;
     
     public events : Events;
@@ -58,6 +59,7 @@ export class AllMyData{
         this.friends = new Array<Friend>();
         this.notifications = new Array<PushNotification>();
         this.numberOfUnseenNotifications = 0;
+        this.numberOfFriendsGoingOut = 0;
         this.favoriteBars = new Array<string>();
         this.storage.get("favoriteBars")
         .then((val : string[]) => {
@@ -750,7 +752,6 @@ export class AllMyData{
             var query = new Query(this, http);
             query.getFriends()
             .then((res) => {
-                this.changeGoingOutStatusOfFriendsToUnknownIfStatusIsExpired();
                 resolve("getFriends query succeeded.");
             })
             .catch((err) => {
@@ -761,11 +762,15 @@ export class AllMyData{
 
     public changeGoingOutStatusOfFriendsToUnknownIfStatusIsExpired(){
         this.zone.run(() => {
+            this.numberOfFriendsGoingOut = 0;
             for(let i = 0; i < this.friends.length; i++){
                 let friend = this.friends[i];
                 var goingOutStatusIsExpired = Utility.isGoingOutStatusExpired(friend.status["timeGoingOutStatusWasSet"]);
                 if(goingOutStatusIsExpired){
                     friend.status["goingOut"] = "Unknown";
+                }
+                if(friend.status["goingOut"] == "Yes"){
+                    this.numberOfFriendsGoingOut++;
                 }
             }
         });

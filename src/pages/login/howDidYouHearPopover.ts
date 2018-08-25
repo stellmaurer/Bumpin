@@ -173,6 +173,7 @@ export class HowDidYouHearPopover {
     }
 
     private validateInput(){
+        this.inputError = "";
         if((this.facebook || this.sidewalk || this.classroom || this.friend || this.other) == false){
             this.inputError = "Select at least 1 option.";
         }

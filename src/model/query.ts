@@ -23,7 +23,7 @@ export class Query{
       
     }
     // curl -X "POST" https://graph.facebook.com/10154326505409816/permissions -d "method=delete&access_token=EAAGqhN2UkfwBAMJU7mVOr16nWCGOvSZAP1YEX88A68pnW3HnXUckMsfolSqSm8ZCKLukabk0Cwvt0OULXvBHHJY69axPX7EWeHs1TUqfALGeuVI5bdAn5guB1ckkBwnGdwmtfZCUoUXBYJXIX2gYu42gQtXxDLJpyv0JXcoeUGQNZCZAnMGvm8WnHAWxhb8VyUQDHhyjHefCijBZA7fHXt"
-    // curl -X "POST" https://graph.facebook.com/107808443432866/permissions -d "method=delete&access_token=EAAGqhN2UkfwBAI3lvmVNhdzxZCbUxZBsr1XPFR05ZARbQGYx8R2iVbD6W3LgqPOlfy5poItCKPueLsbQAyBzbQpLtmnPJU3mHkU0I2pxohgPE5YtEBDImBzEZAbVCYu9jKIJUXOesyZAwE8ZBl2uqveVMMgJKhLdRznt5iGeWIHL39lvPZCa1LbAqeng1x6yby2fUHvZCUEi82xC0Gp4J43s7PhWYScaxt4ZD"
+    // curl -X "POST" https://graph.facebook.com/111961819566368/permissions -d "method=delete&access_token=EAAGqhN2UkfwBAFWqVDHuZAK3Xwiftqlio8ZCSZBOexknZAEIW08dzk8KpJgV1L32iNaHYZCoQrC13CBSg5zrW7WZBU5o4O6j3TqcbaMxJAOrVtrZCNrrxeKR2jkTenQaMdDZBzZBq9A8UoceWnh3tEyyNzCyZBZBq5ojl4UVr6JRBLnAauPmKHMnxGR03GEGrFPKnVGbpu2QbiW5Aharvg0JXOZAGFMzWkj1YJeJ1pZB6w2lFW6vnIyHpErcd"
     public revokeAppFacebookPermissions(){
         console.log("query.ts: in revokeAppFacebookPermissions");
         return new Promise((resolve, reject) => {
@@ -91,26 +91,28 @@ export class Query{
             //console.log("Friend added: FacebookID=" + friend.facebookID + ", Name= " + friend.name + ", Male=" + friend.isMale);
         }
 
-        if(data.friends.paging.next != undefined){
-            this.pageThroughMoreFriends(data.friends.paging.next)
-            .then((res) => {
+        if(data.friends.data.length >= 1){
+            if(data.friends.paging.next != undefined){
+                this.pageThroughMoreFriends(data.friends.paging.next)
+                .then((res) => {
+                    // This step takes out friends who downloaded the app, 
+                    //     but then deleted their Person object from the database
+                    this.getFriends()
+                    .catch((err) => {
+                        this.allMyData.logError("More Tab", "client", "issue getting friends from db : Err msg = " + err, this.http);
+                    });
+                })
+                .catch((err) => {
+                    this.allMyData.logError("More Tab", "login", "error while paging through user's FB friends : Err msg = " + err, this.http);
+                });
+            }else{
                 // This step takes out friends who downloaded the app, 
                 //     but then deleted their Person object from the database
                 this.getFriends()
                 .catch((err) => {
                     this.allMyData.logError("More Tab", "client", "issue getting friends from db : Err msg = " + err, this.http);
                 });
-            })
-            .catch((err) => {
-                this.allMyData.logError("More Tab", "login", "error while paging through user's FB friends : Err msg = " + err, this.http);
-            });
-        }else{
-            // This step takes out friends who downloaded the app, 
-            //     but then deleted their Person object from the database
-            this.getFriends()
-            .catch((err) => {
-                this.allMyData.logError("More Tab", "client", "issue getting friends from db : Err msg = " + err, this.http);
-            });
+            }
         }
     }
 

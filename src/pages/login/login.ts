@@ -79,6 +79,7 @@ export class Login {
           this.fb.login(['public_profile', 'user_friends'])
           .then((response: FacebookLoginResponse) => {
             let accessToken = response.authResponse.accessToken;
+            console.log("access_token=" + accessToken);
             this.allMyData.facebookAccessToken = accessToken;
             this.createOrUpdatePersonWithFacebookInfo(accessToken)
             .then((res) => {

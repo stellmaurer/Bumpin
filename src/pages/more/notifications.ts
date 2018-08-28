@@ -81,7 +81,8 @@ export class NotificationsPage {
                 this.presentAlertWithMessage("This notification was for an earlier date.");
                 this.deleteTheNotification(notification);
             }
-            
+        }else{
+            this.deleteTheNotification(notification);
         }
     }
 

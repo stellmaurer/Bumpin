@@ -1,11 +1,15 @@
 <ion-header>
   <ion-navbar>
-    <ion-title>
-      More
-    </ion-title>
-    <ion-buttons end>
+    <ion-buttons start>
         <ion-spinner *ngIf="currentlyLoadingData == true" name="ios" id="loadingIndicator"></ion-spinner>
     </ion-buttons>
+    <!--
+    <ion-buttons end>
+        <button ion-button style="color: #32db64; background-color: #222" (click)='goToPointsPage();'>
+            {{allMyData.me.pointMap.get("points")}} Points
+        </button>
+    </ion-buttons>
+    -->
   </ion-navbar>
 </ion-header>
 
@@ -69,15 +73,8 @@
           <h1 [style.color]="'#32db64'">Version: {{ versionNumber }}</h1>
         </div>
       </ion-col>
-  </ion-row>
-
-    <ion-row justify-content-center>
-      <ion-col col-12 class="oneElement">
-        <div class="centerMe">
-            <button ion-button block color="primary" style="color: black;" (click)="login.logout();">Logout</button>
-        </div>
-      </ion-col>
     </ion-row>
+
   </ion-grid>
 </ion-content>
 

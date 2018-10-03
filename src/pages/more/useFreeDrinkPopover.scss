@@ -1,0 +1,26 @@
+page-useFreeDrinkPopover {
+
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+
+        #countdown {
+            z-index: 10000;
+            position: absolute;
+            margin-top: 0px;
+            margin-left: 0px;
+            top: 20px;
+            left: 20px;
+        }
+    
+        #bumpinLogo {
+            font-weight: bold;
+            font-size: 100px;
+            text-align: center;
+        }
+    
+        #messageForBartender {
+            font-size: 40px;
+            text-align: center;
+        }
+}

@@ -11,13 +11,13 @@
 import { Component } from '@angular/core';
 import { App, NavController, AlertController, Events } from 'ionic-angular';
 import { AllMyData } from '../../model/allMyData';
-import { Login } from '../login/login';
 import { Http } from '@angular/http';
 import { FriendsPage } from './friends';
 import { MyStatusPage } from './myStatus';
 import { NotificationsPage } from './notifications';
 import { AppVersion } from '@ionic-native/app-version';
 import { Storage } from '@ionic/storage';
+import { PointsPage } from './points';
 
 @Component({
   selector: 'page-more',
@@ -37,7 +37,7 @@ export class MorePage {
   private feedbackExplanationIsActive : boolean;
   private logoutExplanationIsActive : boolean;
 
-  constructor(private storage: Storage, private events: Events, private appVersion: AppVersion, private app: App, private login : Login, public allMyData : AllMyData, private http:Http, private navCtrl: NavController, public alertCtrl: AlertController) {
+  constructor(private storage: Storage, private events: Events, private appVersion: AppVersion, private app: App, public allMyData : AllMyData, private http:Http, private navCtrl: NavController, public alertCtrl: AlertController) {
     this.currentlyLoadingData = true;
     this.bugDescription = "";
     this.featureRequest = "";
@@ -64,29 +64,6 @@ export class MorePage {
                 this.overlayIsNowActive();
             }
         }
-    });
-  }
-
-  ngOnInit(){
-    this.events.subscribe("aDifferentUserJustLoggedIn",() => {
-      console.log("more.ts: a different user just logged in");
-      this.currentlyLoadingData = true;
-
-      this.allMyData.refreshPerson(this.http)
-      .then(thePromise => {
-        this.allMyData.getNotifications(this.http)
-        .then(thePromise => {
-          this.currentlyLoadingData = false;
-        })
-        .catch((err) => {
-          this.currentlyLoadingData = false;
-          this.allMyData.logError(this.tabName, "server", "getNotifications query error: Err msg = " + err, this.http);
-        });
-      })
-      .catch((err) => {
-        this.currentlyLoadingData = false;
-        this.allMyData.logError(this.tabName, "server", "refreshPerson query error: Err msg = " + err, this.http);
-      });
     });
   }
 
@@ -121,6 +98,10 @@ export class MorePage {
 
   ionViewWillLeave(){
     this.overlayIsNowInactive();
+  }
+
+  private goToPointsPage(){
+    this.navCtrl.push(PointsPage, {}, {animate: false});
   }
 
   private goToNotificationsPage(){

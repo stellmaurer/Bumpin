@@ -40,7 +40,8 @@ import { LocalNotifications } from '@ionic-native/local-notifications';
 import { ClaimBarPage } from '../pages/find/claimBar';
 import { AppVersion } from '@ionic-native/app-version';
 import { HowDidYouHearPopover } from '../pages/login/howDidYouHearPopover';
-
+import { PointsPage } from '../pages/more/points';
+import { UseFreeDrinkPopover } from '../pages/more/useFreeDrinkPopover';
 
 const cloudSettings: CloudSettings = {
   'core': {
@@ -49,7 +50,7 @@ const cloudSettings: CloudSettings = {
   'auth': {
     'facebook': {
       // email and public_profile are included by default.
-      'scope': ['user_friends']
+      'scope': ['user_friends', 'user_gender']
     }
   }
 };
@@ -78,7 +79,9 @@ const cloudSettings: CloudSettings = {
     PartyPopover,
     BarPopover,
     TabsPage,
-    HowDidYouHearPopover
+    HowDidYouHearPopover,
+    PointsPage,
+    UseFreeDrinkPopover
   ],
   imports: [
     BrowserModule,
@@ -111,7 +114,9 @@ const cloudSettings: CloudSettings = {
     PartyPopover,
     BarPopover,
     TabsPage,
-    HowDidYouHearPopover
+    HowDidYouHearPopover,
+    PointsPage,
+    UseFreeDrinkPopover
   ],
   providers: [
     LocationTracker,

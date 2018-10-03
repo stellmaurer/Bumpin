@@ -24,6 +24,8 @@ export class Person {
     public numberOfFriendsThatMightGoOut : number;
     public sevenPMLocalHourInZulu : number;
     public whatGotThemToDownload : string;
+    public version : string;
+    public pointMap : Map<string,any>;
 
     constructor() {
         this.facebookID = "Not yet set.";
@@ -40,10 +42,13 @@ export class Person {
         this.numberOfFriendsThatMightGoOut = 0;
         this.sevenPMLocalHourInZulu = 0;
         this.whatGotThemToDownload = "Not yet set.";
+        this.version = "Not yet set.";
+        this.pointMap = new Map<string,any>();
     }
 
     fixMaps(){
         this.fixStatusMap();
+        this.fixPointMap();
         this.fixPartyHostForMap();
         this.fixBarHostForMap();
         this.fixInvitedToMap();
@@ -59,6 +64,19 @@ export class Person {
                 fixedStatusMap.set(key, status[key]);
             });
             this.status = fixedStatusMap;
+        }
+    }
+
+    private fixPointMap(){
+        if(this.pointMap == null){
+            this.pointMap = new Map<string,any>();
+        }else{
+            let fixedPointMap = new Map<string,any>();
+            let pointMap = this.pointMap;
+            Object.keys(pointMap).forEach(function (key) {
+                fixedPointMap.set(key, pointMap[key]);
+            });
+            this.pointMap = fixedPointMap;
         }
     }
 
@@ -101,3 +119,12 @@ export class Person {
         }
     }
 }
+/*
+export class PointStruct {
+    public points : number;
+    public pointsUserStartedOffWithToday : number;
+    public timeUserGotFirstPointsOfDay : string;
+    public hasFreeDrink : boolean;
+    constructor() {}
+}
+*/

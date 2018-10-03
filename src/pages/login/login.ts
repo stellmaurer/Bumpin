@@ -55,7 +55,7 @@ export class Login {
           // the user is logged in to Facebook, 
           // but has not authenticated your app
           this.allMyData.logError(this.tabName, "client", "The user is logged in to Facebook, but has not authenticated your app.", this.http);
-          this.fb.login(['public_profile', 'user_friends'])
+          this.fb.login(['public_profile', 'user_friends', 'user_gender'])
           .then((response: FacebookLoginResponse) => {
             let accessToken = response.authResponse.accessToken;
             this.allMyData.facebookAccessToken = accessToken;
@@ -76,7 +76,7 @@ export class Login {
         } else {
           console.log("response.status = not connected");
           // the user isn't logged in to Facebook.
-          this.fb.login(['public_profile', 'user_friends'])
+          this.fb.login(['public_profile', 'user_friends', 'user_gender'])
           .then((response: FacebookLoginResponse) => {
             let accessToken = response.authResponse.accessToken;
             console.log("access_token=" + accessToken);

@@ -1,0 +1,115 @@
+<ion-header>
+  <ion-navbar>
+    <ion-title>
+      You have {{allMyData.me.pointMap.get("points")}} points
+    </ion-title>
+    <ion-buttons start>
+        <ion-spinner *ngIf="currentlyLoadingData == true" name="ios" id="loadingIndicator"></ion-spinner>
+    </ion-buttons>
+  </ion-navbar>
+</ion-header>
+
+<ion-content>
+  <ion-grid class="home">
+
+    <ion-row>
+        <ion-col col-12>
+          <div class="centerMe">
+            <h3 style="margin-bottom: 30px;">
+              Bumpin Point System<br>
+            </h3>
+            <h5 style="margin-bottom: 5px;">
+              Every 100 points = a free drink
+            </h5>
+            <div class="pointCol">
+              <div class="rowForPoints">
+                <label class="pointsLabel">10 points</label>
+              </div>
+              <div class="rowForPoints">
+                <label class="pointsLabel">5 points</label>
+              </div>
+              <div class="rowForPoints">
+                <label class="pointsLabel">4 points</label>
+              </div>
+              <div class="rowForPoints">
+                <label class="pointsLabel">3 points</label>
+              </div>
+              <div class="rowForPoints">
+                <label class="pointsLabel">2 points</label>
+              </div>
+              <div class="rowForPoints">
+                <label class="pointsLabel">1 point</label>
+              </div>
+            </div>
+
+            <div class="actionCol">
+              <div class="rowForAction">
+                <label class="actionLabel">Create party with 5+ invitations</label>
+              </div>
+              <div class="rowForAction">
+                <label class="actionLabel">Rate bar or party</label>
+              </div>
+              <div class="rowForAction">
+                <label class="actionLabel">Provide line info</label>
+              </div>
+              <div class="rowForAction">
+                <label class="actionLabel">Provide cover info</label>
+              </div>
+              <div class="rowForAction">
+                <label class="actionLabel">Set your going out status</label>
+              </div>
+              <div class="rowForAction">
+                <label class="actionLabel">Logging in</label>
+              </div>
+            </div>
+
+            <h5 style="margin-bottom: 5px;">
+                Caveats
+            </h5>
+            <div class="pointCol">
+              <div class="rowForPoints">
+                <label class="pointsLabel">(1)</label>
+              </div>
+              <div class="rowForPoints">
+                <label class="pointsLabel">(2)</label>
+              </div>
+              <div class="rowForPoints">
+                <label class="pointsLabel">(3)</label>
+              </div>
+              <div class="rowForPoints">
+                <label class="pointsLabel"> </label>
+              </div>
+            </div>
+
+            <div class="actionCol">
+              <div class="rowForAction">
+                <label class="actionLabel">Can only earn 50 points in a 24 hour period</label>
+              </div>
+              <div class="rowForAction">
+                <label class="actionLabel">Points stop accruing if you have a free drink</label>
+              </div>
+              <div class="rowForAction">
+                <label class="actionLabel">Free drink deal is only at select bars</label>
+              </div>
+              <div class="rowForAction">
+                <label class="actionLabel">- use map filter to find those bars</label>
+              </div>
+            </div>
+          </div>
+        </ion-col>
+    </ion-row>
+
+    <ion-row>
+      <ion-col col-12>
+          <div class="centerMe" style="margin-top: 30px;">
+            <label>Tap this once the bartender is ready for you</label>
+          </div>
+          <button ion-button block [color]="primary" style="color: black;" (click)='useFreeDrink();' [disabled]="allMyData.me.pointMap.get('hasFreeDrink') == false">
+            Use Free Drink
+          </button>
+      </ion-col>
+    </ion-row>
+
+  </ion-grid>
+
+</ion-content>

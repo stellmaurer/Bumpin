@@ -20,6 +20,7 @@ import { Injectable, NgZone } from '@angular/core';
 import { Storage } from '@ionic/storage';
 import { PushNotification } from "./pushNotification";
 import { deserialize } from "serializer.ts/Serializer";
+import { AppVersion } from '@ionic-native/app-version';
 
 // This class only gets created once and it happens when the app launches.
 //      Person is equal to your Person object in the database. It is used
@@ -47,7 +48,7 @@ export class AllMyData{
     public events : Events;
     public dataRetrievalTimer : NodeJS.Timer;
 
-    constructor(public zone: NgZone, public storage: Storage) {
+    constructor(public zone: NgZone, public storage: Storage, private appVersion: AppVersion) {
         this.facebookAccessToken = null;
         this.me = new Person();
         this.partyHostFor = new Array<Party>();
@@ -108,12 +109,38 @@ export class AllMyData{
     public createOrUpdatePerson(http : Http){
         return new Promise((resolve, reject) => {
             var query = new Query(this, http);
-            query.createOrUpdatePerson()
+            query.createOrUpdatePerson(this.appVersion)
             .then((res) => {
                 return this.refreshPerson(http);
             })
             .then((res) => {
                 resolve("createOrUpdatePerson query succeeded.");
+            })
+            .catch((err) => {
+                reject(err);
+            });
+        });
+    }
+
+    public increasePointsForUser(pointsToAdd : number, http : Http){
+        return new Promise((resolve, reject) => {
+            var query = new Query(this, http);
+            query.increasePointsForUser(pointsToAdd)
+            .then((res) => {
+                resolve("increasePointsForUser query succeeded.");
+            })
+            .catch((err) => {
+                reject(err);
+            });
+        });
+    }
+
+    public useFreeDrink(http : Http){
+        return new Promise((resolve, reject) => {
+            var query = new Query(this, http);
+            query.useFreeDrink()
+            .then((res) => {
+                resolve("useFreeDrink query succeeded.");
             })
             .catch((err) => {
                 reject(err);

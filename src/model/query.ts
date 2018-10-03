@@ -17,13 +17,15 @@ import { Http, Headers, RequestOptions, RequestMethod } from '@angular/http';
 import { deserialize } from "serializer.ts/Serializer";
 import { Utility } from "./utility";
 import { PushNotification } from "./pushNotification";
+import { AppVersion } from '@ionic-native/app-version';
 
 export class Query{
+    
     constructor(private allMyData : AllMyData, private http : Http){
       
     }
-    // curl -X "POST" https://graph.facebook.com/10154326505409816/permissions -d "method=delete&access_token=EAAGqhN2UkfwBAMJU7mVOr16nWCGOvSZAP1YEX88A68pnW3HnXUckMsfolSqSm8ZCKLukabk0Cwvt0OULXvBHHJY69axPX7EWeHs1TUqfALGeuVI5bdAn5guB1ckkBwnGdwmtfZCUoUXBYJXIX2gYu42gQtXxDLJpyv0JXcoeUGQNZCZAnMGvm8WnHAWxhb8VyUQDHhyjHefCijBZA7fHXt"
-    // curl -X "POST" https://graph.facebook.com/111961819566368/permissions -d "method=delete&access_token=EAAGqhN2UkfwBAFWqVDHuZAK3Xwiftqlio8ZCSZBOexknZAEIW08dzk8KpJgV1L32iNaHYZCoQrC13CBSg5zrW7WZBU5o4O6j3TqcbaMxJAOrVtrZCNrrxeKR2jkTenQaMdDZBzZBq9A8UoceWnh3tEyyNzCyZBZBq5ojl4UVr6JRBLnAauPmKHMnxGR03GEGrFPKnVGbpu2QbiW5Aharvg0JXOZAGFMzWkj1YJeJ1pZB6w2lFW6vnIyHpErcd"
+    // curl -X "POST" https://graph.facebook.com/10154326505409816/permissions -d "method=delete&access_token=EAAGqhN2UkfwBACTm1ejiFkRZBG7joe8VtpF6B6WJS8FmpDEa2AedZBqY8jjW2CZArkZBjdRlJ5s1HIPAakHPY62KLZATvpHnuiuX0oPKepvqix8hWjZCVLPH80KZBm6wWRYOeS6jjfh7jUoVxa7GQZBlHFr1qR5aXZCzbwXAZCZBlgmDL1ZAwc99IcZAKhRjZBI5yG7iQFcyYqzXZCmG2jKFEipfZBsK"
+    // curl -X "POST" https://graph.facebook.com/107808443432866/permissions -d "method=delete&access_token=EAAGqhN2UkfwBAKijGhGQSZCpDtZANJICtW6cjImZBeVDAqnn85A9sgF2GcwLGOZBG6FZC6SyZC7pJvDkFO60cold3s1EK3MQNxfbuZAdUXI8zLX6bNpgLmAvit6Q73nPe6S08aZCqVt6yWeo3BddZB6kC4kZBKwsVBaKDH9lt6YzOqO4D5400EGEXdizyrQ6lu9J26oH6mU4FselaYdLAnqZB08NnR3sQp9pkgZD"
     public revokeAppFacebookPermissions(){
         console.log("query.ts: in revokeAppFacebookPermissions");
         return new Promise((resolve, reject) => {
@@ -265,16 +267,21 @@ export class Query{
         return sevenPMLocalTime.getUTCHours().toString();
     }
     
-    public createOrUpdatePerson(){
+    // curl http://bumpin-env.us-west-2.elasticbeanstalk.com:80/createOrUpdatePerson -d "facebookID=107808443432866&isMale=false&name=Alex%20Dataroid&platform=iOS&deviceToken=blah&sevenPMLocalHourInZulu=0"
+    public createOrUpdatePerson(appVersion : AppVersion){
         return new Promise((resolve, reject) => {
-            Promise.all([this.allMyData.storage.get('platform'), this.allMyData.storage.get('deviceToken')]).then(data => {
+            Promise.all([this.allMyData.storage.get('platform'), 
+                         this.allMyData.storage.get('deviceToken'),
+                         appVersion.getVersionNumber()]).then(data => {
                 let platform = data[0];
                 let deviceToken = data[1];
+                let versionNumber = data[2];
                 var url = "http://bumpin-env.us-west-2.elasticbeanstalk.com:80/createOrUpdatePerson";
                 let body = "facebookID=" + this.allMyData.me.facebookID + "&isMale=" + this.allMyData.me.isMale + 
                             "&name=" + encodeURIComponent(this.allMyData.me.name) + "&platform=" + platform +
                             "&deviceToken=" + encodeURIComponent(deviceToken) +
-                            "&sevenPMLocalHourInZulu=" + encodeURIComponent(this.getSevenPMLocalHourInZulu());
+                            "&sevenPMLocalHourInZulu=" + encodeURIComponent(this.getSevenPMLocalHourInZulu()) +
+                            "&version=" + encodeURIComponent(versionNumber);
                 var headers = new Headers();
                 headers.append('content-type', "application/x-www-form-urlencoded");
                 let options= new RequestOptions({headers: headers});
@@ -289,6 +296,46 @@ export class Query{
               .catch((err) => {
                 reject(err);
               });
+        });
+    }
+
+    // curl http://localhost:5000/increasePointsForUser -d "facebookID=10154326505409816&pointsToAdd=60&points=150&pointsUserStartedOffWithToday=150&timeUserGotFirstPointsOfDay=2018-08-29T01:03:15Z&hasFreeDrink=false"
+    public increasePointsForUser(pointsToAdd : number){
+        return new Promise((resolve, reject) => {
+            var url = "http://bumpin-env.us-west-2.elasticbeanstalk.com:80/increasePointsForUser";
+            let body = "facebookID=" + this.allMyData.me.facebookID + "&pointsToAdd=" + pointsToAdd + 
+                        "&points=" + this.allMyData.me.pointMap.get("points") +
+                        "&pointsUserStartedOffWithToday=" + this.allMyData.me.pointMap.get("pointsUserStartedOffWithToday") +
+                        "&timeUserGotFirstPointsOfDay=" + this.allMyData.me.pointMap.get("timeUserGotFirstPointsOfDay") +
+                        "&hasFreeDrink=" + this.allMyData.me.pointMap.get("hasFreeDrink");
+            var headers = new Headers();
+            headers.append('content-type', "application/x-www-form-urlencoded");
+            let options= new RequestOptions({headers: headers});
+            this.http.post(url, body, options).map(res => res.json()).subscribe(data => {
+                if(data.succeeded){
+                    resolve(data);
+                }else{
+                    reject(data.error);
+                }
+            });
+        });
+    }
+
+    // curl http://localhost:5000/useFreeDrink -d "facebookID=10154326505409816"
+    public useFreeDrink(){
+        return new Promise((resolve, reject) => {
+            var url = "http://bumpin-env.us-west-2.elasticbeanstalk.com:80/useFreeDrink";
+            let body = "facebookID=" + this.allMyData.me.facebookID;
+            var headers = new Headers();
+            headers.append('content-type', "application/x-www-form-urlencoded");
+            let options= new RequestOptions({headers: headers});
+            this.http.post(url, body, options).map(res => res.json()).subscribe(data => {
+                if(data.succeeded){
+                    resolve(data);
+                }else{
+                    reject(data.error);
+                }
+            });
         });
     }
 

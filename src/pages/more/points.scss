@@ -1,0 +1,57 @@
+page-points {
+
+    .home {
+        display: flex;
+        flex-direction: column;
+    
+        ion-grid {
+            padding: 0;
+            height: 100%;
+        }
+        
+        ion-col {
+            position: initial;
+        }
+
+
+        .pointCol{
+            margin-right: 5px;
+            display: inline-block;
+            text-align: left;
+            .rowForPoints{
+                margin-top: 5px;
+                margin-bottom: 5px;
+                .pointsLabel {
+                    white-space: pre-wrap;
+                }
+            }
+        }
+        .actionCol{
+            margin-left: 5px;
+            display: inline-block;
+            text-align: left;
+            .rowForAction{
+                margin-top: 5px;
+                margin-bottom: 5px;
+                .actionLabel {
+                    white-space: pre-wrap;
+                }
+            }
+        }
+    
+        .centerMe {
+            text-align: center;
+        }
+
+        .needsPadding {
+            padding-left: 10px;
+            padding-right: 10px;
+            padding-top: 2px;
+            padding-bottom: 2px;
+        }
+
+        .needsSpaceOnTop {
+            margin-top: 10px;
+        }
+    }
+}

@@ -362,7 +362,7 @@ export class FindPage {
         fullscreenControl: false,
         scaleControl: false
       }
-      this.allMyData.logError("Location Tracker", "client", "test: find.ts: setUpMapWithMyCoordinates: lat = " + coordinates.lat + ", lon = " + coordinates.lng, this.http);
+      
       this.map = new google.maps.Map(this.mapElement.nativeElement, mapOptions);
       let image = 'assets/greencircle.png';
       this.userLocationMarker = new google.maps.Marker({
@@ -384,7 +384,7 @@ export class FindPage {
       fullscreenControl: false,
       scaleControl: false
     }
-    this.allMyData.logError("Location Tracker", "client", "test: find.ts: setUpMapWithGenericCoordinates: lat = " + coordinates.lat + ", lon = " + coordinates.lng, this.http);
+    
     this.map = new google.maps.Map(this.mapElement.nativeElement, mapOptions);
     let image = 'assets/greencircle.png';
     this.userLocationMarker = new google.maps.Marker({
@@ -575,7 +575,7 @@ export class FindPage {
   private presentHowDidYouHearPopover() {
     this.overlayIsActive = true;
     this.events.publish("overlayIsNowActive");
-    let popover = this.popoverCtrl.create(HowDidYouHearPopover, {allMyData:this.allMyData, http:this.http, navCtrl:this.navCtrl, alertCtrl:this.alertCtrl}, {cssClass:'howDidYouHear.scss', enableBackdropDismiss: false});
+    let popover = this.popoverCtrl.create(HowDidYouHearPopover, {allMyData:this.allMyData, http:this.http, navCtrl:this.navCtrl, alertCtrl:this.alertCtrl}, {cssClass:'howDidYouHearPopover.scss', enableBackdropDismiss: false});
     popover.present();
   }
 
